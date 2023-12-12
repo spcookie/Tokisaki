@@ -1,0 +1,9 @@
+plugins {
+    id("org.kordamp.gradle.jandex") version "1.0.0"
+}
+
+dependencies {
+    api("cn.hutool:hutool-core:5.8.16")
+    implementation("net.mamoe:mirai-core:2.15.0")
+    implementation("net.mamoe:mirai-logging-slf4j:2.15.0")
+}
