@@ -6,6 +6,26 @@
 
 > 用于学习的项目，目前正在开发中，提供`http-api`服务
 
+## 🎁项目开发模式启动
+
+### 修改配置
+
+修改配置文件`./tokisaki-starter/src/resources/application.yml`中postgresql、redis、minio的配置
+
+### 启动
+
+```shell
+# windows
+cd tokisaki-starter && ../gradlew.cmd quarkusDev
+```
+
+```shell
+# linux macos
+cd tokisaki-starter && ../gradlew quarkusDev
+```
+
+> 启动后键入`h`获取帮助
+
 ## 🔥开发进度
 
 <div align="center">
