@@ -10,6 +10,6 @@ pluginManagement {
         id(quarkusPluginId) version quarkusPluginVersion
     }
 }
-rootProject.name = "cokie-cloud"
+rootProject.name = "Tokisaki"
 
-include("cokie-api", "cokie-core", "cokie-function", "cokie-server")
+include("tokisaki-starter", "tokisaki-api", "tokisaki-core", "tokisaki-function", "tokisaki-server")
