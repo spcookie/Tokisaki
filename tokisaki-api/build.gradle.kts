@@ -4,5 +4,6 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":tokisaki-core"))
     implementation(project(":tokisaki-server"))
 }

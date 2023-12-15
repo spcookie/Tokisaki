@@ -6,7 +6,8 @@ plugins {
 val mapstructVersion = "1.5.5.Final"
 
 dependencies {
-    api(project(":tokisaki-core"))
+    implementation(project(":tokisaki-core"))
+    implementation(project(":tokisaki-function"))
     kapt("org.mapstruct:mapstruct-processor:$mapstructVersion")
     implementation("org.mapstruct:mapstruct:$mapstructVersion")
 }
