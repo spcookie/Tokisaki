@@ -1,6 +1,6 @@
 package io.micro.server.auth.domain.repository
 
-import io.micro.server.auth.domain.entity.WXUser
+import io.micro.server.auth.domain.model.entity.WXUser
 import io.smallrye.mutiny.Uni
 
 /**

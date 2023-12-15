@@ -1,8 +1,8 @@
 package io.micro.server.auth.domain.service.impl
 
-import io.micro.server.auth.domain.entity.WXUser
+import io.micro.server.auth.domain.model.entity.WXUser
 import io.micro.server.auth.domain.service.WxLoginService
-import io.micro.server.auth.infrastructure.repository.AuthRepository
+import io.micro.server.auth.infra.repository.AuthRepository
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.Uni

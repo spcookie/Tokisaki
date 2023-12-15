@@ -2,7 +2,7 @@ quarkus:
   log:
     console:
       filter: qr-filter
-    level: TRACE
+    level: DEBUG
   http:
     cors:
       ~: true
@@ -13,13 +13,19 @@ quarkus:
       enabled: true
   datasource:
     db-kind: postgresql
-    username: root
+    username: postgres
     password: root
     reactive:
-      url: vertx-reactive:postgresql://localhost:5432/cokie
+      url: vertx-reactive:postgresql://localhost:5432/Tokisaki
   hibernate-orm:
     database:
       generation: update
+  redis:
+    hosts: redis://localhost:6379
+  minio:
+    url: http://localhost:9000
+    access-key: minioadmin
+    secret-key: minioadmin
 mp:
   jwt:
     verify:
