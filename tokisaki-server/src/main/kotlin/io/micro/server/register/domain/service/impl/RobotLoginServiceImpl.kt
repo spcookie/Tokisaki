@@ -84,12 +84,8 @@ class RobotLoginServiceImpl(
             val qrCode = Base64.getEncoder().encodeToString(qr)
             em.emit("qr#$qrCode")
         }
-        robot.loginSuccess = {
-            em.emit("success#")
-        }
-        robot.loginFail = { ex ->
-            em.emit("fail#${ex.message}")
-        }
+        robot.loginSuccess = { em.emit("success#") }
+        robot.loginFail = { ex -> em.emit("fail#${ex.message}") }
         robot.loginTimeout = {
             // 登录超时时注销登录，移除QQ机器人
             manager.unregisterRobot(id)
