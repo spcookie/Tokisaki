@@ -29,9 +29,8 @@ quarkus:
 smallrye:
   jwt:
     sign:
-      key: privateKey.pem
-#    encrypt:
-#      key: publicKey.pem
+      key:
+        location: privateKey.pem
 mp:
   jwt:
     verify:

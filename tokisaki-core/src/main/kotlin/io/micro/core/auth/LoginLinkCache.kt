@@ -1,6 +1,5 @@
 package io.micro.core.auth
 
-import cn.hutool.core.util.IdUtil
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.benmanes.caffeine.cache.LoadingCache
@@ -11,7 +10,7 @@ import java.time.Duration
  *@author Augenstern
  *@since 2023/11/25
  */
-class LoginCache private constructor() {
+class LoginLinkCache private constructor() {
 
     val linkPool: Cache<String, SseEventSink> = Caffeine.newBuilder()
         .expireAfterAccess(Duration.ofMinutes(3))
@@ -20,15 +19,11 @@ class LoginCache private constructor() {
         }
         .build()
 
-    val idPool: LoadingCache<String, String> = Caffeine.newBuilder()
+    val idPool: LoadingCache<String, RandomLoginCode.Code> = Caffeine.newBuilder()
         .expireAfterAccess(Duration.ofMillis(3))
-        .build {
-            // TODO
-            IdUtil.nanoId()
-            IdUtil.getDataCenterId(9999L).toString()
-        }
+        .build { RandomLoginCode.hire() }
 
     companion object {
-        fun newInstance() = LoginCache()
+        fun newInstance() = LoginLinkCache()
     }
 }

@@ -1,7 +1,7 @@
 package io.micro.server.auth.domain.model.entity
 
-import io.micro.core.auth.GenerateToken
-import io.micro.core.auth.LoginCache
+import io.micro.core.auth.GenerateJwtToken
+import io.micro.core.auth.LoginLinkCache
 import io.micro.core.entity.BaseDomainEntity
 import io.smallrye.mutiny.Multi
 import jakarta.ws.rs.sse.OutboundSseEvent
@@ -12,39 +12,38 @@ import jakarta.ws.rs.sse.SseEventSink
  *@author Augenstern
  *@since 2023/11/25
  */
-class WXUser(
+class WXLoginUser(
     var name: String,
     var openid: String,
     var authorities: MutableSet<String> = mutableSetOf()
 ) : BaseDomainEntity() {
 
     companion object {
-        private val loginCache = LoginCache.newInstance()
+        private val loginLinkCache = LoginLinkCache.newInstance()
 
         fun loginStart(driveId: String, sse: Sse, sink: SseEventSink): Multi<OutboundSseEvent> {
-            val id = loginCache.idPool[driveId]
-            loginCache.linkPool.put(id, sink)
+            val code = loginLinkCache.idPool[driveId]
+            loginLinkCache.linkPool.put(code.value, sink)
             val broadcaster = sse.newBroadcaster()
             broadcaster.register(sink)
             broadcaster.onClose {
-                loginCache.idPool.invalidate(driveId)
+                loginLinkCache.idPool.invalidate(driveId)
+                code.back()
             }
-            return Multi.createFrom().emitter { em ->
-                em.emit(sse.newEvent("start#$id"))
-            }
+            return Multi.createFrom().emitter { em -> em.emit(sse.newEvent("start#${code.value}")) }
         }
 
         fun loginEnd(code: String, token: String, sse: Sse) {
-            loginCache.linkPool.getIfPresent(code)?.send(sse.newEvent("end#$token"))
-            loginCache.linkPool.invalidate(code)
+            loginLinkCache.linkPool.getIfPresent(code)?.send(sse.newEvent("end#$token"))
+            loginLinkCache.linkPool.invalidate(code)
         }
 
         fun containsCode(code: String): Boolean {
-            return loginCache.linkPool.getIfPresent(code) != null
+            return loginLinkCache.linkPool.getIfPresent(code) != null
         }
 
-        fun defaultUser(openId: String): WXUser {
-            return WXUser(randomName(), openId)
+        fun defaultUser(openId: String): WXLoginUser {
+            return WXLoginUser(randomName(), openId)
         }
 
         private fun randomName(): String {
@@ -54,6 +53,6 @@ class WXUser(
     }
 
     fun generateToken(): String {
-        return GenerateToken.generate(name, openid, authorities)
+        return GenerateJwtToken.generate(name, openid, authorities)
     }
 }

@@ -1,6 +1,6 @@
 package io.micro.server.auth.domain.service.impl
 
-import io.micro.server.auth.domain.model.entity.WXUser
+import io.micro.server.auth.domain.model.entity.WXLoginUser
 import io.micro.server.auth.domain.service.WxLoginService
 import io.micro.server.auth.infra.repository.AuthRepository
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction
@@ -22,31 +22,28 @@ class WxLoginServiceImpl(
 ) : WxLoginService {
 
     override fun loginSubscript(driveId: String, sse: Sse, sink: SseEventSink): Multi<OutboundSseEvent> {
-        return WXUser.loginStart(driveId, sse, sink)
+        return WXLoginUser.loginStart(driveId, sse, sink)
     }
 
     @WithTransaction
     override fun login(code: String, openId: String, sse: Sse): Uni<Unit> {
-        return if (WXUser.containsCode(code)) {
-            loginUser(openId).map { token ->
-                WXUser.loginEnd(code, token, sse)
-            }.replaceWithUnit()
+        return if (WXLoginUser.containsCode(code)) {
+            loginUser(openId).map { token -> WXLoginUser.loginEnd(code, token, sse) }.replaceWithUnit()
         } else {
             Uni.createFrom().voidItem().replaceWithUnit()
         }
     }
 
     private fun loginUser(openId: String): Uni<String> {
-        return authRepository.findUserByOpenid(openId).flatMap { user ->
-            if (user == null) {
-                val defaultUser = WXUser.defaultUser(openId)
-                authRepository.registerUser(defaultUser)
-                    .replaceWith(defaultUser)
-            } else {
-                Uni.createFrom().item(user)
+        return authRepository.findUserByOpenid(openId)
+            .flatMap { user ->
+                if (user == null) {
+                    val defaultUser = WXLoginUser.defaultUser(openId)
+                    authRepository.registerUser(defaultUser).replaceWith(defaultUser)
+                } else {
+                    Uni.createFrom().item(user)
+                }
             }
-        }.map {
-            it.generateToken()
-        }
+            .map { it.generateToken() }
     }
 }
