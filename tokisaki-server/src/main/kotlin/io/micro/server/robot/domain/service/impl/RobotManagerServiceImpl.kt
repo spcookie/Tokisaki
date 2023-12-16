@@ -1,11 +1,11 @@
-package io.micro.server.register.domain.service.impl
+package io.micro.server.robot.domain.service.impl
 
 import io.micro.core.robot.Credential
 import io.micro.core.robot.Robot
 import io.micro.core.robot.qq.QQRobot
 import io.micro.core.robot.qq.QQRobotFactory
 import io.micro.core.robot.qq.QQRobotManager
-import io.micro.server.register.domain.service.RobotLoginService
+import io.micro.server.robot.domain.service.RobotManagerService
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.subscription.MultiEmitter
 import jakarta.enterprise.context.ApplicationScoped
@@ -18,10 +18,10 @@ import java.util.*
  *@since 2023/11/23
  */
 @ApplicationScoped
-class RobotLoginServiceImpl(
+class RobotManagerServiceImpl(
     private val factory: QQRobotFactory,
     private val manager: QQRobotManager
-) : RobotLoginService {
+) : RobotManagerService {
 
     /**
      * QQ号与半长连接的映射
