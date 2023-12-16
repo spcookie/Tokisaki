@@ -4,12 +4,8 @@ import jakarta.xml.bind.annotation.XmlElement
 import jakarta.xml.bind.annotation.XmlRootElement
 import jakarta.xml.bind.annotation.XmlTransient
 
-/**
- *@author Augenstern
- *@since 2023/11/25
- */
-@XmlRootElement
-class TextMessage {
+@XmlRootElement(name = "xml")
+class ReplyMessage {
 
     /**
      * 开发者微信号
@@ -46,24 +42,4 @@ class TextMessage {
     @XmlElement(name = "Content")
     var content: String? = null
 
-    /**
-     * 消息id，64位整型
-     */
-    @set:XmlTransient
-    @XmlElement(name = "MsgId")
-    var msgId: String? = null
-
-    /**
-     * 消息的数据ID（消息如果来自文章时才有）
-     */
-    @set:XmlTransient
-    @XmlElement(name = "MsgDataId")
-    var msgDataId: String? = null
-
-    /**
-     * 多图文时第几篇文章，从1开始（消息如果来自文章时才有）
-     */
-    @set:XmlTransient
-    @XmlElement(name = "Idx")
-    var idx: String? = null
 }
