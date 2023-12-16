@@ -2,7 +2,6 @@ package io.micro.starter.config;
 
 import io.quarkus.resteasy.reactive.kotlin.serialization.runtime.KotlinSerializationMessageBodyReader;
 import jakarta.annotation.Priority;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
@@ -20,14 +19,7 @@ import java.util.Objects;
 @Priority(100)
 public class JsonTextReaderAdapter implements MessageBodyReader<Object> {
 
-    @Inject
-    public JsonTextReaderAdapter(Json json) {
-        this.json = json;
-    }
-
-    private Json json;
-
-    private KotlinSerializationMessageBodyReader entrust = new KotlinSerializationMessageBodyReader(json);
+    private final KotlinSerializationMessageBodyReader entrust = new KotlinSerializationMessageBodyReader(Json.Default);
 
 
     @Override

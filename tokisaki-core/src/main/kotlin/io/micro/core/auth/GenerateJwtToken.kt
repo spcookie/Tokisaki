@@ -8,7 +8,7 @@ import org.eclipse.microprofile.jwt.Claims
  *@author Augenstern
  *@since 2023/11/25
  */
-object GenerateToken {
+object GenerateJwtToken {
     /**
      * 生成JWT令牌
      */

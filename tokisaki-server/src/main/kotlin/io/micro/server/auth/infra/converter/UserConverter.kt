@@ -1,6 +1,6 @@
 package io.micro.server.auth.infra.converter
 
-import io.micro.server.auth.domain.model.entity.WXUser
+import io.micro.server.auth.domain.model.entity.WXLoginUser
 import io.micro.server.auth.infra.po.Authority
 import io.micro.server.auth.infra.po.User
 import org.mapstruct.BeanMapping
@@ -16,12 +16,12 @@ import org.mapstruct.ReportingPolicy
 @Mapper(componentModel = CDI, uses = [UserMapper::class])
 interface UserConverter {
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
-    fun wxUserToUser(wxUser: WXUser): User
+    fun wxUserToUser(wxLoginUser: WXLoginUser): User
 
     fun stringToAuthority(string: MutableSet<String>): MutableSet<Authority>
 
     @InheritInverseConfiguration
-    fun userToWXUser(user: User): WXUser
+    fun userToWXUser(user: User): WXLoginUser
 
     @InheritInverseConfiguration
     fun authorityToString(string: MutableSet<Authority>): MutableSet<String>
