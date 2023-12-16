@@ -1,6 +1,6 @@
 package io.micro.api.register
 
-import io.micro.server.register.domain.service.RobotLoginService
+import io.micro.server.robot.domain.service.RobotManagerService
 import io.smallrye.mutiny.Multi
 import jakarta.ws.rs.GET
 import jakarta.ws.rs.Path
@@ -18,19 +18,23 @@ import org.jboss.resteasy.reactive.RestStreamElementType
  *@author Augenstern
  *@since 2023/11/23
  */
-@Path("/robot/login")
-class RobotLoginController(
-    private val robotLoginService: RobotLoginService
+@Path("/robot/manager")
+class RobotManagerController(
+    private val robotManagerService: RobotManagerService
 ) {
     @Operation(summary = "QQ机器人扫码登录")
     @GET
-    @Path("qq/{qq}")
+    @Path("login/qq/{qq}")
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @RestStreamElementType(MediaType.TEXT_HTML)
-    fun qqLogin(
+    fun qqRobotLogin(
         @Parameter(description = "QQ账号") @PathParam("qq") qq: String,
         @Context sse: Sse
     ): Multi<OutboundSseEvent> {
-        return robotLoginService.qrQQLogin(qq, sse)
+        return robotManagerService.qrQQLogin(qq, sse)
+    }
+
+    fun qqRobotCreate() {
+
     }
 }

@@ -1,4 +1,4 @@
-package io.micro.server.register.domain.service
+package io.micro.server.robot.domain.service
 
 import io.smallrye.mutiny.Multi
 import jakarta.ws.rs.sse.OutboundSseEvent
@@ -8,7 +8,7 @@ import jakarta.ws.rs.sse.Sse
  *@author Augenstern
  *@since 2023/11/23
  */
-interface RobotLoginService {
+interface RobotManagerService {
     /**
      * QQ机器人扫码登录
      * @param qq QQ号
