@@ -25,6 +25,25 @@ class User : BasePO() {
         joinColumns = [JoinColumn(name = "user_id")],
         inverseJoinColumns = [JoinColumn(name = "authority_id")]
     )
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     val authorities: MutableSet<Authority>? = null
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is User) return false
+
+        if (name != other.name) return false
+        if (openid != other.openid) return false
+        if (authorities != other.authorities) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = name?.hashCode() ?: 0
+        result = 31 * result + (openid?.hashCode() ?: 0)
+        result = 31 * result + (authorities?.hashCode() ?: 0)
+        return result
+    }
+
 }

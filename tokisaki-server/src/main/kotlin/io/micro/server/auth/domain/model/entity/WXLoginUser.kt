@@ -3,6 +3,7 @@ package io.micro.server.auth.domain.model.entity
 import io.micro.core.auth.GenerateJwtToken
 import io.micro.core.auth.LoginLinkCache
 import io.micro.core.entity.BaseDomainEntity
+import io.micro.server.auth.domain.model.valobj.DefaultName
 import io.smallrye.mutiny.Multi
 import jakarta.ws.rs.sse.OutboundSseEvent
 import jakarta.ws.rs.sse.Sse
@@ -15,7 +16,7 @@ import jakarta.ws.rs.sse.SseEventSink
 class WXLoginUser(
     var name: String,
     var openid: String,
-    var authorities: MutableSet<String> = mutableSetOf()
+    var authorities: MutableSet<String>
 ) : BaseDomainEntity() {
 
     companion object {
@@ -43,12 +44,7 @@ class WXLoginUser(
         }
 
         fun defaultUser(openId: String): WXLoginUser {
-            return WXLoginUser(randomName(), openId)
-        }
-
-        private fun randomName(): String {
-            // TODO
-            return "cokie"
+            return WXLoginUser(DefaultName.generate(), openId, mutableSetOf())
         }
     }
 
