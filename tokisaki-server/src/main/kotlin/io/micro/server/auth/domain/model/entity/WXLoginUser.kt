@@ -16,8 +16,10 @@ import jakarta.ws.rs.sse.SseEventSink
 class WXLoginUser(
     var name: String,
     var openid: String,
-    var authorities: MutableSet<String>
+    var authorities: MutableSet<String>,
 ) : BaseDomainEntity() {
+
+    lateinit var token: String
 
     companion object {
         private val loginLinkCache = LoginLinkCache.newInstance()

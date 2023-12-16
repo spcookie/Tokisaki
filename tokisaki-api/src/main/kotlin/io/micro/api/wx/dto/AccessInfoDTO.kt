@@ -6,7 +6,7 @@ import jakarta.ws.rs.QueryParam
  *@author Augenstern
  *@since 2023/11/25
  */
-class AccessInfo {
+class AccessInfoDTO {
     @QueryParam("signature")
     var signature: String? = null
 

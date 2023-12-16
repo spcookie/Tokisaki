@@ -1,8 +1,9 @@
 package io.micro.api.wx
 
-import cn.hutool.core.util.StrUtil
-import io.micro.api.wx.dto.AccessInfo
-import io.micro.api.wx.dto.TextMessage
+import io.micro.api.wx.convert.WxMessageConvert
+import io.micro.api.wx.dto.AccessInfoDTO
+import io.micro.api.wx.dto.ReplyMessage
+import io.micro.api.wx.dto.WxMessageDTO
 import io.micro.core.filter.ReqInfo
 import io.micro.server.auth.domain.service.WxLoginService
 import io.smallrye.mutiny.Multi
@@ -24,7 +25,8 @@ import org.jboss.resteasy.reactive.RestStreamElementType
 @Path("/wx")
 class WxOfficialController(
     private val wxLoginService: WxLoginService,
-    private val reqInfo: ReqInfo
+    private val reqInfo: ReqInfo,
+    private val wxMessageConvert: WxMessageConvert
 ) {
 
     @Context
@@ -33,22 +35,27 @@ class WxOfficialController(
     @Operation(summary = "微信公众号认证回调", description = "认证成功后需要返回收到的echostr")
     @GET
     @Path("/callback")
-    fun echo(@Parameter(description = "回调参数") @BeanParam accessInfo: AccessInfo): Uni<String> {
-        return Uni.createFrom().item(accessInfo.echostr)
+    fun echo(@Parameter(description = "回调参数") @BeanParam accessInfoDTO: AccessInfoDTO): Uni<String> {
+        return Uni.createFrom().item(accessInfoDTO.echostr)
     }
 
     @Operation(summary = "微信公众号接收信息回调")
     @POST
     @Path("/callback")
     @Consumes(MediaType.TEXT_XML)
-    fun message(@Parameter(description = "普通文本信息") textMessage: TextMessage): Uni<Unit> {
-        val code = textMessage.content
-        val openid = textMessage.fromUserName
-        return if (StrUtil.isNotBlank(code) && StrUtil.isNotBlank(openid)) {
-            wxLoginService.login(code!!, openid!!, sse)
-        } else {
-            Uni.createFrom().nullItem()
-        }
+    @Produces(MediaType.APPLICATION_XML)
+    fun message(@Parameter(description = "普通文本信息") wxMessageDTO: WxMessageDTO): Uni<ReplyMessage> {
+        return wxLoginService.login(wxMessageConvert.wxMessageDTO2WxMessage(wxMessageDTO), sse)
+            .onItem().ifNotNull()
+            .transform { user ->
+                ReplyMessage().apply {
+                    fromUserName = wxMessageDTO.toUserName
+                    toUserName = wxMessageDTO.fromUserName
+                    createTime = System.currentTimeMillis().toString()
+                    msgType = "text"
+                    content = "登陆成功，${user.name}"
+                }
+            }
     }
 
     @Operation(summary = "微信公众号登录订阅")
