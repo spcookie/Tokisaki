@@ -12,7 +12,9 @@
 
 ## 🔥开发进度
 
-![feature](./assets/img/feat.jpeg)
+<div align="center">
+    <img src="./assets/img/feat.jpeg" width="512" alt="feature">
+</div>
 
 ## 😍技术栈
 
