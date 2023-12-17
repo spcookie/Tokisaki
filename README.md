@@ -2,10 +2,6 @@
     <h1>✨Tokisaki✨</h1>
 </div>
 
----
-
-[visitors](https://visitor-badge.glitch.me/badge?page_id=spcookie.Tokisaki&left_color=green&right_color=red)
-
 只需几个简单的步骤即可启动机器人服务，使用很酷的功能。
 
 > 用于学习的项目，目前正在开发中，提供`http-api`服务
@@ -13,7 +9,7 @@
 ## 🔥开发进度
 
 <div align="center">
-    <img src="./assets/img/feat.jpeg" width="512" alt="feature">
+    <img src="assets/img/dev.jpeg" width="512" alt="dev">
 </div>
 
 ## 😍技术栈
@@ -45,12 +41,10 @@
 
 ## 🎉功能
 
-| 特性           | 机器人     |
-|--------------|---------|
-| 群内ChatGPT    | 逆向QQ机器人 |
-| 随机小姐姐        | 逆向QQ机器人 |
-| 随机动漫         | 逆向QQ机器人 |
-| Emoji合成      | 逆向QQ机器人 |
-| Midjourney绘图 | 逆向QQ机器人 |
+<div align="center">
+    <img src="assets/img/feature.jpeg" alt="feature">
+</div>
+
+---
 
 !["Repobeats analytics image"](https://repobeats.axiom.co/api/embed/dc09eabba303f877085bc7d000b2e47715097763.svg)
