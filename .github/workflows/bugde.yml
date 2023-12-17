@@ -1,0 +1,16 @@
+name: Bugde
+
+on: workflow_dispatch
+
+jobs:
+  bugde:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Labels
+        uses: lowlighter/metrics@latest
+        with:
+          filename: metrics.plugin.topics.svg
+          token: NOT_NEEDED
+          base: "kotlin"
+          plugin_topics: yes
+          plugin_topics_limit: 12
