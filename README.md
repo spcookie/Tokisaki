@@ -9,7 +9,7 @@
 ## 🔥开发进度
 
 <div align="center">
-    <img src="assets/img/dev.jpeg" width="512" alt="dev">
+    <img src="assets/dev.jpeg" width="512" alt="dev">
 </div>
 
 ## 😍技术栈
@@ -42,7 +42,7 @@
 ## 🎉功能
 
 <div align="center">
-    <img src="assets/img/feature.jpeg" alt="feature">
+    <img src="assets/feature.jpeg" alt="feature">
 </div>
 
 ---
