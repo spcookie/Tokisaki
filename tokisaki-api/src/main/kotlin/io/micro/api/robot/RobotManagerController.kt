@@ -1,8 +1,8 @@
 package io.micro.api.robot
 
-import io.micro.api.R
 import io.micro.api.robot.converter.RobotManagerConverter
 import io.micro.api.robot.dto.RobotManagerDTO
+import io.micro.core.rest.R
 import io.micro.server.robot.domain.service.RobotManagerService
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.Uni
@@ -41,6 +41,6 @@ class RobotManagerController(
     @Path("/create")
     fun qqRobotCreate(@Parameter(description = "创建信息") robotManagerDTO: RobotManagerDTO): Uni<R<Unit>> {
         return robotManagerService.createRobot(robotManagerConverter.robotManagerDTO2RobotManager(robotManagerDTO))
-            .replaceWith { R.success("创建成功") }
+            .replaceWith { R.newInstance("创建成功") }
     }
 }
