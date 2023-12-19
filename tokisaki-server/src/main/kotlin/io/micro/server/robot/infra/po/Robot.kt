@@ -12,7 +12,7 @@ class Robot : BasePO() {
     companion object : PanacheCompanion<Robot>
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     var user: User? = null
 
     @Column(name = "robot_name", nullable = false)

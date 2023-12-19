@@ -2,7 +2,7 @@ package io.micro.api.wx
 
 import io.micro.api.wx.convert.WxMessageConvert
 import io.micro.api.wx.dto.AccessInfoDTO
-import io.micro.api.wx.dto.ReplyMessage
+import io.micro.api.wx.dto.ReplyMessageDTO
 import io.micro.api.wx.dto.WxMessageDTO
 import io.micro.core.filter.ReqInfo
 import io.micro.server.auth.domain.service.WxLoginService
@@ -44,11 +44,11 @@ class WxOfficialController(
     @Path("/callback")
     @Consumes(MediaType.TEXT_XML)
     @Produces(MediaType.APPLICATION_XML)
-    fun message(@Parameter(description = "普通文本信息") wxMessageDTO: WxMessageDTO): Uni<ReplyMessage> {
+    fun message(@Parameter(description = "普通文本信息") wxMessageDTO: WxMessageDTO): Uni<ReplyMessageDTO> {
         return wxLoginService.login(wxMessageConvert.wxMessageDTO2WxMessage(wxMessageDTO), sse)
             .onItem().ifNotNull()
             .transform { user ->
-                ReplyMessage().apply {
+                ReplyMessageDTO().apply {
                     fromUserName = wxMessageDTO.toUserName
                     toUserName = wxMessageDTO.fromUserName
                     createTime = System.currentTimeMillis().toString()

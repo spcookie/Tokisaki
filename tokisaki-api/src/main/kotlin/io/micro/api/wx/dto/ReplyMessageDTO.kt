@@ -5,7 +5,7 @@ import jakarta.xml.bind.annotation.XmlRootElement
 import jakarta.xml.bind.annotation.XmlTransient
 
 @XmlRootElement(name = "xml")
-class ReplyMessage {
+class ReplyMessageDTO {
 
     /**
      * 开发者微信号

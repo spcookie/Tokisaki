@@ -5,8 +5,12 @@ import io.micro.core.robot.Robot
 import io.micro.core.robot.qq.QQRobot
 import io.micro.core.robot.qq.QQRobotFactory
 import io.micro.core.robot.qq.QQRobotManager
+import io.micro.server.robot.domain.model.entity.RobotManager
+import io.micro.server.robot.domain.repository.IRobotManagerRepository
 import io.micro.server.robot.domain.service.RobotManagerService
 import io.smallrye.mutiny.Multi
+import io.smallrye.mutiny.Uni
+import io.smallrye.mutiny.replaceWithUnit
 import io.smallrye.mutiny.subscription.MultiEmitter
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.ws.rs.sse.OutboundSseEvent
@@ -20,7 +24,8 @@ import java.util.*
 @ApplicationScoped
 class RobotManagerServiceImpl(
     private val factory: QQRobotFactory,
-    private val manager: QQRobotManager
+    private val manager: QQRobotManager,
+    private val robotManagerRepository: IRobotManagerRepository
 ) : RobotManagerService {
 
     /**
@@ -48,6 +53,11 @@ class RobotManagerServiceImpl(
             // 若不存在机器人，则直接开始登录
             qrQQLoginStart(qq, sse)
         }
+    }
+
+    override fun createRobot(robotManager: RobotManager): Uni<Unit> {
+        robotManager.verify()
+        return robotManagerRepository.saveRobotWithUser(robotManager).replaceWithUnit()
     }
 
     /**

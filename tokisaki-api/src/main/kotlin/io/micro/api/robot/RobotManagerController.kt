@@ -1,11 +1,12 @@
-package io.micro.api.register
+package io.micro.api.robot
 
+import io.micro.api.R
+import io.micro.api.robot.converter.RobotManagerConverter
+import io.micro.api.robot.dto.RobotManagerDTO
 import io.micro.server.robot.domain.service.RobotManagerService
 import io.smallrye.mutiny.Multi
-import jakarta.ws.rs.GET
-import jakarta.ws.rs.Path
-import jakarta.ws.rs.PathParam
-import jakarta.ws.rs.Produces
+import io.smallrye.mutiny.Uni
+import jakarta.ws.rs.*
 import jakarta.ws.rs.core.Context
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.sse.OutboundSseEvent
@@ -20,7 +21,8 @@ import org.jboss.resteasy.reactive.RestStreamElementType
  */
 @Path("/robot/manager")
 class RobotManagerController(
-    private val robotManagerService: RobotManagerService
+    private val robotManagerService: RobotManagerService,
+    private val robotManagerConverter: RobotManagerConverter
 ) {
     @Operation(summary = "QQ机器人扫码登录")
     @GET
@@ -34,7 +36,11 @@ class RobotManagerController(
         return robotManagerService.qrQQLogin(qq, sse)
     }
 
-    fun qqRobotCreate() {
-
+    @Operation(summary = "机器人创建")
+    @POST
+    @Path("/create")
+    fun qqRobotCreate(@Parameter(description = "创建信息") robotManagerDTO: RobotManagerDTO): Uni<R<Unit>> {
+        return robotManagerService.createRobot(robotManagerConverter.robotManagerDTO2RobotManager(robotManagerDTO))
+            .replaceWith { R.success("创建成功") }
     }
 }
