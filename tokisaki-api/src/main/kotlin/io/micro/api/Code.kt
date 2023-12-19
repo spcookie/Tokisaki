@@ -7,5 +7,6 @@ package io.micro.api
 object Code {
     const val IGNORE = 10000
     const val OK = 10200
-    const val FAIL = 10500
+    const val FAIL = 10509
+    const val ERROR = 10500
 }

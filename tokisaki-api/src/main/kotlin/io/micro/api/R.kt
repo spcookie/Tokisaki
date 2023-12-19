@@ -14,24 +14,16 @@ data class R<T>(
 ) {
     companion object {
 
-        fun <E> success(msg: String, data: E): R<E> {
+        fun <E> success(msg: String = "", data: E? = null): R<E> {
             return R(Code.OK, msg, data)
         }
 
-        fun success(): R<Unit> {
-            return R(Code.OK)
-        }
-
-        fun success(msg: String): R<Unit> {
-            return R(Code.OK, msg)
-        }
-
-        fun fail(msg: String): R<Unit> {
+        fun fail(msg: String = ""): R<Unit> {
             return R(Code.FAIL, msg)
         }
 
-        fun fail(): R<Unit> {
-            return R(Code.FAIL)
+        fun error(msg: String = ""): R<Unit> {
+            return R(Code.ERROR, msg)
         }
     }
 }
