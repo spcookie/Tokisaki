@@ -21,7 +21,6 @@ subprojects {
 
     apply {
         plugin("org.jetbrains.kotlin.jvm")
-        plugin("org.jetbrains.kotlin.kapt")
         plugin("org.jetbrains.kotlin.plugin.allopen")
         plugin("io.quarkus")
     }
@@ -73,6 +72,7 @@ subprojects {
     allOpen {
         annotation("jakarta.ws.rs.Path")
         annotation("jakarta.enterprise.context.ApplicationScoped")
+        annotation("jakarta.enterprise.context.Singleton")
         annotation("jakarta.persistence.Entity")
         annotation("io.quarkus.test.junit.QuarkusTest")
     }
