@@ -2,6 +2,7 @@ package io.micro.api.robot
 
 import io.micro.api.robot.converter.RobotManagerConverter
 import io.micro.api.robot.dto.RobotManagerDTO
+import io.micro.core.annotation.InitAuthContext
 import io.micro.core.rest.R
 import io.micro.server.robot.domain.service.RobotManagerService
 import io.smallrye.mutiny.Multi
@@ -19,6 +20,7 @@ import org.jboss.resteasy.reactive.RestStreamElementType
  *@author Augenstern
  *@since 2023/11/23
  */
+@InitAuthContext
 @Path("/robot/manager")
 class RobotManagerController(
     private val robotManagerService: RobotManagerService,

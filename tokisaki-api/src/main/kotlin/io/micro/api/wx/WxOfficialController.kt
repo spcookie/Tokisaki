@@ -4,6 +4,7 @@ import io.micro.api.wx.convert.WxMessageConvert
 import io.micro.api.wx.dto.AccessInfoDTO
 import io.micro.api.wx.dto.ReplyMessageDTO
 import io.micro.api.wx.dto.WxMessageDTO
+import io.micro.core.annotation.InitAuthContext
 import io.micro.core.filter.ReqInfo
 import io.micro.server.auth.domain.service.WxLoginService
 import io.smallrye.mutiny.Multi
@@ -22,6 +23,7 @@ import org.jboss.resteasy.reactive.RestStreamElementType
  *@author Augenstern
  *@since 2023/11/25
  */
+@InitAuthContext
 @Path("/wx")
 class WxOfficialController(
     private val wxLoginService: WxLoginService,

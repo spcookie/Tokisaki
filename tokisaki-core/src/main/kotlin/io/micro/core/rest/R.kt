@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class R<T>(
-    val code: Int = Code.OK,
+    var code: Int = Code.OK,
     var message: String = "",
     var data: T? = null
 ) {

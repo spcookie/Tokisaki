@@ -7,10 +7,10 @@ import io.smallrye.common.vertx.ContextLocals
  *@since 2023/10/20
  */
 object AuthContext {
+
     object Constant {
-        const val USER = "user"
-        const val TENANT = "tenant"
-        const val CLIENT = "client"
+        const val OPENID = "openid"
+        const val NICKNAME = "nickname"
         const val ROLES = "roles"
     }
 
@@ -18,18 +18,19 @@ object AuthContext {
         return ContextLocals.get<Set<String>>(Constant.ROLES).orElse(setOf()).contains(role.lowercase())
     }
 
-    val user: String
+    val openid: String
         get() {
-            return ContextLocals.get<String>(Constant.USER).get()
+            return ContextLocals.get<String>(Constant.OPENID).get()
         }
 
-    val tenant: String
+    val nickname: String
         get() {
-            return ContextLocals.get<String>(Constant.TENANT).get()
+            return ContextLocals.get<String>(Constant.NICKNAME).get()
         }
 
-    val client: String
+    val roles: String
         get() {
-            return ContextLocals.get<String>(Constant.CLIENT).get()
+            return ContextLocals.get<String>(Constant.ROLES).get()
         }
+
 }
