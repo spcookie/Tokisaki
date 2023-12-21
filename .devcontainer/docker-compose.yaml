@@ -3,7 +3,8 @@ version: "3.4"
 services:
   devcontainer:
     image: mcr.microsoft.com/devcontainers/java:1-17-bullseye
-    restart: unless-stopped
+    volumes:
+      - ../..:/workspaces
   minio:
     image: minio/minio
     volumes:
@@ -15,8 +16,6 @@ services:
       - "9000:9000"
       - "9111:9001"
     command: server --console-address ':9001' /tokisaki
-    privileged: true
-    restart: unless-stopped
   postgres:
     image: postgres
     ports:
@@ -27,11 +26,9 @@ services:
       POSTGRES_PASSWORD: root
       POSTGRES_USER: postgres
       POSTGRES_DB: Tokisaki
-    restart: unless-stopped
   redis:
     image: redis
     command: redis-server --appendonly yes
-    restart: unless-stopped
     volumes:
       - redis-data:/data
     ports:
