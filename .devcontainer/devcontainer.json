@@ -1,24 +1,17 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/java
 {
-  "name": "Java",
+  "name": "Tokisaki",
   // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-  "image": "mcr.microsoft.com/devcontainers/java:1-17-bullseye",
+  "dockerComposeFile": [
+    "docker-compose.yaml"
+  ],
+  "service": "devcontainer",
   "features": {
     "ghcr.io/devcontainers/features/java:1": {
       "version": "none",
       "installMaven": "false",
       "installGradle": "true"
-    },
-    "ghcr.io/christophermacgown/devcontainer-features/minio-client:1": {
-      "vendor": "linux",
-      "architecture": "amd64"
-    },
-    "ghcr.io/itsmechlark/features/postgresql:1": {
-      "version": "latest"
-    },
-    "ghcr.io/itsmechlark/features/redis-server:1": {
-      "version": "latest"
     }
   }
 
