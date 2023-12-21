@@ -33,7 +33,7 @@ services:
     command: redis-server --appendonly yes
     restart: unless-stopped
     volumes:
-      - redis-data:/data              #数据文件挂载
+      - redis-data:/data
     ports:
       - "6379:6379"
 
