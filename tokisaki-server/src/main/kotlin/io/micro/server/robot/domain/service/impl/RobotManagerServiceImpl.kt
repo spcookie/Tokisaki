@@ -38,25 +38,30 @@ class RobotManagerServiceImpl(
     override fun qqRobotLogin(id: Long, sse: Sse): Multi<OutboundSseEvent> {
         return robotManagerRepository.findRobotById(id).onItem().transformToMulti { robotManager ->
             Throws.requireNull(robotManager, "未找到机器人")
-            Throws.requireTure("非法操作") { StrUtil.equals(AuthContext.id, robotManager.id.toString()) }
-            // 先移除旧的连接
-            oldSse.remove(id)
-            // 再关联新的连接
-            oldSse[id] = sse
-            val robot = manager.getRobot(id)
-            if (robot != null) {
-                if (robot.state() != Robot.State.Online) {
-                    // 已存在机器人且未登录，则先注销机器人，可以使登录二维码失效
-                    manager.unregisterRobot(id)
-                    // 开始扫码登录
-                    qqRobotQRLoginStart(robotManager, sse)
-                } else {
-                    // 若机器人已登录，则重置二维码登录
-                    Multi.createFrom().items(sse.newEvent("reset#"))
-                }
+            if (robotManager == null) {
+                Multi.createFrom().items(sse.newEvent("error#未找到机器人"))
+            } else if (!StrUtil.equals(AuthContext.id, robotManager.id.toString())) {
+                Multi.createFrom().items(sse.newEvent("error#非法操作"))
             } else {
-                // 若不存在机器人，则直接开始登录
-                qqRobotQRLoginStart(robotManager, sse)
+                // 先移除旧的连接
+                oldSse.remove(id)
+                // 再关联新的连接
+                oldSse[id] = sse
+                val robot = manager.getRobot(id)
+                if (robot != null) {
+                    if (robot.state() != Robot.State.Online) {
+                        // 已存在机器人且未登录，则先注销机器人，可以使登录二维码失效
+                        manager.unregisterRobot(id)
+                        // 开始扫码登录
+                        qqRobotQRLoginStart(robotManager, sse)
+                    } else {
+                        // 若机器人已登录，则重置二维码登录
+                        Multi.createFrom().items(sse.newEvent("reset#"))
+                    }
+                } else {
+                    // 若不存在机器人，则直接开始登录
+                    qqRobotQRLoginStart(robotManager, sse)
+                }
             }
         }
     }
