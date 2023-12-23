@@ -40,7 +40,7 @@ class AuthContextInterceptor {
     }
 
     private fun id(): String {
-        return jwt.getClaim(Claims.sub)
+        return jwt.getClaim(Claims.sub) ?: ""
     }
 
     @AroundInvoke

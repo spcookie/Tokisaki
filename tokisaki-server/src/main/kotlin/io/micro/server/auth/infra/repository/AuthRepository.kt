@@ -6,7 +6,6 @@ import io.micro.server.auth.infra.converter.UserConverter
 import io.micro.server.auth.infra.dao.UserDao
 import io.micro.server.auth.infra.po.User
 import io.smallrye.mutiny.Uni
-import io.smallrye.mutiny.replaceWithUnit
 import jakarta.enterprise.context.ApplicationScoped
 
 /**
@@ -15,14 +14,12 @@ import jakarta.enterprise.context.ApplicationScoped
  */
 @ApplicationScoped
 class AuthRepository(private val userDao: UserDao, private val userConverter: UserConverter) : IAuthRepository {
-    override fun registerUser(wxLoginUser: WXLoginUser): Uni<Unit> {
-        return Uni.createFrom().item {
-            userConverter.wxUserToUser(wxLoginUser)
-        }.flatMap { user ->
-            user.persistAndFlush<User>()
-        }.invoke { user ->
-            wxLoginUser.id = user.id
-        }.replaceWithUnit()
+    override fun registerUser(wxLoginUser: WXLoginUser): Uni<WXLoginUser> {
+        return Uni.createFrom()
+            .item { userConverter.wxUserToUser(wxLoginUser) }
+            .flatMap { user -> user.persistAndFlush<User>() }
+            .invoke { user -> wxLoginUser.id = user.id }
+            .replaceWith(wxLoginUser)
     }
 
     override fun findUserByOpenid(openid: String): Uni<WXLoginUser> {

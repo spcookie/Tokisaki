@@ -13,7 +13,6 @@ import io.micro.server.robot.domain.repository.IRobotManagerRepository
 import io.micro.server.robot.domain.service.RobotManagerService
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.Uni
-import io.smallrye.mutiny.replaceWithUnit
 import io.smallrye.mutiny.subscription.MultiEmitter
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.ws.rs.sse.OutboundSseEvent
@@ -37,40 +36,46 @@ class RobotManagerServiceImpl(
     private val oldSse = mutableMapOf<Long, Sse>()
 
     override fun qqRobotLogin(id: Long, sse: Sse): Multi<OutboundSseEvent> {
-        return robotManagerRepository.findRobotById(id)
-            .onItem()
-            .transformToMulti { robotManager ->
-                Throws.requireNull(robotManager, "未找到机器人")
-                Throws.requireTure("非法操作") { StrUtil.equals(AuthContext.id, robotManager.id.toString()) }
-                // 先移除旧的连接
-                oldSse.remove(id)
-                // 再关联新的连接
-                oldSse[id] = sse
-                val robot = manager.getRobot(id)
-                if (robot != null) {
-                    if (robot.state() != Robot.State.Online) {
-                        // 已存在机器人且未登录，则先注销机器人，可以使登录二维码失效
-                        manager.unregisterRobot(id)
-                        // 开始扫码登录
-                        qqRobotQRLoginStart(robotManager, sse)
-                    } else {
-                        // 若机器人已登录，则重置二维码登录
-                        Multi.createFrom().items(sse.newEvent("reset#"))
-                    }
-                } else {
-                    // 若不存在机器人，则直接开始登录
+        return robotManagerRepository.findRobotById(id).onItem().transformToMulti { robotManager ->
+            Throws.requireNull(robotManager, "未找到机器人")
+            Throws.requireTure("非法操作") { StrUtil.equals(AuthContext.id, robotManager.id.toString()) }
+            // 先移除旧的连接
+            oldSse.remove(id)
+            // 再关联新的连接
+            oldSse[id] = sse
+            val robot = manager.getRobot(id)
+            if (robot != null) {
+                if (robot.state() != Robot.State.Online) {
+                    // 已存在机器人且未登录，则先注销机器人，可以使登录二维码失效
+                    manager.unregisterRobot(id)
+                    // 开始扫码登录
                     qqRobotQRLoginStart(robotManager, sse)
+                } else {
+                    // 若机器人已登录，则重置二维码登录
+                    Multi.createFrom().items(sse.newEvent("reset#"))
                 }
+            } else {
+                // 若不存在机器人，则直接开始登录
+                qqRobotQRLoginStart(robotManager, sse)
             }
+        }
     }
 
     override fun qqRobotLogout(id: Long): Uni<Unit> {
         TODO("Not yet implemented")
     }
 
-    override fun createRobot(robotManager: RobotManager): Uni<Unit> {
-        robotManager.verify()
-        return robotManagerRepository.saveRobotWithUser(robotManager).replaceWithUnit()
+    override fun createRobot(robotManager: RobotManager): Uni<RobotManager> {
+        robotManager.userId = AuthContext.id.toLongOrNull()
+        robotManager.paramVerify()
+        return robotManagerRepository.existRobotByAccount(robotManager.account)
+            .flatMap { exist ->
+                if (exist) {
+                    Throws.fail("已存在相同账号的机器人")
+                } else {
+                    robotManagerRepository.saveRobotWithUser(robotManager)
+                }
+            }
     }
 
     /**
@@ -84,17 +89,15 @@ class RobotManagerServiceImpl(
         Throws.requireNonNull(id, "ID为空")
         // 创建QQ机器人
         val robot = factory.create(Credential(id, robotManager.account)) as QQRobot
-        return Multi.createFrom()
-            .emitter<String> { em ->
-                // 绑定登录回调函数
-                qqRobotEventEmitBind(robot, em)
-                // 注册机器人并开始登录
-                manager.registerRobot(robot)
-            }
-            .map {
-                // 发送消息事件
-                sse.newEvent(it)
-            }
+        return Multi.createFrom().emitter<String> { em ->
+            // 绑定登录回调函数
+            qqRobotEventEmitBind(robot, em)
+            // 注册机器人并开始登录
+            manager.registerRobot(robot)
+        }.map {
+            // 发送消息事件
+            sse.newEvent(it)
+        }
     }
 
     /**

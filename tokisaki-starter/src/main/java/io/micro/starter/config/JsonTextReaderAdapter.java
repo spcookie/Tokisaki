@@ -8,6 +8,7 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
 import kotlinx.serialization.json.Json;
+import kotlinx.serialization.json.JsonKt;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,8 +20,14 @@ import java.util.Objects;
 @Priority(100)
 public class JsonTextReaderAdapter implements MessageBodyReader<Object> {
 
-    private final KotlinSerializationMessageBodyReader entrust = new KotlinSerializationMessageBodyReader(Json.Default);
+    private final KotlinSerializationMessageBodyReader entrust;
 
+    public JsonTextReaderAdapter() {
+        entrust = new KotlinSerializationMessageBodyReader(JsonKt.Json(Json.Default, builder -> {
+            builder.setIgnoreUnknownKeys(true);
+            return null;
+        }));
+    }
 
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {

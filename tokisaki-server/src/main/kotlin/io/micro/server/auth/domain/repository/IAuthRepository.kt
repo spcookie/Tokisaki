@@ -8,6 +8,6 @@ import io.smallrye.mutiny.Uni
  *@since 2023/11/25
  */
 interface IAuthRepository {
-    fun registerUser(wxLoginUser: WXLoginUser): Uni<Unit>
+    fun registerUser(wxLoginUser: WXLoginUser): Uni<WXLoginUser>
     fun findUserByOpenid(openid: String): Uni<WXLoginUser>
 }

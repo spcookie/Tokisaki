@@ -16,13 +16,13 @@ object Throws {
         contract {
             callsInPlace(block, InvocationKind.EXACTLY_ONCE)
         }
-        if (block()) {
+        if (!block()) {
             fail(msg)
         }
     }
 
     fun requireTure(block: Boolean, msg: String) {
-        if (block) {
+        if (!block) {
             fail(msg)
         }
     }
@@ -31,13 +31,13 @@ object Throws {
         contract {
             callsInPlace(block, InvocationKind.EXACTLY_ONCE)
         }
-        if (!block()) {
+        if (block()) {
             fail(msg)
         }
     }
 
     fun requireFalse(value: Boolean, msg: String) {
-        if (!value) {
+        if (value) {
             fail(msg)
         }
     }
@@ -46,13 +46,13 @@ object Throws {
         contract {
             callsInPlace(block, InvocationKind.EXACTLY_ONCE)
         }
-        if (Objects.isNull(block())) {
+        if (!Objects.isNull(block())) {
             fail(msg)
         }
     }
 
     fun <T> requireNull(value: T, msg: String) {
-        if (Objects.isNull(value)) {
+        if (!Objects.isNull(value)) {
             fail(msg)
         }
     }
@@ -61,7 +61,7 @@ object Throws {
         contract {
             callsInPlace(block, InvocationKind.EXACTLY_ONCE)
         }
-        if (!Objects.isNull(block())) {
+        if (Objects.isNull(block())) {
             fail(msg)
         }
     }
@@ -70,7 +70,7 @@ object Throws {
         contract {
             returns() implies (value != null)
         }
-        if (!Objects.isNull(value)) {
+        if (Objects.isNull(value)) {
             fail(msg)
         }
     }

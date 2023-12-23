@@ -41,7 +41,7 @@ class WxLoginServiceImpl(
             .flatMap { user ->
                 if (user == null) {
                     val defaultUser = WXLoginUser.defaultUser(openId)
-                    authRepository.registerUser(defaultUser).replaceWith(defaultUser)
+                    authRepository.registerUser(defaultUser)
                 } else {
                     Uni.createFrom().item(user)
                 }

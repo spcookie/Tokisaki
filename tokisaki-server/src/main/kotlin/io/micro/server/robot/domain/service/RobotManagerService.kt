@@ -21,5 +21,5 @@ interface RobotManagerService {
 
     fun qqRobotLogout(id: Long): Uni<Unit>
 
-    fun createRobot(robotManager: RobotManager): Uni<Unit>
+    fun createRobot(robotManager: RobotManager): Uni<RobotManager>
 }

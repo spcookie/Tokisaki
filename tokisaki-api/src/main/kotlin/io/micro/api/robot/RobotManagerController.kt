@@ -31,18 +31,29 @@ class RobotManagerController(
     @Path("login/qq/{id}")
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @RestStreamElementType(MediaType.TEXT_HTML)
-    fun qqRobotLogin(
+    fun loginQQRobot(
         @Parameter(description = "机器人ID") @PathParam("id") id: Long,
         @Context sse: Sse
     ): Multi<OutboundSseEvent> {
         return robotManagerService.qqRobotLogin(id, sse)
     }
 
+    @Operation(summary = "机器人查询")
+    @GET
+    @Path("/")
+    fun getQQRobot(
+        @Parameter(description = "查询样例") robotManagerDTO: RobotManagerDTO,
+        @QueryParam("size") @DefaultValue("10") size: Int,
+        @QueryParam("page") @DefaultValue("1") page: Int
+    ): Uni<R<Unit>> {
+        return Uni.createFrom().item(R.newInstance("list"))
+    }
+
     @Operation(summary = "机器人创建")
     @POST
-    @Path("/create")
-    fun qqRobotCreate(@Parameter(description = "创建信息") robotManagerDTO: RobotManagerDTO): Uni<R<Unit>> {
+    @Path("/")
+    fun createQQRobot(@Parameter(description = "创建信息") robotManagerDTO: RobotManagerDTO): Uni<R<RobotManagerDTO>> {
         return robotManagerService.createRobot(robotManagerConverter.robotManagerDTO2RobotManager(robotManagerDTO))
-            .replaceWith { R.newInstance("创建成功") }
+            .map { R.newInstance("创建成功", robotManagerConverter.robotManager2RobotManagerDTO(it)) }
     }
 }

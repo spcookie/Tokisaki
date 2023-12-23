@@ -8,6 +8,10 @@ data class RobotManagerDTO(
 
     var name: String,
 
+    var account: String,
+
+    var authorization: String? = null,
+
     var type: Int,
 
     var state: Int = 0,

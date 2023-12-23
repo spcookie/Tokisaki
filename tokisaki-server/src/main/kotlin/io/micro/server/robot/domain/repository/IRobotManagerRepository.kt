@@ -5,7 +5,9 @@ import io.smallrye.mutiny.Uni
 
 interface IRobotManagerRepository {
 
-    fun saveRobotWithUser(robotManager: RobotManager): Uni<Unit>
+    fun saveRobotWithUser(robotManager: RobotManager): Uni<RobotManager>
 
     fun findRobotById(id: Long): Uni<RobotManager>
+
+    fun existRobotByAccount(account: String): Uni<Boolean>
 }

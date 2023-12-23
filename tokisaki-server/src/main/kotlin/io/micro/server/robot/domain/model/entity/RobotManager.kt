@@ -7,7 +7,7 @@ import kotlin.properties.Delegates
 
 class RobotManager : BaseDomainEntity() {
 
-    var userId: Long by Delegates.notNull()
+    var userId: Long? = null
 
     lateinit var name: String
 
@@ -23,13 +23,15 @@ class RobotManager : BaseDomainEntity() {
 
     val functions: MutableList<FeatureFunction> = mutableListOf()
 
-    fun isValidType() = validTypeIds.contains(type)
+    private fun isValidType() = validTypeIds.contains(type)
 
-    fun isValidState() = validStateIds.contains(state)
+    private fun isValidState() = validStateIds.contains(state)
 
-    fun verify() {
-        Throws.requireFalse("非法的类型", ::isValidType)
-        Throws.requireFalse("非法的状态", ::isValidState)
+    fun paramVerify() {
+        Throws.requireNonNull(userId, "用户ID为空")
+        Throws.requireTure("机器人账号为空") { ::account.isInitialized }
+        Throws.requireTure("非法的机器人类型", ::isValidType)
+        Throws.requireTure("非法的机器人状态", ::isValidState)
     }
 
     companion object {
