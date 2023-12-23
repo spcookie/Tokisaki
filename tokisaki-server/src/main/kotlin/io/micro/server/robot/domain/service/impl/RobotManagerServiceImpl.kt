@@ -1,5 +1,8 @@
 package io.micro.server.robot.domain.service.impl
 
+import cn.hutool.core.util.StrUtil
+import io.micro.core.context.AuthContext
+import io.micro.core.exception.Throws
 import io.micro.core.robot.Credential
 import io.micro.core.robot.Robot
 import io.micro.core.robot.qq.QQRobot
@@ -31,28 +34,38 @@ class RobotManagerServiceImpl(
     /**
      * QQ号与半长连接的映射
      */
-    private val oldSse = mutableMapOf<String, Sse>()
+    private val oldSse = mutableMapOf<Long, Sse>()
 
-    override fun qrQQLogin(qq: String, sse: Sse): Multi<OutboundSseEvent> {
-        // 先移除旧的连接
-        oldSse.remove(qq)
-        // 再关联新的连接
-        oldSse[qq] = sse
-        val robot = manager.getRobot(qq)
-        return if (robot != null) {
-            if (robot.state() != Robot.State.Online) {
-                // 已存在机器人且未登录，则先注销机器人，可以使登录二维码失效
-                manager.unregisterRobot(qq)
-                // 开始扫码登录
-                qrQQLoginStart(qq, sse)
-            } else {
-                // 若机器人已登录，则重置二维码登录
-                Multi.createFrom().items(sse.newEvent("reset#"))
+    override fun qqRobotLogin(id: Long, sse: Sse): Multi<OutboundSseEvent> {
+        return robotManagerRepository.findRobotById(id)
+            .onItem()
+            .transformToMulti { robotManager ->
+                Throws.requireNull(robotManager, "未找到机器人")
+                Throws.requireTure("非法操作") { StrUtil.equals(AuthContext.id, robotManager.id.toString()) }
+                // 先移除旧的连接
+                oldSse.remove(id)
+                // 再关联新的连接
+                oldSse[id] = sse
+                val robot = manager.getRobot(id)
+                if (robot != null) {
+                    if (robot.state() != Robot.State.Online) {
+                        // 已存在机器人且未登录，则先注销机器人，可以使登录二维码失效
+                        manager.unregisterRobot(id)
+                        // 开始扫码登录
+                        qqRobotQRLoginStart(robotManager, sse)
+                    } else {
+                        // 若机器人已登录，则重置二维码登录
+                        Multi.createFrom().items(sse.newEvent("reset#"))
+                    }
+                } else {
+                    // 若不存在机器人，则直接开始登录
+                    qqRobotQRLoginStart(robotManager, sse)
+                }
             }
-        } else {
-            // 若不存在机器人，则直接开始登录
-            qrQQLoginStart(qq, sse)
-        }
+    }
+
+    override fun qqRobotLogout(id: Long): Uni<Unit> {
+        TODO("Not yet implemented")
     }
 
     override fun createRobot(robotManager: RobotManager): Uni<Unit> {
@@ -66,9 +79,11 @@ class RobotManagerServiceImpl(
      * @param sse 半长连接
      * @return 消息事件
      */
-    private fun qrQQLoginStart(qq: String, sse: Sse): Multi<OutboundSseEvent> {
+    private fun qqRobotQRLoginStart(robotManager: RobotManager, sse: Sse): Multi<OutboundSseEvent> {
+        val id = robotManager.id
+        Throws.requireNonNull(id, "ID为空")
         // 创建QQ机器人
-        val robot = factory.create(Credential(qq)) as QQRobot
+        val robot = factory.create(Credential(id, robotManager.account)) as QQRobot
         return Multi.createFrom()
             .emitter<String> { em ->
                 // 绑定登录回调函数
@@ -88,18 +103,22 @@ class RobotManagerServiceImpl(
      * @param em 事件触发器
      */
     private fun qqRobotEventEmitBind(robot: QQRobot, em: MultiEmitter<in String?>) {
-        val id = robot.identify()
-        robot.obtainQRCode = { qr ->
-            // 将图片转换为Base64发送
-            val qrCode = Base64.getEncoder().encodeToString(qr)
-            em.emit("qr#$qrCode")
-        }
-        robot.loginSuccess = { em.emit("success#") }
-        robot.loginFail = { ex -> em.emit("fail#${ex.message}") }
-        robot.loginTimeout = {
-            // 登录超时时注销登录，移除QQ机器人
-            manager.unregisterRobot(id)
-            em.emit("timeout#")
+        val id = robot.id()
+        robot.setStateChangeListener { event ->
+            when (event) {
+                is QQRobot.QRCodeStartEvent -> {
+                    val qrCode = Base64.getEncoder().encodeToString(event.qr)
+                    em.emit("qr#$qrCode")
+                }
+
+                is QQRobot.LoginTimeoutEvent -> {
+                    manager.unregisterRobot(id)
+                    em.emit("timeout#")
+                }
+
+                is QQRobot.LoginSuccessEvent -> em.emit("success#")
+                is QQRobot.LoginFailEvent -> em.emit("fail#${event.ex.message}")
+            }
         }
     }
 }

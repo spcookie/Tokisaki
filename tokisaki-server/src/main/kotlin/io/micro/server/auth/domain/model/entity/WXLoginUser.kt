@@ -3,6 +3,7 @@ package io.micro.server.auth.domain.model.entity
 import io.micro.core.auth.GenerateJwtToken
 import io.micro.core.auth.LoginLinkCache
 import io.micro.core.entity.BaseDomainEntity
+import io.micro.core.exception.Throws
 import io.micro.server.auth.domain.model.valobj.DefaultName
 import io.smallrye.mutiny.Multi
 import jakarta.ws.rs.sse.OutboundSseEvent
@@ -51,6 +52,7 @@ class WXLoginUser(
     }
 
     fun generateToken(): String {
-        return GenerateJwtToken.generate(name, openid, authorities)
+        Throws.requireNonNull(id, "生成Jwt时失败，原因是：ID为空")
+        return GenerateJwtToken.generate(name, id!!, openid, authorities)
     }
 }

@@ -33,7 +33,7 @@ class QQRobotManager : RobotManager {
         }
     }
 
-    override fun unregisterRobot(id: String) {
+    override fun unregisterRobot(id: Long) {
         pool[id]?.let {
             pool.remove(id)
             if (it.state() != Robot.State.Closed) {
@@ -42,7 +42,7 @@ class QQRobotManager : RobotManager {
         }
     }
 
-    override fun getRobot(id: String): Robot? {
+    override fun getRobot(id: Long): Robot? {
         return pool[id]
     }
 }

@@ -46,7 +46,8 @@ class QRLogFilter(private val qqRobotManager: QQRobotManager) : Filter {
                 val reader = FileInputStream(File(URI.create(qrPath).path))
                 val bufferedReader = BufferedInputStream(reader)
                 val byteArray = bufferedReader.readBytes()
-                val robot = qqRobotManager.getRobot(qqNumber) as QQRobot?
+                // FIXME
+                val robot = qqRobotManager.getRobot(qqNumber.toLong()) as QQRobot?
                 // 发布二维码开始事件
                 robot?.loggingInListener(QQRobot.QRCodeStartEvent(byteArray))
             }

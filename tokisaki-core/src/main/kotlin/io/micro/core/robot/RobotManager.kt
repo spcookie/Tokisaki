@@ -15,12 +15,12 @@ interface RobotManager {
      * 注销机器人，关闭下线移除pool
      * @param id 机器人标识
      */
-    fun unregisterRobot(id: String)
+    fun unregisterRobot(id: Long)
 
     /**
      * 获取机器人
      * @param id 机器人标识
      * @return 机器人
      */
-    fun getRobot(id: String): Robot?
+    fun getRobot(id: Long): Robot?
 }

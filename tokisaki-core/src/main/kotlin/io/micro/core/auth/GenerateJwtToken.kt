@@ -18,8 +18,9 @@ object GenerateJwtToken {
     /**
      * 生成JWT令牌
      */
-    fun generate(name: String, openId: String, authorities: Set<String>): String {
+    fun generate(name: String, id: Long, openId: String, authorities: Set<String>): String {
         return Jwt.issuer(issuer)
+            .subject(id.toString())
             .upn(openId)
             .groups(authorities)
             .claim(Claims.nickname.name, name)

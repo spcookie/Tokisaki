@@ -39,6 +39,10 @@ class AuthContextInterceptor {
         return jwt.getClaim(Claims.nickname) ?: ""
     }
 
+    private fun id(): String {
+        return jwt.getClaim(Claims.sub)
+    }
+
     @AroundInvoke
     fun init(ctx: InvocationContext): Any {
         Log.debug("AuthContext拦截器开始...")
@@ -48,6 +52,7 @@ class AuthContextInterceptor {
     }
 
     private fun poll() {
+        ContextLocals.put(AuthContext.Constant.ID, id())
         ContextLocals.put(AuthContext.Constant.OPENID, openid())
         ContextLocals.put(AuthContext.Constant.NICKNAME, nickname())
         ContextLocals.put(AuthContext.Constant.ROLES, roles())

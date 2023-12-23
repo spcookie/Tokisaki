@@ -13,11 +13,13 @@ import jakarta.ws.rs.sse.Sse
 interface RobotManagerService {
     /**
      * QQ机器人扫码登录
-     * @param qq QQ号
+     * @param qq ID
      * @param sse 半长连接
      * @return 服务器推送事件
      */
-    fun qrQQLogin(qq: String, sse: Sse): Multi<OutboundSseEvent>
+    fun qqRobotLogin(id: Long, sse: Sse): Multi<OutboundSseEvent>
+
+    fun qqRobotLogout(id: Long): Uni<Unit>
 
     fun createRobot(robotManager: RobotManager): Uni<Unit>
 }

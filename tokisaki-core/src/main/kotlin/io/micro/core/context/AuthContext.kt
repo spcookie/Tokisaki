@@ -9,28 +9,25 @@ import io.smallrye.common.vertx.ContextLocals
 object AuthContext {
 
     object Constant {
+        const val ID = "id"
         const val OPENID = "openid"
         const val NICKNAME = "nickname"
         const val ROLES = "roles"
     }
 
-    fun hasRole(role: String): Boolean {
-        return ContextLocals.get<Set<String>>(Constant.ROLES).orElse(setOf()).contains(role.lowercase())
-    }
+    fun hasRole(role: String): Boolean =
+        ContextLocals.get<Set<String>>(Constant.ROLES).orElse(setOf()).contains(role.lowercase())
+
+    val id: String
+        get() = ContextLocals.get<String>(Constant.ID).get()
 
     val openid: String
-        get() {
-            return ContextLocals.get<String>(Constant.OPENID).get()
-        }
+        get() = ContextLocals.get<String>(Constant.OPENID).get()
 
     val nickname: String
-        get() {
-            return ContextLocals.get<String>(Constant.NICKNAME).get()
-        }
+        get() = ContextLocals.get<String>(Constant.NICKNAME).get()
 
     val roles: String
-        get() {
-            return ContextLocals.get<String>(Constant.ROLES).get()
-        }
+        get() = ContextLocals.get<String>(Constant.ROLES).get()
 
 }

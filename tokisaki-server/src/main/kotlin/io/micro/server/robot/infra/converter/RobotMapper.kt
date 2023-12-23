@@ -18,6 +18,10 @@ class RobotMapper {
         }
     }
 
+    fun type2Number(type: Robot.Type): Int {
+        return Robot.Type.entries.indexOf(type)
+    }
+
     fun number2State(num: Int): Robot.State {
         val entries = Robot.State.entries
         if (num < entries.size) {
@@ -27,12 +31,24 @@ class RobotMapper {
         }
     }
 
+    fun state2Number(state: Robot.State): Int {
+        return Robot.State.entries.indexOf(state)
+    }
+
     fun featureFunction2UseFunction(featureFunction: FeatureFunction): UseFunction {
         return UseFunction().apply {
             function = Function().apply { id = featureFunction.id }
             remark = featureFunction.remark
             enabled = featureFunction.enabled
         }
+    }
+
+    fun useFunction2FeatureFunction(useFunction: UseFunction): FeatureFunction {
+        return FeatureFunction(
+            id = useFunction.id!!,
+            remark = useFunction.remark,
+            enabled = useFunction.enabled
+        )
     }
 
 }

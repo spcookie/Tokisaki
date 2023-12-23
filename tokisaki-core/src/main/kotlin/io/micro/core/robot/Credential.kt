@@ -5,6 +5,7 @@ package io.micro.core.robot
  *@since 2023/11/21
  */
 data class Credential(
-    val identify: String,
-    val evidence: String = ""
+    val id: Long,
+    val account: String,
+    val password: String = ""
 )

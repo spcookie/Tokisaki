@@ -16,8 +16,8 @@ import net.mamoe.mirai.utils.BotConfiguration
 class QQRobotFactory : RobotFactory {
     override fun create(credential: Credential): Robot {
         // 凭证，这里是QQ号
-        val (identify, _) = credential
-        val robot = QQRobot(identify)
+        val (id, account, _) = credential
+        val robot = QQRobot(id, account)
         val configuration = BotConfiguration {
             // 使用手表协议
             protocol = BotConfiguration.MiraiProtocol.ANDROID_WATCH
@@ -25,7 +25,7 @@ class QQRobotFactory : RobotFactory {
             autoReconnectOnForceOffline = false
         }
         // 使用扫码登录
-        val bot = BotFactory.newBot(identify.toLong(), BotAuthorization.byQRCode(), configuration)
+        val bot = BotFactory.newBot(account.toLong(), BotAuthorization.byQRCode(), configuration)
         robot.bot = bot
         robot.state = Robot.State.Create
         // 群消息处理

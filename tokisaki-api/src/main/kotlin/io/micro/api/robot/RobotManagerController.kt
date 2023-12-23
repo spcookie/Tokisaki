@@ -28,14 +28,14 @@ class RobotManagerController(
 ) {
     @Operation(summary = "QQ机器人扫码登录")
     @GET
-    @Path("login/qq/{qq}")
+    @Path("login/qq/{id}")
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @RestStreamElementType(MediaType.TEXT_HTML)
     fun qqRobotLogin(
-        @Parameter(description = "QQ账号") @PathParam("qq") qq: String,
+        @Parameter(description = "机器人ID") @PathParam("id") id: Long,
         @Context sse: Sse
     ): Multi<OutboundSseEvent> {
-        return robotManagerService.qrQQLogin(qq, sse)
+        return robotManagerService.qqRobotLogin(id, sse)
     }
 
     @Operation(summary = "机器人创建")

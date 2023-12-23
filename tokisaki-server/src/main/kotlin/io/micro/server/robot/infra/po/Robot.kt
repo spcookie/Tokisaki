@@ -18,6 +18,12 @@ class Robot : BasePO() {
     @Column(name = "robot_name", nullable = false)
     var name: String? = null
 
+    @Column(name = "robot_account", nullable = false)
+    var account: String? = null
+
+    @Column(name = "robot_authorization")
+    var authorization: String? = null
+
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "robot_type", nullable = false)
     var type: Type? = null

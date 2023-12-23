@@ -11,6 +11,10 @@ class RobotManager : BaseDomainEntity() {
 
     lateinit var name: String
 
+    lateinit var account: String
+
+    var authorization: String? = null
+
     var type: Int by Delegates.notNull()
 
     var state: Int = 0
@@ -24,8 +28,8 @@ class RobotManager : BaseDomainEntity() {
     fun isValidState() = validStateIds.contains(state)
 
     fun verify() {
-        Throws.failIfFalse(::isValidType, "非法的类型")
-        Throws.failIfFalse(::isValidState, "非法的状态")
+        Throws.requireFalse("非法的类型", ::isValidType)
+        Throws.requireFalse("非法的状态", ::isValidState)
     }
 
     companion object {

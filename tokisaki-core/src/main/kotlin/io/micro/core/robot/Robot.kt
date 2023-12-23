@@ -6,6 +6,8 @@ package io.micro.core.robot
  */
 interface Robot {
 
+    fun id(): Long
+
     /**
      * 机器人状态
      */
@@ -14,7 +16,7 @@ interface Robot {
     /**
      * 机器人标识
      */
-    fun identify(): String
+    fun account(): String
 
     /**
      * 登录
@@ -25,6 +27,8 @@ interface Robot {
      * 下线并关闭机器人
      */
     fun close()
+
+    fun setStateChangeListener(block: (event: Event) -> Unit)
 
     interface LifeCycle {
 

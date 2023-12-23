@@ -14,7 +14,7 @@ import net.mamoe.mirai.event.events.GroupMessageEvent
  *@author Augenstern
  *@since 2023/11/21
  */
-class QQRobot(private val identify: String) : Robot, Robot.LifeCycle {
+class QQRobot(private val id: Long, private val account: String) : Robot, Robot.LifeCycle {
 
     companion object {
         // 登录超时时间 2m
@@ -29,7 +29,7 @@ class QQRobot(private val identify: String) : Robot, Robot.LifeCycle {
     /**
      * 一个机器人开启一个协程
      */
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + CoroutineName("qq-robot-$identify"))
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + CoroutineName("qq-robot-$id"))
 
     /**
      * Mirai机器人
@@ -43,29 +43,11 @@ class QQRobot(private val identify: String) : Robot, Robot.LifeCycle {
     lateinit var state: Robot.State
 
     /**
-     * 二维码获取、刷新回调
-     */
-    var obtainQRCode: ((ByteArray) -> Unit)? = null
-
-    /**
-     * 登录成功回调
-     */
-    var loginSuccess: (() -> Unit)? = null
-
-    /**
-     * 登录失败回调
-     */
-    var loginFail: ((ex: Exception) -> Unit)? = null
-
-    /**
-     * 登录超时回调
-     */
-    var loginTimeout: (() -> Unit)? = null
-
-    /**
      * 收到群消息回调
      */
     var onGroupMessage: (suspend (GroupMessageEvent) -> Unit)? = null
+
+    private var onStateChange: ((Robot.Event) -> Unit)? = null
 
     /**
      * 二维码获取开始事件
@@ -92,12 +74,16 @@ class QQRobot(private val identify: String) : Robot, Robot.LifeCycle {
      */
     class OnlineGroupMessageEvent(val event: GroupMessageEvent) : Robot.Event
 
+    override fun id(): Long {
+        return id
+    }
+
     override fun state(): Robot.State {
         return state
     }
 
-    override fun identify(): String {
-        return identify
+    override fun account(): String {
+        return account
     }
 
     override fun login() {
@@ -129,58 +115,60 @@ class QQRobot(private val identify: String) : Robot, Robot.LifeCycle {
         bot.close()
     }
 
+    override fun setStateChangeListener(block: (event: Robot.Event) -> Unit) {
+        onStateChange = block
+    }
+
     /**
      * 根据状态判断是否能登录
      */
     private fun canLogin() = state != Robot.State.LoggingIn || state != Robot.State.Online
 
     override fun loggingInListener(event: Robot.Event) {
-        when (event) {
-            is QRCodeStartEvent -> {
-                val handle = obtainQRCode
-                if (handle != null) {
+        val handle = onStateChange
+        if (handle != null) {
+            when (event) {
+                is QRCodeStartEvent -> {
                     try {
-                        handle(event.qr)
+                        handle(event)
                     } catch (ex: Exception) {
                         this.state = Robot.State.LoggingFail
                         loggingInListener(LoginFailEvent(ex))
                     }
                 }
-            }
 
-            is LoginSuccessEvent -> {
-                val handle = loginSuccess
-                if (handle != null) {
+                is LoginSuccessEvent -> {
                     try {
-                        handle()
+                        handle(event)
                     } catch (ex: Exception) {
                         Log.error(ex)
                     }
+                    state = Robot.State.Online
+                    resetLoginCallback()
                 }
-                state = Robot.State.Online
-                resetLoginCallback()
-            }
 
-            is LoginFailEvent -> {
-                val handle = loginFail
-                if (handle != null) {
-                    handle(event.ex)
+                is LoginFailEvent -> {
+                    try {
+                        handle(event)
+                    } catch (ex: Exception) {
+                        Log.error(ex)
+                    }
+                    state = Robot.State.LoggingFail
+                    resetLoginCallback()
                 }
-                state = Robot.State.LoggingFail
-                resetLoginCallback()
-            }
 
-            is LoginTimeoutEvent -> {
-                state = Robot.State.Closed
-                bot.close()
-                val handle = loginTimeout
-                if (handle != null) {
-                    handle()
+                is LoginTimeoutEvent -> {
+                    state = Robot.State.Closed
+                    bot.close()
+                    try {
+                        handle(event)
+                    } catch (ex: Exception) {
+                        Log.error(ex)
+                    }
+                    resetLoginCallback()
                 }
-                resetLoginCallback()
             }
         }
-
     }
 
     override fun onlineListener(event: Robot.Event) {
@@ -201,10 +189,7 @@ class QQRobot(private val identify: String) : Robot, Robot.LifeCycle {
      * 重置登录回调
      */
     private fun resetLoginCallback() {
-        obtainQRCode = null
-        loginSuccess = null
-        loginFail = null
-        loginTimeout = null
+        onStateChange = null
     }
 
     /**

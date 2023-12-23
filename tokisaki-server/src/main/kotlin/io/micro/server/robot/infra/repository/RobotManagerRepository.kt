@@ -17,12 +17,16 @@ class RobotManagerRepository(private val robotConverter: RobotConverter) : IRobo
     @WithSession
     override fun saveRobotWithUser(robotManager: RobotManager): Uni<Unit> {
         return User.findById(robotManager.userId).flatMap { user ->
-            Throws.failIfNull({ user }, "用户不存在")
-            robotConverter.robotManager2RobotPO(robotManager)
+            Throws.requireNull({ user }, "用户不存在")
+            robotConverter.robotManager2RobotPO(robotManager)!!
                 .apply { this.user = user }
                 .persistAndFlush<Robot>()
                 .replaceWithUnit()
         }
+    }
+
+    override fun findRobotById(id: Long): Uni<RobotManager> {
+        return Robot.findById(id).map(robotConverter::robotPO2RobotManager)
     }
 
 }
