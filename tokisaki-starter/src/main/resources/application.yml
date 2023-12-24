@@ -1,8 +1,6 @@
 quarkus:
   log:
-    console:
-      filter: qr-filter
-    level: DEBUG
+    level: INFO
   http:
     cors:
       ~: true

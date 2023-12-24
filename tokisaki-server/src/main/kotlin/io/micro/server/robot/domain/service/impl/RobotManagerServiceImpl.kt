@@ -37,11 +37,10 @@ class RobotManagerServiceImpl(
 
     override fun qqRobotLogin(id: Long, sse: Sse): Multi<OutboundSseEvent> {
         return robotManagerRepository.findRobotById(id).onItem().transformToMulti { robotManager ->
-            Throws.requireNull(robotManager, "未找到机器人")
             if (robotManager == null) {
-                Multi.createFrom().items(sse.newEvent("error#未找到机器人"))
-            } else if (!StrUtil.equals(AuthContext.id, robotManager.id.toString())) {
-                Multi.createFrom().items(sse.newEvent("error#非法操作"))
+                Multi.createFrom().items(sse.newEvent("fail#未找到机器人"))
+            } else if (!StrUtil.equals(AuthContext.id, robotManager.userId.toString())) {
+                Multi.createFrom().items(sse.newEvent("fail#非法操作"))
             } else {
                 // 先移除旧的连接
                 oldSse.remove(id)

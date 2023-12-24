@@ -6,6 +6,8 @@ import kotlinx.serialization.Serializable
 data class RobotManagerDTO(
     var userId: Long,
 
+    var id: Long? = null,
+
     var name: String,
 
     var account: String,

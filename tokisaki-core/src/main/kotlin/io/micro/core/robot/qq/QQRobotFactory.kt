@@ -26,6 +26,7 @@ class QQRobotFactory : RobotFactory {
         }
         // 使用扫码登录
         val bot = BotFactory.newBot(account.toLong(), BotAuthorization.byQRCode(), configuration)
+        bot.setBizId(id)
         robot.bot = bot
         robot.state = Robot.State.Create
         // 群消息处理
