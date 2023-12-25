@@ -5,5 +5,5 @@ plugins {
 
 dependencies {
     api("cn.hutool:hutool-core:5.8.16")
-    implementation("net.mamoe:mirai-core-jvm:2.16.0.1-hook")
+    implementation("io.github.spcookie:mirai-core-jvm:2.16.0-hook")
 }
