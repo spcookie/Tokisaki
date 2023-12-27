@@ -18,7 +18,7 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
 
     companion object {
         // 登录超时时间 2m
-        private const val LOGIN_TIMEOUT = 1000 * 60 * 2L
+        private const val LOGIN_TIMEOUT = 1000 * 60 * 1L
     }
 
     /**
@@ -144,7 +144,6 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
                         Log.error(ex)
                     }
                     state = Robot.State.Online
-                    resetLoginCallback()
                 }
 
                 is LoginFailEvent -> {
@@ -154,7 +153,6 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
                         Log.error(ex)
                     }
                     state = Robot.State.LoggingFail
-                    resetLoginCallback()
                 }
 
                 is LoginTimeoutEvent -> {
@@ -165,7 +163,6 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
                     } catch (ex: Exception) {
                         Log.error(ex)
                     }
-                    resetLoginCallback()
                 }
             }
         }
@@ -183,13 +180,6 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
                 }
             }
         }
-    }
-
-    /**
-     * 重置登录回调
-     */
-    private fun resetLoginCallback() {
-        onStateChange = null
     }
 
     /**
