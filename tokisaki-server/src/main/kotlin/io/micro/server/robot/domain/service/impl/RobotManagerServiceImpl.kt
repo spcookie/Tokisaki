@@ -119,8 +119,9 @@ class RobotManagerServiceImpl(
                 }
 
                 is QQRobot.LoginTimeoutEvent -> {
-                    manager.unregisterRobot(id)
                     em.emit("timeout#")
+                    em.complete()
+                    manager.unregisterRobot(id)
                 }
 
                 is QQRobot.LoginSuccessEvent -> em.emit("success#")
