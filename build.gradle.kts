@@ -8,13 +8,6 @@ plugins {
 
 allprojects {
     repositories {
-        maven {
-            url = uri("https://maven.pkg.github.com/spcookie/Tokisaki")
-            credentials {
-                username = "spcokie@gmail.com"
-                password = "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"
-            }
-        }
         mavenCentral()
         mavenLocal()
     }
