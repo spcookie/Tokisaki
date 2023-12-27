@@ -1,4 +1,6 @@
 quarkus:
+  banner:
+    path: tokisaki.txt
   log:
     level: INFO
   http:
