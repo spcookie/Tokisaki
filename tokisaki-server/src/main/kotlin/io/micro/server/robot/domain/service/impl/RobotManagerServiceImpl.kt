@@ -1,8 +1,10 @@
 package io.micro.server.robot.domain.service.impl
 
-import cn.hutool.core.util.StrUtil
 import io.micro.core.context.AuthContext
 import io.micro.core.exception.Throws
+import io.micro.core.rest.CommonCode
+import io.micro.core.rest.PageDTO
+import io.micro.core.rest.Pageable
 import io.micro.core.robot.Credential
 import io.micro.core.robot.Robot
 import io.micro.core.robot.qq.QQRobot
@@ -11,8 +13,12 @@ import io.micro.core.robot.qq.QQRobotManager
 import io.micro.server.robot.domain.model.entity.RobotManager
 import io.micro.server.robot.domain.repository.IRobotManagerRepository
 import io.micro.server.robot.domain.service.RobotManagerService
+import io.quarkus.hibernate.reactive.panache.common.WithSession
+import io.quarkus.hibernate.reactive.panache.common.WithTransaction
+import io.quarkus.panache.common.Page
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.Uni
+import io.smallrye.mutiny.replaceWithUnit
 import io.smallrye.mutiny.subscription.MultiEmitter
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.ws.rs.sse.OutboundSseEvent
@@ -35,12 +41,12 @@ class RobotManagerServiceImpl(
      */
     private val oldSse = mutableMapOf<Long, Sse>()
 
-    override fun qqRobotLogin(id: Long, sse: Sse): Multi<OutboundSseEvent> {
+    override fun loginQQRobot(id: Long, sse: Sse): Multi<OutboundSseEvent> {
         return robotManagerRepository.findRobotById(id).onItem().transformToMulti { robotManager ->
             if (robotManager == null) {
-                Multi.createFrom().items(sse.newEvent("fail#未找到机器人"))
-            } else if (!StrUtil.equals(AuthContext.id, robotManager.userId.toString())) {
-                Multi.createFrom().items(sse.newEvent("fail#非法操作"))
+                Multi.createFrom().items(sse.newEvent("fail#${CommonCode.NOT_FOUND.code}"))
+            } else if (AuthContext.equalId(robotManager.userId)) {
+                Multi.createFrom().items(sse.newEvent("fail#${CommonCode.ILLEGAL_OPERATION.code}"))
             } else {
                 // 先移除旧的连接
                 oldSse.remove(id)
@@ -65,21 +71,39 @@ class RobotManagerServiceImpl(
         }
     }
 
-    override fun qqRobotLogout(id: Long): Uni<Unit> {
-        TODO("Not yet implemented")
+    @WithTransaction
+    @WithSession
+    override fun closeRobot(id: Long): Uni<Unit> {
+        return robotManagerRepository.findRobotById(id)
+            .flatMap { robotManager ->
+                Throws.requireTure(
+                    value = AuthContext.equalId(robotManager.userId),
+                    code = CommonCode.ILLEGAL_OPERATION
+                )
+                manager.unregisterRobot(id)
+                robotManager.state = 5
+                robotManagerRepository.modifyRobot(robotManager)
+            }.replaceWithUnit()
     }
 
     override fun createRobot(robotManager: RobotManager): Uni<RobotManager> {
         robotManager.userId = AuthContext.id.toLongOrNull()
         robotManager.paramVerify()
-        return robotManagerRepository.existRobotByAccount(robotManager.account)
+        return robotManagerRepository.existRobotByAccount(robotManager.account!!)
             .flatMap { exist ->
                 if (exist) {
-                    Throws.fail("已存在相同账号的机器人")
+                    Throws.fail(code = CommonCode.DUPLICATE)
                 } else {
                     robotManagerRepository.saveRobotWithUser(robotManager)
                 }
             }
+    }
+
+    @WithTransaction
+    override fun getRobotList(robotManager: RobotManager, page: Pageable): Uni<PageDTO<RobotManager>> {
+        robotManager.userId = AuthContext.id.toLongOrNull()
+        return robotManagerRepository.findRobotByExample(robotManager, Page.of(page.current, page.limit))
+            .map { PageDTO.of(page.current, page.limit, it) }
     }
 
     /**
@@ -90,9 +114,8 @@ class RobotManagerServiceImpl(
      */
     private fun qqRobotQRLoginStart(robotManager: RobotManager, sse: Sse): Multi<OutboundSseEvent> {
         val id = robotManager.id
-        Throws.requireNonNull(id, "ID为空")
         // 创建QQ机器人
-        val robot = factory.create(Credential(id, robotManager.account)) as QQRobot
+        val robot = factory.create(Credential(id!!, robotManager.account!!)) as QQRobot
         return Multi.createFrom().emitter<String> { em ->
             // 绑定登录回调函数
             qqRobotEventEmitBind(robot, em)

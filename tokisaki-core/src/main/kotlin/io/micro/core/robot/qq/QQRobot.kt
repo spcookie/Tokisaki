@@ -1,6 +1,7 @@
 package io.micro.core.robot.qq
 
-import io.micro.core.robot.DuplicateLoginException
+import io.micro.core.exception.Throws
+import io.micro.core.rest.CommonCode
 import io.micro.core.robot.Robot
 import io.quarkus.logging.Log
 import kotlinx.coroutines.*
@@ -102,12 +103,12 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
                             loggingInListener(LoginFailEvent(ex))
                         }
                     } else {
-                        throw DuplicateLoginException()
+                        Throws.fail(code = CommonCode.DUPLICATE)
                     }
                 }
             }
         } else {
-            throw DuplicateLoginException()
+            Throws.fail(code = CommonCode.DUPLICATE)
         }
     }
 

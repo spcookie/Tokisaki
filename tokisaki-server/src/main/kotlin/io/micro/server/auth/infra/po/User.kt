@@ -1,7 +1,6 @@
 package io.micro.server.auth.infra.po
 
 import io.micro.core.persistence.BasePO
-import io.quarkus.hibernate.reactive.panache.kotlin.PanacheCompanion
 import jakarta.persistence.*
 
 /**
@@ -11,8 +10,6 @@ import jakarta.persistence.*
 @Table(name = "tokisaki_user")
 @Entity
 class User : BasePO() {
-
-    companion object : PanacheCompanion<User>
 
     @Column(name = "user_name", nullable = false)
     var name: String? = null

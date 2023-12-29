@@ -2,8 +2,6 @@ package io.micro.server.robot.infra.po
 
 import io.micro.core.persistence.BasePO
 import io.micro.server.auth.infra.po.User
-import io.quarkus.hibernate.reactive.panache.kotlin.PanacheCompanion
-import io.smallrye.mutiny.Uni
 import jakarta.persistence.*
 
 @Table(name = "tokisaki_robot")
@@ -38,12 +36,6 @@ class Robot : BasePO() {
     @JoinColumn(name = "use_function_id")
     var functions: MutableSet<UseFunction>? = null
 
-    companion object : PanacheCompanion<Robot> {
-        fun existByAccount(account: String): Uni<Boolean> {
-            return this.count("account = ?1", account).map { it > 0 }
-        }
-    }
-
     enum class Type { QQ }
 
     enum class State {
@@ -52,7 +44,8 @@ class Robot : BasePO() {
         LoggingFail,
         Online,
         Offline,
-        Closed
+        Closed,
+        ALL
     }
 
 }

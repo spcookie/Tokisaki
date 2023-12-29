@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class E(
-    var code: Int = Code.IGNORE,
-    var message: String = "",
+    var code: Int = CommonCode.IGNORE.code,
+    var message: String = CommonCode.IGNORE.msg,
+    var detail: String = "",
 )

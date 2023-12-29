@@ -1,7 +1,10 @@
 plugins {
     id("org.kordamp.gradle.jandex") version "1.0.0"
     kotlin("plugin.serialization") version "1.9.10"
+    kotlin("kapt")
 }
+
+val jpamodelgenVersion = "6.2.13.Final"
 
 dependencies {
     api("cn.hutool:hutool-core:5.8.16")
@@ -12,4 +15,6 @@ dependencies {
         exclude("net.mamoe", "mirai-core-jvm")
         exclude("net.mamoe", "mirai-core-utils-jvm")
     }
+    kapt("org.hibernate:hibernate-jpamodelgen:$jpamodelgenVersion")
+    compileOnly("org.hibernate:hibernate-jpamodelgen:$jpamodelgenVersion")
 }

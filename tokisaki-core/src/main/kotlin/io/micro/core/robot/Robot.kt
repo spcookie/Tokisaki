@@ -54,7 +54,6 @@ interface Robot {
         LoggingIn,
         LoggingFail,
         Online,
-        Offline,
         Closed
     }
 }

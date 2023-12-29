@@ -1,6 +1,5 @@
 package io.micro.core.persistence
 
-import io.quarkus.hibernate.reactive.panache.kotlin.PanacheEntity
 import jakarta.persistence.*
 import java.util.*
 
@@ -10,7 +9,11 @@ import java.util.*
  */
 @EntityListeners(AuditListener::class)
 @MappedSuperclass
-abstract class BasePO : PanacheEntity() {
+abstract class BasePO {
+
+    @Id
+    @GeneratedValue
+    open var id: Long? = null
 
     @Column(name = "created_at", nullable = false)
     @Temporal(TemporalType.DATE)

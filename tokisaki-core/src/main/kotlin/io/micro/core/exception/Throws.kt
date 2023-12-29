@@ -1,5 +1,6 @@
 package io.micro.core.exception
 
+import io.micro.core.rest.CommonCode
 import java.util.*
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -8,70 +9,70 @@ import kotlin.contracts.contract
 @OptIn(ExperimentalContracts::class)
 object Throws {
 
-    fun fail(msg: String): Nothing {
-        throw BusinessException(msg)
+    fun fail(detail: String? = null, code: CommonCode = CommonCode.FAIL): Nothing {
+        throw BusinessException(code, detail)
     }
 
-    fun requireTure(msg: String, block: () -> Boolean) {
+    fun requireTure(detail: String = "", code: CommonCode = CommonCode.FAIL, block: () -> Boolean) {
         contract {
             callsInPlace(block, InvocationKind.EXACTLY_ONCE)
         }
         if (!block()) {
-            fail(msg)
+            fail(detail, code)
         }
     }
 
-    fun requireTure(block: Boolean, msg: String) {
-        if (!block) {
-            fail(msg)
+    fun requireTure(value: Boolean, detail: String? = null, code: CommonCode = CommonCode.FAIL) {
+        if (!value) {
+            fail(detail, code)
         }
     }
 
-    fun requireFalse(msg: String, block: () -> Boolean) {
+    fun requireFalse(detail: String? = null, code: CommonCode = CommonCode.FAIL, block: () -> Boolean) {
         contract {
             callsInPlace(block, InvocationKind.EXACTLY_ONCE)
         }
         if (block()) {
-            fail(msg)
+            fail(detail, code)
         }
     }
 
-    fun requireFalse(value: Boolean, msg: String) {
+    fun requireFalse(value: Boolean, detail: String? = null, code: CommonCode = CommonCode.FAIL) {
         if (value) {
-            fail(msg)
+            fail(detail, code)
         }
     }
 
-    fun <T> requireNull(msg: String, block: () -> T) {
+    fun <T> requireNull(detail: String? = null, code: CommonCode = CommonCode.FAIL, block: () -> T) {
         contract {
             callsInPlace(block, InvocationKind.EXACTLY_ONCE)
         }
         if (!Objects.isNull(block())) {
-            fail(msg)
+            fail(detail, code)
         }
     }
 
-    fun <T> requireNull(value: T, msg: String) {
+    fun <T> requireNull(value: T, detail: String? = null, code: CommonCode = CommonCode.FAIL) {
         if (!Objects.isNull(value)) {
-            fail(msg)
+            fail(detail, code)
         }
     }
 
-    fun <T> requireNonNull(msg: String, block: () -> T) {
+    fun <T> requireNonNull(detail: String? = null, code: CommonCode = CommonCode.FAIL, block: () -> T) {
         contract {
             callsInPlace(block, InvocationKind.EXACTLY_ONCE)
         }
         if (Objects.isNull(block())) {
-            fail(msg)
+            fail(detail, code)
         }
     }
 
-    fun <T> requireNonNull(value: T, msg: String) {
+    fun <T> requireNonNull(value: T, detail: String? = null, code: CommonCode = CommonCode.FAIL) {
         contract {
             returns() implies (value != null)
         }
         if (Objects.isNull(value)) {
-            fail(msg)
+            fail(detail, code)
         }
     }
 

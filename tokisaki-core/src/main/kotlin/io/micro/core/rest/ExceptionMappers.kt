@@ -10,7 +10,7 @@ class ExceptionMappers {
 
     @ServerExceptionMapper(BusinessException::class, priority = Priorities.USER - 1)
     fun businessExceptionMapper(ex: BusinessException): Uni<RestResponse<E>> {
-        return Uni.createFrom().item { RestResponse.ok(E(Code.FAIL, ex.message.toString())) }
+        return Uni.createFrom().item { RestResponse.ok(E(ex.code.code, ex.code.msg, ex.detail.toString())) }
     }
 
     @ServerExceptionMapper(Exception::class)
@@ -19,7 +19,7 @@ class ExceptionMappers {
             .item {
                 RestResponse.status(
                     RestResponse.Status.INTERNAL_SERVER_ERROR,
-                    E(Code.ERROR, ex.message.toString())
+                    E(CommonCode.ERROR.code, CommonCode.ERROR.msg, ex.message.toString())
                 )
             }
     }

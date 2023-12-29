@@ -1,6 +1,7 @@
 package io.micro.core.context
 
 import io.smallrye.common.vertx.ContextLocals
+import java.util.*
 
 /**
  *@author Augenstern
@@ -15,8 +16,21 @@ object AuthContext {
         const val ROLES = "roles"
     }
 
-    fun hasRole(role: String): Boolean =
-        ContextLocals.get<Set<String>>(Constant.ROLES).orElse(setOf()).contains(role.lowercase())
+    fun hasRole(role: String?): Boolean =
+        role?.let {
+            Optional.ofNullable(roles)
+                .orElse(setOf())
+                .contains(role.lowercase())
+        } ?: false
+
+
+    fun equalId(id: String?) = id.equals(this.id)
+
+    fun equalId(id: Long?) = id.toString().equals(this.id)
+
+    fun equalOpenid(openid: String?) = openid.equals(this.openid)
+
+    fun equalNickname(nickname: String?) = nickname.equals(this.nickname)
 
     val id: String
         get() = ContextLocals.get<String>(Constant.ID).get()
@@ -27,7 +41,7 @@ object AuthContext {
     val nickname: String
         get() = ContextLocals.get<String>(Constant.NICKNAME).get()
 
-    val roles: String
-        get() = ContextLocals.get<String>(Constant.ROLES).get()
+    val roles: Set<String>
+        get() = ContextLocals.get<Set<String>>(Constant.ROLES).get()
 
 }

@@ -8,12 +8,12 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class R<T>(
-    var code: Int = Code.OK,
+    val code: Int = CommonCode.OK.code,
     var message: String = "",
     var data: T? = null
 ) {
     companion object {
-        fun <E> newInstance(msg: String = "", data: E? = null): R<E> {
+        fun <E> newInstance(msg: String = CommonCode.OK.msg, data: E? = null): R<E> {
             return R(message = msg, data = data)
         }
     }
