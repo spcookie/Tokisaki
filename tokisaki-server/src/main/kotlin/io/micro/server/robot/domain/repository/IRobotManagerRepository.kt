@@ -1,6 +1,6 @@
 package io.micro.server.robot.domain.repository
 
-import io.micro.server.robot.domain.model.entity.RobotManager
+import io.micro.core.robot.RobotManager
 import io.quarkus.panache.common.Page
 import io.smallrye.mutiny.Uni
 

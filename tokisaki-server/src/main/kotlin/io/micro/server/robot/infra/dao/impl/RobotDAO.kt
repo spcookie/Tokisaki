@@ -1,43 +1,53 @@
 package io.micro.server.robot.infra.dao.impl
 
+import com.linecorp.kotlinjdsl.dsl.jpql.jpql
+import com.linecorp.kotlinjdsl.render.jpql.JpqlRenderContext
+import com.linecorp.kotlinjdsl.support.hibernate.reactive.extension.createQuery
+import io.micro.server.auth.infra.po.User
 import io.micro.server.robot.infra.dao.IRobotDAO
-import io.micro.server.robot.infra.po.Robot
-import io.micro.server.robot.infra.po.Robot_
+import io.micro.server.robot.infra.po.RobotEntity
 import io.quarkus.panache.common.Page
 import io.smallrye.mutiny.Uni
 import jakarta.enterprise.context.ApplicationScoped
-import jakarta.inject.Inject
-import org.hibernate.reactive.mutiny.Mutiny
 
 @ApplicationScoped
 class RobotDAO : IRobotDAO {
 
-    @Inject
-    lateinit var sf: Mutiny.SessionFactory
+    val jpqlRenderContext = JpqlRenderContext()
 
     override fun existByAccount(account: String): Uni<Boolean> {
         return this.count("account = ?1", account).map { it > 0 }
     }
 
-    override fun findByExample(robot: Robot, page: Page): Uni<List<Robot>> {
-        return sf.withSession { session ->
-            val cb = session.factory.criteriaBuilder
-            val cq = cb.createQuery(Robot::class.java)
-            val root = cq.from(Robot::class.java)
-            val example = buildList {
-                robot.name?.also { add(cb.equal(root.get(Robot_.name), it)) }
-                robot.account?.also { add(cb.equal(root.get(Robot_.account), it)) }
-                robot.type?.also { add(cb.equal(root.get(Robot_.type), it)) }
-                robot.state?.also {
-                    if (it != Robot.State.ALL) {
-                        add(cb.equal(root.get(Robot_.state), it))
+    override fun findByExample(robotPO: RobotEntity, page: Page): Uni<List<RobotEntity>> {
+        return getSession().flatMap { session ->
+            val jpql = jpql {
+                val and = buildList {
+                    if (robotPO.name != null) {
+                        add(path(RobotEntity::name).eq(robotPO.name))
                     }
+                    if (robotPO.account != null) {
+                        add(path(RobotEntity::account).eq(robotPO.account))
+                    }
+                    if (robotPO.type != null) {
+                        add(path(RobotEntity::type).eq(robotPO.type))
+                    }
+                    if (robotPO.state != null && robotPO.state != RobotEntity.State.ALL) {
+                        add(path(RobotEntity::state).eq(robotPO.state))
+                    }
+                    if (robotPO.remark != null) {
+                        add(path(RobotEntity::remark).like("%${robotPO.remark}%"))
+                    }
+                }.toTypedArray()
+                var predicate = and(*and)
+                if (robotPO.user?.id == null) {
+                    predicate = predicate.or(path(RobotEntity::user)(User::id).eq(robotPO.user?.id))
                 }
-                robot.remark?.also { add(cb.equal(root.get(Robot_.remark), it)) }
+                select(entity(RobotEntity::class))
+                    .from(entity(RobotEntity::class))
+                    .where(predicate)
             }
-            val andUserId = mutableListOf(cb.or(*example.toTypedArray()))
-            robot.user?.id?.let { andUserId.add(cb.equal(root.get(Robot_.id), it)) }
-            session.createQuery(cq.select(root).where(*andUserId.toTypedArray()))
+            session.createQuery(jpql, jpqlRenderContext)
                 .setFirstResult((page.index - 1) * page.size)
                 .setMaxResults(page.index * page.size)
                 .resultList

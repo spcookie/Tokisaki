@@ -2,7 +2,7 @@ package io.micro.server.robot.domain.service
 
 import io.micro.core.rest.PageDTO
 import io.micro.core.rest.Pageable
-import io.micro.server.robot.domain.model.entity.RobotManager
+import io.micro.server.robot.domain.model.entity.RobotDO
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.Uni
 import jakarta.ws.rs.sse.OutboundSseEvent
@@ -23,7 +23,7 @@ interface RobotManagerService {
 
     fun closeRobot(id: Long): Uni<Unit>
 
-    fun createRobot(robotManager: RobotManager): Uni<RobotManager>
+    fun createRobot(robotDO: RobotDO): Uni<RobotDO>
 
-    fun getRobotList(robotManager: RobotManager, page: Pageable): Uni<PageDTO<RobotManager>>
+    fun getRobotList(robotDO: RobotDO, page: Pageable): Uni<PageDTO<RobotDO>>
 }

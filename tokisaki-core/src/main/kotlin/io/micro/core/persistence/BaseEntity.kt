@@ -9,7 +9,7 @@ import java.util.*
  */
 @EntityListeners(AuditListener::class)
 @MappedSuperclass
-abstract class BasePO {
+abstract class BaseEntity {
 
     @Id
     @GeneratedValue

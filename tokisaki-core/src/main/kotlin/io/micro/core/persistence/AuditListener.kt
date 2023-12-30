@@ -11,14 +11,14 @@ import java.util.*
 class AuditListener {
 
     @PrePersist
-    fun prePersist(entity: BasePO) {
+    fun prePersist(entity: BaseEntity) {
         val date = Date()
         entity.createdAt = date
         entity.modifyAt = date
     }
 
     @PreUpdate
-    fun preUpdate(entity: BasePO) {
+    fun preUpdate(entity: BaseEntity) {
         entity.modifyAt = Date()
     }
 }

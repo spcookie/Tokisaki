@@ -6,9 +6,9 @@ import kotlin.properties.Delegates
 @Serializable
 open class Pageable {
 
-    open var current: Int by Delegates.notNull()
+    var current: Int = 0
 
-    open var limit: Int by Delegates.notNull()
+    var limit: Int = 0
 
     companion object {
         fun of(current: Int, limit: Int) = Pageable().also {

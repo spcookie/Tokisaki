@@ -1,6 +1,6 @@
 package io.micro.server.auth.infra.po
 
-import io.micro.core.persistence.BasePO
+import io.micro.core.persistence.BaseEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.ManyToMany
@@ -12,7 +12,7 @@ import jakarta.persistence.Table
  */
 @Table(name = "tokisaki_authority")
 @Entity
-class Authority : BasePO() {
+class Authority : BaseEntity() {
 
     @Column(name = "authority_value")
     var value: String? = null

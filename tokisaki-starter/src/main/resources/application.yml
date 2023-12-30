@@ -3,6 +3,10 @@ quarkus:
     path: tokisaki.txt
   log:
     level: INFO
+    min-level: TRACE
+    category:
+      "org.hibernate.orm.jdbc.bind":
+        level: TRACE
   http:
     cors:
       ~: true
@@ -20,6 +24,8 @@ quarkus:
   hibernate-orm:
     database:
       generation: update
+    log:
+      sql: true
   redis:
     hosts: redis://localhost:6379
   minio:

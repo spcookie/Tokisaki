@@ -1,16 +1,16 @@
 package io.micro.server.robot.infra.converter
 
-import io.micro.server.function.infra.po.Function
+import io.micro.server.function.infra.po.FunctionEntity
 import io.micro.server.robot.domain.model.valobj.FeatureFunction
-import io.micro.server.robot.infra.po.Robot
-import io.micro.server.robot.infra.po.UseFunction
+import io.micro.server.robot.infra.po.RobotEntity
+import io.micro.server.robot.infra.po.UseFunctionEntity
 import jakarta.inject.Singleton
 
 @Singleton
 class RobotMapper {
 
-    fun number2Type(num: Int): Robot.Type {
-        val entries = Robot.Type.entries
+    fun number2Type(num: Int): RobotEntity.Type {
+        val entries = RobotEntity.Type.entries
         if (num < entries.size) {
             return entries[num]
         } else {
@@ -18,12 +18,12 @@ class RobotMapper {
         }
     }
 
-    fun type2Number(type: Robot.Type): Int {
-        return Robot.Type.entries.indexOf(type)
+    fun type2Number(type: RobotEntity.Type): Int {
+        return RobotEntity.Type.entries.indexOf(type)
     }
 
-    fun number2State(num: Int): Robot.State {
-        val entries = Robot.State.entries
+    fun number2State(num: Int): RobotEntity.State {
+        val entries = RobotEntity.State.entries
         if (num < entries.size) {
             return entries[num]
         } else {
@@ -31,23 +31,23 @@ class RobotMapper {
         }
     }
 
-    fun state2Number(state: Robot.State): Int {
-        return Robot.State.entries.indexOf(state)
+    fun state2Number(state: RobotEntity.State): Int {
+        return RobotEntity.State.entries.indexOf(state)
     }
 
-    fun featureFunction2UseFunction(featureFunction: FeatureFunction): UseFunction {
-        return UseFunction().apply {
-            function = Function().apply { id = featureFunction.id }
+    fun featureFunction2UseFunction(featureFunction: FeatureFunction): UseFunctionEntity {
+        return UseFunctionEntity().apply {
+            functionPO = FunctionEntity().apply { id = featureFunction.id }
             remark = featureFunction.remark
             enabled = featureFunction.enabled
         }
     }
 
-    fun useFunction2FeatureFunction(useFunction: UseFunction): FeatureFunction {
+    fun useFunction2FeatureFunction(useFunctionPO: UseFunctionEntity): FeatureFunction {
         return FeatureFunction(
-            id = useFunction.id!!,
-            remark = useFunction.remark,
-            enabled = useFunction.enabled
+            id = useFunctionPO.id!!,
+            remark = useFunctionPO.remark,
+            enabled = useFunctionPO.enabled
         )
     }
 

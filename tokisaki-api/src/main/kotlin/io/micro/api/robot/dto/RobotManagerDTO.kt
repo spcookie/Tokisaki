@@ -1,6 +1,7 @@
 package io.micro.api.robot.dto
 
 import io.micro.core.valid.ValidGroup
+import jakarta.validation.Valid
 import jakarta.validation.constraints.NotNull
 import kotlinx.serialization.Serializable
 
@@ -17,14 +18,14 @@ data class RobotManagerDTO(
     @NotNull(groups = [ValidGroup.Create::class], message = "帐号不能为空")
     var account: String? = null,
 
-    var authorization: String? = null,
+    var password: String? = null,
 
     @NotNull(groups = [ValidGroup.Create::class], message = "类型不能为空")
     var type: Int = 0,
 
-    var state: Int = 7,
+    var state: Int = 6,
 
     var remark: String? = null,
 
-    val functions: MutableList<FeatureFunctionDTO> = mutableListOf()
+    val functions: MutableList<@Valid FeatureFunctionDTO> = mutableListOf()
 )

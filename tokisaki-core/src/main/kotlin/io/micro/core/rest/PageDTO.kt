@@ -1,12 +1,11 @@
 package io.micro.core.rest
 
 import kotlinx.serialization.Serializable
-import kotlin.properties.Delegates
 
 @Serializable
 class PageDTO<T> : Pageable() {
 
-    var total: Int by Delegates.notNull()
+    var total: Int = 0
 
     var records: List<T> = listOf()
 

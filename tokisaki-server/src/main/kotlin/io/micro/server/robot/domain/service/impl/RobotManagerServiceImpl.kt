@@ -10,7 +10,7 @@ import io.micro.core.robot.Robot
 import io.micro.core.robot.qq.QQRobot
 import io.micro.core.robot.qq.QQRobotFactory
 import io.micro.core.robot.qq.QQRobotManager
-import io.micro.server.robot.domain.model.entity.RobotManager
+import io.micro.server.robot.domain.model.entity.RobotDO
 import io.micro.server.robot.domain.repository.IRobotManagerRepository
 import io.micro.server.robot.domain.service.RobotManagerService
 import io.quarkus.hibernate.reactive.panache.common.WithSession
@@ -86,23 +86,25 @@ class RobotManagerServiceImpl(
             }.replaceWithUnit()
     }
 
-    override fun createRobot(robotManager: RobotManager): Uni<RobotManager> {
-        robotManager.userId = AuthContext.id.toLongOrNull()
-        robotManager.paramVerify()
-        return robotManagerRepository.existRobotByAccount(robotManager.account!!)
+    override fun createRobot(robotDO: RobotDO): Uni<RobotDO> {
+        robotDO.userId = AuthContext.id.toLongOrNull()
+        robotDO.paramVerify()
+        val existRobot = robotManagerRepository.existRobotByAccount(robotDO.account!!)
+
+        return existRobot
             .flatMap { exist ->
                 if (exist) {
-                    Throws.fail(code = CommonCode.DUPLICATE)
+                    Throws.fail(code = CommonCode.DUPLICATE, detail = "存在相同帐号机器人")
                 } else {
-                    robotManagerRepository.saveRobotWithUser(robotManager)
+                    robotManagerRepository.saveRobotWithUser(robotDO)
                 }
             }
     }
 
     @WithTransaction
-    override fun getRobotList(robotManager: RobotManager, page: Pageable): Uni<PageDTO<RobotManager>> {
-        robotManager.userId = AuthContext.id.toLongOrNull()
-        return robotManagerRepository.findRobotByExample(robotManager, Page.of(page.current, page.limit))
+    override fun getRobotList(robotDO: RobotDO, page: Pageable): Uni<PageDTO<RobotDO>> {
+        robotDO.userId = AuthContext.id.toLongOrNull()
+        return robotManagerRepository.findRobotByExample(robotDO, Page.of(page.current, page.limit))
             .map { PageDTO.of(page.current, page.limit, it) }
     }
 
@@ -112,10 +114,10 @@ class RobotManagerServiceImpl(
      * @param sse 半长连接
      * @return 消息事件
      */
-    private fun qqRobotQRLoginStart(robotManager: RobotManager, sse: Sse): Multi<OutboundSseEvent> {
-        val id = robotManager.id
+    private fun qqRobotQRLoginStart(robotDO: RobotDO, sse: Sse): Multi<OutboundSseEvent> {
+        val id = robotDO.id
         // 创建QQ机器人
-        val robot = factory.create(Credential(id!!, robotManager.account!!)) as QQRobot
+        val robot = factory.create(Credential(id!!, robotDO.account!!)) as QQRobot
         return Multi.createFrom().emitter<String> { em ->
             // 绑定登录回调函数
             qqRobotEventEmitBind(robot, em)

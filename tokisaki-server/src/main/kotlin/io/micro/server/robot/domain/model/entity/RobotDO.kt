@@ -6,7 +6,7 @@ import io.micro.core.rest.CommonCode
 import io.micro.server.robot.domain.model.valobj.FeatureFunction
 import kotlin.properties.Delegates
 
-class RobotManager : BaseDomainEntity() {
+class RobotDO : BaseDomainEntity() {
 
     var userId: Long? = null
 
@@ -14,7 +14,7 @@ class RobotManager : BaseDomainEntity() {
 
     var account: String? = null
 
-    var authorization: String? = null
+    var password: String? = null
 
     var type: Int by Delegates.notNull()
 

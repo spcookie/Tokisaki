@@ -4,8 +4,6 @@ plugins {
     kotlin("kapt")
 }
 
-val jpamodelgenVersion = "6.2.13.Final"
-
 dependencies {
     api("cn.hutool:hutool-core:5.8.16")
     implementation("io.github.spcookie:mirai-core-jvm:2.16.0")
@@ -15,6 +13,4 @@ dependencies {
         exclude("net.mamoe", "mirai-core-jvm")
         exclude("net.mamoe", "mirai-core-utils-jvm")
     }
-    kapt("org.hibernate:hibernate-jpamodelgen:$jpamodelgenVersion")
-    compileOnly("org.hibernate:hibernate-jpamodelgen:$jpamodelgenVersion")
 }

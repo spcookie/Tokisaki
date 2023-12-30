@@ -1,6 +1,6 @@
 package io.micro.server.auth.infra.po
 
-import io.micro.core.persistence.BasePO
+import io.micro.core.persistence.BaseEntity
 import jakarta.persistence.*
 
 /**
@@ -9,7 +9,7 @@ import jakarta.persistence.*
  */
 @Table(name = "tokisaki_user")
 @Entity
-class User : BasePO() {
+class User : BaseEntity() {
 
     @Column(name = "user_name", nullable = false)
     var name: String? = null
