@@ -10,6 +10,7 @@ import io.micro.core.valid.ValidGroup
 import io.micro.server.robot.domain.service.RobotManagerService
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.Uni
+import jakarta.inject.Inject
 import jakarta.validation.Valid
 import jakarta.validation.groups.ConvertGroup
 import jakarta.ws.rs.*
@@ -27,10 +28,14 @@ import org.jboss.resteasy.reactive.RestStreamElementType
  */
 @InitAuthContext
 @Path("/robot/manager")
-class RobotManagerController(
-    private val robotManagerService: RobotManagerService,
-    private val robotManagerConverter: RobotManagerConverter
-) {
+class RobotManagerController {
+
+    @Inject
+    lateinit var robotManagerService: RobotManagerService
+
+    @Inject
+    lateinit var robotManagerConverter: RobotManagerConverter
+
     @Operation(summary = "QQ机器人扫码登录")
     @GET
     @Path("login/qq/{id}")

@@ -1,9 +1,9 @@
 package io.micro.server.auth.domain.service.impl
 
-import io.micro.server.auth.domain.model.entity.WXLoginUser
+import io.micro.server.auth.domain.model.entity.WXLoginUserDO
 import io.micro.server.auth.domain.model.valobj.WXMessage
+import io.micro.server.auth.domain.repository.IAuthRepository
 import io.micro.server.auth.domain.service.WxLoginService
-import io.micro.server.auth.infra.repository.AuthRepository
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.Uni
@@ -18,29 +18,29 @@ import jakarta.ws.rs.sse.SseEventSink
  */
 @ApplicationScoped
 class WxLoginServiceImpl(
-    private val authRepository: AuthRepository
+    private val authRepository: IAuthRepository
 ) : WxLoginService {
 
     override fun loginSubscript(driveId: String, sse: Sse, sink: SseEventSink): Multi<OutboundSseEvent> {
-        return WXLoginUser.loginStart(driveId, sse, sink)
+        return WXLoginUserDO.loginStart(driveId, sse, sink)
     }
 
     @WithTransaction
-    override fun login(wxMessage: WXMessage, sse: Sse): Uni<WXLoginUser> {
+    override fun login(wxMessage: WXMessage, sse: Sse): Uni<WXLoginUserDO> {
         val code = wxMessage.content
         val openId = wxMessage.fromUserName
-        return if (WXLoginUser.containsCode(code)) {
-            loginUser(openId).invoke { user -> WXLoginUser.loginEnd(code, user.token, sse) }
+        return if (WXLoginUserDO.containsCode(code)) {
+            loginUser(openId).invoke { user -> WXLoginUserDO.loginEnd(code, user.token, sse) }
         } else {
             Uni.createFrom().nullItem()
         }
     }
 
-    private fun loginUser(openId: String): Uni<WXLoginUser> {
+    private fun loginUser(openId: String): Uni<WXLoginUserDO> {
         return authRepository.findUserByOpenid(openId)
             .flatMap { user ->
                 if (user == null) {
-                    val defaultUser = WXLoginUser.defaultUser(openId)
+                    val defaultUser = WXLoginUserDO.defaultUser(openId)
                     authRepository.registerUser(defaultUser)
                 } else {
                     Uni.createFrom().item(user)

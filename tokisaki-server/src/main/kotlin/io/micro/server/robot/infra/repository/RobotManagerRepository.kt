@@ -43,9 +43,9 @@ class RobotManagerRepository(
     }
 
     @WithSession
-    override fun modifyRobot(robotDO: RobotDO): Uni<RobotDO> {
+    override fun modifyRobot(robot: RobotDO): Uni<RobotDO> {
         return Uni.createFrom()
-            .item(robotConverter.robotManager2RobotPO(robotDO))
+            .item(robotConverter.robotManager2RobotPO(robot))
             .flatMap {
                 if (it != null) {
                     robotDAO.flush().replaceWith(it)
@@ -57,8 +57,8 @@ class RobotManagerRepository(
     }
 
     @WithSession
-    override fun findRobotByExample(robotDO: RobotDO, pageable: Page): Uni<List<RobotDO>> {
-        return robotConverter.robotManager2RobotPO(robotDO)?.let {
+    override fun findRobotByExample(robot: RobotDO, pageable: Page): Uni<List<RobotDO>> {
+        return robotConverter.robotManager2RobotPO(robot)?.let {
             robotDAO.findByExample(it, Page(pageable.index, pageable.size))
                 .map { robots ->
                     robots.map { robot ->

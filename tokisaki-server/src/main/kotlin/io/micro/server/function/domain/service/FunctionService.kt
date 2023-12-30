@@ -4,5 +4,5 @@ import io.micro.server.function.domain.model.entity.FunctionDO
 import io.smallrye.mutiny.Uni
 
 interface FunctionService {
-    fun getFunctions(): Uni<List<FunctionDO>>
+    fun getUserFunctions(): Uni<List<FunctionDO>>
 }

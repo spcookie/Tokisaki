@@ -1,23 +1,30 @@
-package io.micro.server.robot.infra.po
+package io.micro.server.auth.infra.po
 
 import io.micro.core.persistence.BaseEntity
-import io.micro.server.function.infra.po.FunctionEntity
 import jakarta.persistence.*
 import org.hibernate.proxy.HibernateProxy
 
-@Table(name = "tokisaki_use_function")
+/**
+ *@author Augenstern
+ *@since 2023/11/25
+ */
+@Table(name = "tokisaki_user")
 @Entity
-class UseFunctionEntity : BaseEntity() {
+class UserEntity : BaseEntity() {
 
-    @OneToOne
-    @JoinColumn(name = "function_id")
-    var function: FunctionEntity? = null
+    @Column(name = "user_name", nullable = false)
+    var name: String? = null
 
-    @Column(name = "use_function_remark")
-    var remark: String? = null
+    @Column(name = "user_openid", nullable = false)
+    var openid: String? = null
 
-    @Column(name = "use_function_enabled", nullable = false)
-    var enabled: Boolean = false
+    @JoinTable(
+        name = "tokisaki_user_authority",
+        joinColumns = [JoinColumn(name = "user_id")],
+        inverseJoinColumns = [JoinColumn(name = "authority_id")]
+    )
+    @ManyToMany(fetch = FetchType.EAGER)
+    val authorities: MutableSet<AuthorityEntity>? = null
 
     final override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -27,7 +34,7 @@ class UseFunctionEntity : BaseEntity() {
         val thisEffectiveClass =
             if (this is HibernateProxy) this.hibernateLazyInitializer.persistentClass else this.javaClass
         if (thisEffectiveClass != oEffectiveClass) return false
-        other as UseFunctionEntity
+        other as UserEntity
 
         return id != null && id == other.id
     }

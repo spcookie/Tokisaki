@@ -1,23 +1,25 @@
-package io.micro.server.robot.infra.po
+package io.micro.server.auth.infra.po
 
 import io.micro.core.persistence.BaseEntity
-import io.micro.server.function.infra.po.FunctionEntity
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.ManyToMany
+import jakarta.persistence.Table
 import org.hibernate.proxy.HibernateProxy
 
-@Table(name = "tokisaki_use_function")
+/**
+ *@author Augenstern
+ *@since 2023/11/25
+ */
+@Table(name = "tokisaki_authority")
 @Entity
-class UseFunctionEntity : BaseEntity() {
+class AuthorityEntity : BaseEntity() {
 
-    @OneToOne
-    @JoinColumn(name = "function_id")
-    var function: FunctionEntity? = null
+    @Column(name = "authority_value")
+    var value: String? = null
 
-    @Column(name = "use_function_remark")
-    var remark: String? = null
-
-    @Column(name = "use_function_enabled", nullable = false)
-    var enabled: Boolean = false
+    @ManyToMany(mappedBy = "authorities")
+    var users: MutableSet<UserEntity>? = null
 
     final override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -27,7 +29,7 @@ class UseFunctionEntity : BaseEntity() {
         val thisEffectiveClass =
             if (this is HibernateProxy) this.hibernateLazyInitializer.persistentClass else this.javaClass
         if (thisEffectiveClass != oEffectiveClass) return false
-        other as UseFunctionEntity
+        other as AuthorityEntity
 
         return id != null && id == other.id
     }

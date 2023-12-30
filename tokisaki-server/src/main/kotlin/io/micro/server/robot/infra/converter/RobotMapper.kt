@@ -37,7 +37,7 @@ class RobotMapper {
 
     fun featureFunction2UseFunction(featureFunction: FeatureFunction): UseFunctionEntity {
         return UseFunctionEntity().apply {
-            functionPO = FunctionEntity().apply { id = featureFunction.id }
+            function = FunctionEntity().apply { id = featureFunction.id }
             remark = featureFunction.remark
             enabled = featureFunction.enabled
         }

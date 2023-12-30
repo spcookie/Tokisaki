@@ -3,7 +3,7 @@ package io.micro.server.robot.infra.dao.impl
 import com.linecorp.kotlinjdsl.dsl.jpql.jpql
 import com.linecorp.kotlinjdsl.render.jpql.JpqlRenderContext
 import com.linecorp.kotlinjdsl.support.hibernate.reactive.extension.createQuery
-import io.micro.server.auth.infra.po.User
+import io.micro.server.auth.infra.po.UserEntity
 import io.micro.server.robot.infra.dao.IRobotDAO
 import io.micro.server.robot.infra.po.RobotEntity
 import io.quarkus.panache.common.Page
@@ -41,7 +41,7 @@ class RobotDAO : IRobotDAO {
                 }.toTypedArray()
                 var predicate = and(*and)
                 if (robotPO.user?.id == null) {
-                    predicate = predicate.or(path(RobotEntity::user)(User::id).eq(robotPO.user?.id))
+                    predicate = predicate.or(path(RobotEntity::user)(UserEntity::id).eq(robotPO.user?.id))
                 }
                 select(entity(RobotEntity::class))
                     .from(entity(RobotEntity::class))

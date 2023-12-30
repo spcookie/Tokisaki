@@ -9,6 +9,7 @@ import io.micro.core.filter.ReqInfo
 import io.micro.server.auth.domain.service.WxLoginService
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.Uni
+import jakarta.inject.Inject
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.Context
 import jakarta.ws.rs.core.MediaType
@@ -25,11 +26,16 @@ import org.jboss.resteasy.reactive.RestStreamElementType
  */
 @InitAuthContext
 @Path("/wx")
-class WxOfficialController(
-    private val wxLoginService: WxLoginService,
-    private val reqInfo: ReqInfo,
-    private val wxMessageConvert: WxMessageConvert
-) {
+class WxOfficialController {
+
+    @Inject
+    lateinit var wxLoginService: WxLoginService
+
+    @Inject
+    lateinit var reqInfo: ReqInfo
+
+    @Inject
+    lateinit var wxMessageConvert: WxMessageConvert
 
     @Context
     lateinit var sse: Sse

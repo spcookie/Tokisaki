@@ -14,7 +14,7 @@ import jakarta.ws.rs.sse.SseEventSink
  *@author Augenstern
  *@since 2023/11/25
  */
-class WXLoginUser(
+class WXLoginUserDO(
     var name: String,
     var openid: String,
     var authorities: MutableSet<String>,
@@ -46,8 +46,8 @@ class WXLoginUser(
             return loginLinkCache.linkPool.getIfPresent(code) != null
         }
 
-        fun defaultUser(openId: String): WXLoginUser {
-            return WXLoginUser(DefaultName.generate(), openId, mutableSetOf())
+        fun defaultUser(openId: String): WXLoginUserDO {
+            return WXLoginUserDO(DefaultName.generate(), openId, mutableSetOf())
         }
     }
 

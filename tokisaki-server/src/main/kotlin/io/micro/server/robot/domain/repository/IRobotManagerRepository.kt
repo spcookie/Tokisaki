@@ -1,18 +1,18 @@
 package io.micro.server.robot.domain.repository
 
-import io.micro.core.robot.RobotManager
+import io.micro.server.robot.domain.model.entity.RobotDO
 import io.quarkus.panache.common.Page
 import io.smallrye.mutiny.Uni
 
 interface IRobotManagerRepository {
 
-    fun saveRobotWithUser(robotManager: RobotManager): Uni<RobotManager>
+    fun saveRobotWithUser(robot: RobotDO): Uni<RobotDO>
 
-    fun findRobotById(id: Long): Uni<RobotManager>
+    fun findRobotById(id: Long): Uni<RobotDO>
 
     fun existRobotByAccount(account: String): Uni<Boolean>
 
-    fun modifyRobot(robotManager: RobotManager): Uni<RobotManager>
+    fun modifyRobot(robot: RobotDO): Uni<RobotDO>
 
-    fun findRobotByExample(robotManager: RobotManager, pageable: Page): Uni<List<RobotManager>>
+    fun findRobotByExample(robot: RobotDO, pageable: Page): Uni<List<RobotDO>>
 }
