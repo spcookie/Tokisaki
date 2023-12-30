@@ -1,7 +1,7 @@
 package io.micro.api.robot
 
 import io.micro.api.robot.converter.RobotManagerConverter
-import io.micro.api.robot.dto.RobotManagerDTO
+import io.micro.api.robot.dto.RobotDTO
 import io.micro.core.annotation.InitAuthContext
 import io.micro.core.rest.PageDTO
 import io.micro.core.rest.Pageable
@@ -52,11 +52,11 @@ class RobotManagerController {
     @POST
     @Path("/example")
     fun getRobot(
-        @Parameter(description = "查询样例") robotManagerDTO: RobotManagerDTO,
+        @Parameter(description = "查询样例") robotDTO: RobotDTO,
         @QueryParam("size") @DefaultValue("10") size: Int,
         @QueryParam("page") @DefaultValue("1") page: Int
-    ): Uni<R<PageDTO<RobotManagerDTO>>> {
-        val robotManager = robotManagerConverter.robotManagerDTO2RobotManager(robotManagerDTO)
+    ): Uni<R<PageDTO<RobotDTO>>> {
+        val robotManager = robotManagerConverter.robotManagerDTO2RobotManager(robotDTO)
         return robotManagerService.getRobotList(robotManager, Pageable.of(page, size))
             .map {
                 R.newInstance(
@@ -72,8 +72,8 @@ class RobotManagerController {
     @Operation(summary = "机器人创建")
     @POST
     @Path("/")
-    fun createRobot(@Parameter(description = "创建信息") @Valid @ConvertGroup(to = ValidGroup.Create::class) robotManagerDTO: RobotManagerDTO): Uni<R<RobotManagerDTO>> {
-        return robotManagerService.createRobot(robotManagerConverter.robotManagerDTO2RobotManager(robotManagerDTO.also {
+    fun createRobot(@Parameter(description = "创建信息") @Valid @ConvertGroup(to = ValidGroup.Create::class) robotDTO: RobotDTO): Uni<R<RobotDTO>> {
+        return robotManagerService.createRobot(robotManagerConverter.robotManagerDTO2RobotManager(robotDTO.also {
             it.state = 0
         }))
             .map { R.newInstance("创建成功", robotManagerConverter.robotManager2RobotManagerDTO(it)) }

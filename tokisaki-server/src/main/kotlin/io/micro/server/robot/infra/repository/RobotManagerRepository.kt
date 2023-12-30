@@ -24,7 +24,7 @@ class RobotManagerRepository(
         Throws.requireNonNull(userId, "用户ID为空")
         return userDAO.findById(userId).flatMap { user ->
             Throws.requireNonNull(user, "用户不存在")
-            val robot = robotConverter.robotManager2RobotPO(robotDO)!!
+            val robot = robotConverter.robotDO2RobotEntity(robotDO)!!
             robot.user = user
             robotDAO.persistAndFlush(robot)
                 .invoke { robot -> robotDO.id = robot.id }
@@ -34,7 +34,7 @@ class RobotManagerRepository(
 
     @WithSession
     override fun findRobotById(id: Long): Uni<RobotDO> {
-        return robotDAO.findById(id).map(robotConverter::robotPO2RobotManager)
+        return robotDAO.findById(id).map(robotConverter::robotEntity2RobotDO)
     }
 
     @WithSession
@@ -45,7 +45,7 @@ class RobotManagerRepository(
     @WithSession
     override fun modifyRobot(robot: RobotDO): Uni<RobotDO> {
         return Uni.createFrom()
-            .item(robotConverter.robotManager2RobotPO(robot))
+            .item(robotConverter.robotDO2RobotEntity(robot))
             .flatMap {
                 if (it != null) {
                     robotDAO.flush().replaceWith(it)
@@ -53,16 +53,16 @@ class RobotManagerRepository(
                     Uni.createFrom().item(it)
                 }
             }
-            .map(robotConverter::robotPO2RobotManager)
+            .map(robotConverter::robotEntity2RobotDO)
     }
 
     @WithSession
     override fun findRobotByExample(robot: RobotDO, pageable: Page): Uni<List<RobotDO>> {
-        return robotConverter.robotManager2RobotPO(robot)?.let {
+        return robotConverter.robotDO2RobotEntity(robot)?.let {
             robotDAO.findByExample(it, Page(pageable.index, pageable.size))
                 .map { robots ->
                     robots.map { robot ->
-                        robotConverter.robotPO2RobotManager(robot)!!
+                        robotConverter.robotEntity2RobotDO(robot)!!
                     }
                 }
         } ?: Uni.createFrom().item(listOf())

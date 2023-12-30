@@ -4,6 +4,8 @@ import io.micro.core.entity.BaseDomainEntity
 
 class FunctionDO : BaseDomainEntity() {
 
+    var name: String? = null
+
     var code: String? = null
 
     var config: String? = null

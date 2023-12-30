@@ -1,9 +1,6 @@
 package io.micro.server.robot.infra.converter
 
-import io.micro.server.function.infra.po.FunctionEntity
-import io.micro.server.robot.domain.model.valobj.FeatureFunction
 import io.micro.server.robot.infra.po.RobotEntity
-import io.micro.server.robot.infra.po.UseFunctionEntity
 import jakarta.inject.Singleton
 
 @Singleton
@@ -33,22 +30,6 @@ class RobotMapper {
 
     fun state2Number(state: RobotEntity.State): Int {
         return RobotEntity.State.entries.indexOf(state)
-    }
-
-    fun featureFunction2UseFunction(featureFunction: FeatureFunction): UseFunctionEntity {
-        return UseFunctionEntity().apply {
-            function = FunctionEntity().apply { id = featureFunction.id }
-            remark = featureFunction.remark
-            enabled = featureFunction.enabled
-        }
-    }
-
-    fun useFunction2FeatureFunction(useFunctionPO: UseFunctionEntity): FeatureFunction {
-        return FeatureFunction(
-            id = useFunctionPO.id!!,
-            remark = useFunctionPO.remark,
-            enabled = useFunctionPO.enabled
-        )
     }
 
 }

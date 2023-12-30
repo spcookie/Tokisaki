@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RobotManagerDTO(
+data class RobotDTO(
     var userId: Long? = null,
 
     @NotNull(groups = [ValidGroup.Update::class], message = "ID不能为空")

@@ -90,7 +90,6 @@ class RobotManagerServiceImpl(
         robotDO.userId = AuthContext.id.toLongOrNull()
         robotDO.paramVerify()
         val existRobot = robotManagerRepository.existRobotByAccount(robotDO.account!!)
-
         return existRobot
             .flatMap { exist ->
                 if (exist) {

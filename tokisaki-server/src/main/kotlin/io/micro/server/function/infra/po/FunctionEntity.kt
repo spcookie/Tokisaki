@@ -10,7 +10,10 @@ import org.hibernate.proxy.HibernateProxy
 @Entity
 class FunctionEntity : BaseEntity() {
 
-    @Column(name = "function_code")
+    @Column(name = "function_name", nullable = false)
+    var name: String? = null
+
+    @Column(name = "function_code", nullable = false)
     var code: String? = null
 
     @Column(name = "function_config")

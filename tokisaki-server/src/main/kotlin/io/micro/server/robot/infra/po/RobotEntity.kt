@@ -37,7 +37,7 @@ class RobotEntity : BaseEntity() {
     var remark: String? = null
 
     @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.PERSIST])
-    @JoinColumn(name = "use_function_id")
+    @JoinColumn(name = "robot_id")
     var functions: MutableSet<UseFunctionEntity>? = null
 
     enum class Type { QQ }
