@@ -1,6 +1,6 @@
 package io.micro.core.robot.qq
 
-import io.micro.core.exception.Throws
+import io.micro.core.exception.fail
 import io.micro.core.rest.CommonCode
 import io.micro.core.robot.Robot
 import io.quarkus.logging.Log
@@ -103,12 +103,12 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
                             loggingInListener(LoginFailEvent(ex))
                         }
                     } else {
-                        Throws.fail(code = CommonCode.DUPLICATE)
+                        fail(code = CommonCode.DUPLICATE)
                     }
                 }
             }
         } else {
-            Throws.fail(code = CommonCode.DUPLICATE)
+            fail(code = CommonCode.DUPLICATE)
         }
     }
 

@@ -26,4 +26,7 @@ interface RobotManagerService {
     fun createRobot(robotDO: RobotDO): Uni<RobotDO>
 
     fun getRobotList(robotDO: RobotDO, page: Pageable): Uni<PageDTO<RobotDO>>
+
+    fun modifyRobotInfo(robotDO: RobotDO): Uni<RobotDO>
+
 }

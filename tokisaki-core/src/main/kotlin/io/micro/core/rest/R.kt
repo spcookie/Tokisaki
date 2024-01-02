@@ -13,6 +13,7 @@ data class R<T>(
     var data: T? = null
 ) {
     companion object {
+        @JvmOverloads
         fun <E> newInstance(msg: String = CommonCode.OK.msg, data: E? = null): R<E> {
             return R(message = msg, data = data)
         }

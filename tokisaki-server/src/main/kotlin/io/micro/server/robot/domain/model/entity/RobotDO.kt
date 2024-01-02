@@ -1,7 +1,7 @@
 package io.micro.server.robot.domain.model.entity
 
 import io.micro.core.entity.BaseDomainEntity
-import io.micro.core.exception.Throws
+import io.micro.core.exception.requireTure
 import io.micro.core.rest.CommonCode
 import io.micro.server.robot.domain.model.valobj.FeatureFunction
 import kotlin.properties.Delegates
@@ -16,9 +16,9 @@ class RobotDO : BaseDomainEntity() {
 
     var password: String? = null
 
-    var type: Int by Delegates.notNull()
+    var type: Int? = null
 
-    var state: Int = 6
+    var state: Int? = null
 
     var remark: String? = null
 
@@ -29,8 +29,8 @@ class RobotDO : BaseDomainEntity() {
     private fun isValidState() = validStateIds.contains(state)
 
     fun paramVerify() {
-        Throws.requireTure("非法的机器人类型", CommonCode.ILLEGAL_STATE, ::isValidType)
-        Throws.requireTure("非法的机器人状态", CommonCode.ILLEGAL_STATE, ::isValidState)
+        requireTure("非法的机器人类型", CommonCode.ILLEGAL_STATE, ::isValidType)
+        requireTure("非法的机器人状态", CommonCode.ILLEGAL_STATE, ::isValidState)
     }
 
     companion object {

@@ -6,6 +6,11 @@ import io.quarkus.panache.common.Page
 import io.smallrye.mutiny.Uni
 
 interface IRobotDAO : PanacheRepository<RobotEntity> {
-    fun existByAccount(account: String): Uni<Boolean>
-    fun findByExample(robotPO: RobotEntity, page: Page): Uni<List<RobotEntity>>
+
+    fun existByAccount(account: String, id: Long): Uni<Boolean>
+
+    fun selectByExample(robotEntity: RobotEntity, page: Page): Uni<List<RobotEntity>>
+
+    fun updateById(robotEntity: RobotEntity): Uni<RobotEntity>
+
 }

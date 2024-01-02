@@ -1,7 +1,9 @@
 package io.micro.server.robot.domain.service.impl
 
 import io.micro.core.context.AuthContext
-import io.micro.core.exception.Throws
+import io.micro.core.exception.fail
+import io.micro.core.exception.requireNonNull
+import io.micro.core.exception.requireTure
 import io.micro.core.rest.CommonCode
 import io.micro.core.rest.PageDTO
 import io.micro.core.rest.Pageable
@@ -76,7 +78,7 @@ class RobotManagerServiceImpl(
     override fun closeRobot(id: Long): Uni<Unit> {
         return robotManagerRepository.findRobotById(id)
             .flatMap { robotManager ->
-                Throws.requireTure(
+                requireTure(
                     value = AuthContext.equalId(robotManager.userId),
                     code = CommonCode.ILLEGAL_OPERATION
                 )
@@ -87,13 +89,15 @@ class RobotManagerServiceImpl(
     }
 
     override fun createRobot(robotDO: RobotDO): Uni<RobotDO> {
-        robotDO.userId = AuthContext.id.toLongOrNull()
+        val userId = AuthContext.id.toLongOrNull()
+        requireNonNull(userId, "用户ID为空")
+        robotDO.userId = userId
         robotDO.paramVerify()
-        val existRobot = robotManagerRepository.existRobotByAccount(robotDO.account!!)
+        val existRobot = robotManagerRepository.existRobotByAccountAndUserId(robotDO.account!!, userId)
         return existRobot
             .flatMap { exist ->
                 if (exist) {
-                    Throws.fail(code = CommonCode.DUPLICATE, detail = "存在相同帐号机器人")
+                    fail(code = CommonCode.DUPLICATE, detail = "存在相同帐号机器人")
                 } else {
                     robotManagerRepository.saveRobotWithUser(robotDO)
                 }
@@ -105,6 +109,21 @@ class RobotManagerServiceImpl(
         robotDO.userId = AuthContext.id.toLongOrNull()
         return robotManagerRepository.findRobotByExample(robotDO, Page.of(page.current, page.limit))
             .map { PageDTO.of(page.current, page.limit, it) }
+    }
+
+    @WithTransaction
+    override fun modifyRobotInfo(robotDO: RobotDO): Uni<RobotDO> {
+        return robotManagerRepository.findRobotById(robotDO.id!!).flatMap { robot ->
+            requireNonNull(robot, detail = "未查询到机器人")
+            requireTure(AuthContext.equalId(robot.userId), code = CommonCode.ILLEGAL_OPERATION)
+            val modifyRobotDO = RobotDO().apply {
+                id = robotDO.id
+                name = robotDO.name
+                password = robotDO.password
+                remark = robotDO.remark
+            }
+            robotManagerRepository.updateRobot(modifyRobotDO)
+        }
     }
 
     /**

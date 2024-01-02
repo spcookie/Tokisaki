@@ -15,37 +15,36 @@ class RobotDAO : IRobotDAO {
 
     val jpqlRenderContext = JpqlRenderContext()
 
-    override fun existByAccount(account: String): Uni<Boolean> {
-        return this.count("account = ?1", account).map { it > 0 }
+    override fun existByAccount(account: String, id: Long): Uni<Boolean> {
+        return this.count("account = ?1 and user.id = ?2", account, id).map { it > 0 }
     }
 
-    override fun findByExample(robotPO: RobotEntity, page: Page): Uni<List<RobotEntity>> {
+    override fun selectByExample(robotEntity: RobotEntity, page: Page): Uni<List<RobotEntity>> {
         return getSession().flatMap { session ->
             val jpql = jpql {
-                val and = buildList {
-                    if (robotPO.name != null) {
-                        add(path(RobotEntity::name).eq(robotPO.name))
+                val predicate = buildList {
+                    if (robotEntity.name != null) {
+                        add(path(RobotEntity::name).like("%${robotEntity.name}%"))
                     }
-                    if (robotPO.account != null) {
-                        add(path(RobotEntity::account).eq(robotPO.account))
+                    if (robotEntity.account != null) {
+                        add(path(RobotEntity::account).like("%${robotEntity.account}%"))
                     }
-                    if (robotPO.type != null) {
-                        add(path(RobotEntity::type).eq(robotPO.type))
+                    if (robotEntity.type != null) {
+                        add(path(RobotEntity::type).eq(robotEntity.type))
                     }
-                    if (robotPO.state != null && robotPO.state != RobotEntity.State.ALL) {
-                        add(path(RobotEntity::state).eq(robotPO.state))
+                    if (robotEntity.state != null && robotEntity.state != RobotEntity.State.ALL) {
+                        add(path(RobotEntity::state).eq(robotEntity.state))
                     }
-                    if (robotPO.remark != null) {
-                        add(path(RobotEntity::remark).like("%${robotPO.remark}%"))
+                    if (robotEntity.remark != null) {
+                        add(path(RobotEntity::remark).like("%${robotEntity.remark}%"))
+                    }
+                    if (robotEntity.user?.id != null) {
+                        add(path(RobotEntity::user)(UserEntity::id).eq(robotEntity.user?.id))
                     }
                 }.toTypedArray()
-                var predicate = and(*and)
-                if (robotPO.user?.id == null) {
-                    predicate = predicate.or(path(RobotEntity::user)(UserEntity::id).eq(robotPO.user?.id))
-                }
                 select(entity(RobotEntity::class))
                     .from(entity(RobotEntity::class))
-                    .where(predicate)
+                    .where(and(*predicate))
             }
             session.createQuery(jpql, jpqlRenderContext)
                 .setFirstResult((page.index - 1) * page.size)
@@ -53,4 +52,10 @@ class RobotDAO : IRobotDAO {
                 .resultList
         }
     }
+
+    override fun updateById(robotEntity: RobotEntity): Uni<RobotEntity> {
+
+        TODO("Not yet implemented")
+    }
+
 }

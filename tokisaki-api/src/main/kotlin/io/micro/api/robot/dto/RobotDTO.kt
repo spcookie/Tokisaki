@@ -4,28 +4,40 @@ import io.micro.core.valid.ValidGroup
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotNull
 import kotlinx.serialization.Serializable
+import org.eclipse.microprofile.openapi.annotations.media.Schema
 
+@Schema(name = "机器人信息")
 @Serializable
-data class RobotDTO(
-    var userId: Long? = null,
+class RobotDTO {
 
+    @Schema(name = "用户ID")
+    var userId: Long? = null
+
+    @Schema(name = "机器人ID")
     @NotNull(groups = [ValidGroup.Update::class], message = "ID不能为空")
-    var id: Long? = null,
+    var id: Long? = null
 
+    @Schema(name = "名称")
     @NotNull(groups = [ValidGroup.Create::class], message = "名称不能为空")
-    var name: String? = null,
+    var name: String? = null
 
+    @Schema(name = "帐号")
     @NotNull(groups = [ValidGroup.Create::class], message = "帐号不能为空")
-    var account: String? = null,
+    var account: String? = null
 
-    var password: String? = null,
+    @Schema(name = "密码")
+    var password: String? = null
 
-    @NotNull(groups = [ValidGroup.Create::class], message = "类型不能为空")
-    var type: Int = 0,
+    @Schema(name = "类型")
+    var type: Int? = null
 
-    var state: Int = 6,
+    @Schema(name = "状态")
+    var state: Int? = null
 
-    var remark: String? = null,
+    @Schema(name = "备注")
+    var remark: String? = null
 
+    @Schema(name = "功能列表")
     val functions: MutableList<@Valid FeatureFunctionDTO> = mutableListOf()
-)
+
+}
