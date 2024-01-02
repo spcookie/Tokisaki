@@ -53,9 +53,4 @@ class RobotDAO : IRobotDAO {
         }
     }
 
-    override fun updateById(robotEntity: RobotEntity): Uni<RobotEntity> {
-
-        TODO("Not yet implemented")
-    }
-
 }

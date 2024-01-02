@@ -83,8 +83,7 @@ class RobotManagerServiceImpl(
                     code = CommonCode.ILLEGAL_OPERATION
                 )
                 manager.unregisterRobot(id)
-                robotManager.state = 5
-                robotManagerRepository.modifyRobot(robotManager)
+                robotManagerRepository.updateRobotStateById(5, id)
             }.replaceWithUnit()
     }
 

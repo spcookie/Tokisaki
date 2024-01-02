@@ -11,6 +11,4 @@ interface IRobotDAO : PanacheRepository<RobotEntity> {
 
     fun selectByExample(robotEntity: RobotEntity, page: Page): Uni<List<RobotEntity>>
 
-    fun updateById(robotEntity: RobotEntity): Uni<RobotEntity>
-
 }

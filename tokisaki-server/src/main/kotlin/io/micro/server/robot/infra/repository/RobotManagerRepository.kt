@@ -5,15 +5,18 @@ import io.micro.server.auth.infra.dao.impl.UserDAO
 import io.micro.server.robot.domain.model.entity.RobotDO
 import io.micro.server.robot.domain.repository.IRobotManagerRepository
 import io.micro.server.robot.infra.converter.RobotConverter
+import io.micro.server.robot.infra.converter.RobotMapper
 import io.micro.server.robot.infra.dao.impl.RobotDAO
 import io.quarkus.hibernate.reactive.panache.common.WithSession
 import io.quarkus.panache.common.Page
 import io.smallrye.mutiny.Uni
+import io.smallrye.mutiny.replaceWithUnit
 import jakarta.enterprise.context.ApplicationScoped
 
 @ApplicationScoped
 class RobotManagerRepository(
     private val robotConverter: RobotConverter,
+    private val robotMapper: RobotMapper,
     private val robotDAO: RobotDAO,
     private val userDAO: UserDAO
 ) : IRobotManagerRepository {
@@ -43,17 +46,15 @@ class RobotManagerRepository(
     }
 
     @WithSession
-    override fun modifyRobot(robot: RobotDO): Uni<RobotDO> {
+    override fun updateRobotStateById(state: Int, id: Long): Uni<Unit> {
         return Uni.createFrom()
-            .item(robotConverter.robotDO2RobotEntity(robot))
-            .flatMap {
-                if (it != null) {
-                    robotDAO.flush().replaceWith(it)
-                } else {
-                    Uni.createFrom().item(it)
-                }
+            .item(robotMapper.number2State(state))
+            .flatMap { s ->
+                robotDAO.findById(id)
+                    .map { it.state = s }
+                    .map { robotDAO.flush() }
             }
-            .map(robotConverter::robotEntity2RobotDO)
+            .replaceWithUnit()
     }
 
     @WithSession
