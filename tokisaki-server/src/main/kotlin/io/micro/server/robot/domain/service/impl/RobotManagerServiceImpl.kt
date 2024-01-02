@@ -128,7 +128,7 @@ class RobotManagerServiceImpl(
 
     /**
      * 通过半长连接开始QQ扫码登录
-     * @param qq QQ号
+     * @param robotDO 机器人
      * @param sse 半长连接
      * @return 消息事件
      */

@@ -4,7 +4,6 @@ import io.micro.core.entity.BaseDomainEntity
 import io.micro.core.exception.requireTure
 import io.micro.core.rest.CommonCode
 import io.micro.server.robot.domain.model.valobj.FeatureFunction
-import kotlin.properties.Delegates
 
 class RobotDO : BaseDomainEntity() {
 

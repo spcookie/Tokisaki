@@ -1,7 +1,6 @@
 package io.micro.core.rest
 
 import kotlinx.serialization.Serializable
-import kotlin.properties.Delegates
 
 @Serializable
 open class Pageable {

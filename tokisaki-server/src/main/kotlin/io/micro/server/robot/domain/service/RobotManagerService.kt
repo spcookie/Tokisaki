@@ -15,7 +15,7 @@ import jakarta.ws.rs.sse.Sse
 interface RobotManagerService {
     /**
      * QQ机器人扫码登录
-     * @param qq ID
+     * @param id ID
      * @param sse 半长连接
      * @return 服务器推送事件
      */
