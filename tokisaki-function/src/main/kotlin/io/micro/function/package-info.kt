@@ -1,1 +1,1 @@
-package io.micro.function;
+package io.micro.function
