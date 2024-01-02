@@ -13,6 +13,7 @@ class FeatureFunctionDTO {
     var id: Long? = null
 
     @Schema(name = "名称")
+    @NotNull(message = "功能名称不能为空")
     var name: String? = null
 
     @Schema(name = "备注")

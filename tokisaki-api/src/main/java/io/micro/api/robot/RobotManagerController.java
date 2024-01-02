@@ -1,6 +1,7 @@
 package io.micro.api.robot;
 
 import io.micro.api.robot.converter.RobotManagerConverter;
+import io.micro.api.robot.dto.FeatureFunctionDTO;
 import io.micro.api.robot.dto.RobotDTO;
 import io.micro.core.annotation.InitAuthContext;
 import io.micro.core.rest.CommonCode;
@@ -111,6 +112,18 @@ public class RobotManagerController {
         return robotManagerService.modifyRobotInfo(robotDO)
                 .map(robotManagerConverter::robotManager2RobotManagerDTO)
                 .map(it -> R.Companion.newInstance(CommonCode.OK.getMsg(), it));
+    }
+
+    @Operation(summary = "机器人添加功能")
+    @PATCH
+    @Path("/{id}/function")
+    @Authenticated
+    public Uni<R<Unit>> addUseFunction(
+            @Parameter(description = "机器人ID") @PathParam("id") Long robotId,
+            @Parameter(description = "添加功能信息") FeatureFunctionDTO featureFunctionDTO
+    ) {
+        return robotManagerService.addFeatureFunction(robotId, robotManagerConverter.featureFunctionDTO2FeatureFunction(featureFunctionDTO))
+                .map((it) -> R.Companion.newInstance());
     }
 
 }

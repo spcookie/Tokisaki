@@ -12,7 +12,9 @@ import io.micro.core.robot.Robot
 import io.micro.core.robot.qq.QQRobot
 import io.micro.core.robot.qq.QQRobotFactory
 import io.micro.core.robot.qq.QQRobotManager
+import io.micro.server.function.domain.service.FunctionService
 import io.micro.server.robot.domain.model.entity.RobotDO
+import io.micro.server.robot.domain.model.valobj.FeatureFunction
 import io.micro.server.robot.domain.repository.IRobotManagerRepository
 import io.micro.server.robot.domain.service.RobotManagerService
 import io.quarkus.hibernate.reactive.panache.common.WithSession
@@ -35,7 +37,8 @@ import java.util.*
 class RobotManagerServiceImpl(
     private val factory: QQRobotFactory,
     private val manager: QQRobotManager,
-    private val robotManagerRepository: IRobotManagerRepository
+    private val robotManagerRepository: IRobotManagerRepository,
+    private val functionService: FunctionService
 ) : RobotManagerService {
 
     /**
@@ -76,15 +79,12 @@ class RobotManagerServiceImpl(
     @WithTransaction
     @WithSession
     override fun closeRobot(id: Long): Uni<Unit> {
-        return robotManagerRepository.findRobotById(id)
-            .flatMap { robotManager ->
-                requireTure(
-                    value = AuthContext.equalId(robotManager.userId),
-                    code = CommonCode.ILLEGAL_OPERATION
-                )
-                manager.unregisterRobot(id)
-                robotManagerRepository.updateRobotStateById(5, id)
-            }.replaceWithUnit()
+        return robotManagerRepository.findRobotById(id).flatMap { robotManager ->
+            requireNonNull(robotManager, "未找到机器人", CommonCode.NOT_FOUND)
+            requireTure(value = AuthContext.equalId(robotManager.userId), code = CommonCode.ILLEGAL_OPERATION)
+            manager.unregisterRobot(id)
+            robotManagerRepository.updateRobotStateById(5, id)
+        }.replaceWithUnit()
     }
 
     override fun createRobot(robotDO: RobotDO): Uni<RobotDO> {
@@ -93,14 +93,13 @@ class RobotManagerServiceImpl(
         robotDO.userId = userId
         robotDO.paramVerify()
         val existRobot = robotManagerRepository.existRobotByAccountAndUserId(robotDO.account!!, userId)
-        return existRobot
-            .flatMap { exist ->
-                if (exist) {
-                    fail(code = CommonCode.DUPLICATE, detail = "存在相同帐号机器人")
-                } else {
-                    robotManagerRepository.saveRobotWithUser(robotDO)
-                }
+        return existRobot.flatMap { exist ->
+            if (exist) {
+                fail(code = CommonCode.DUPLICATE, detail = "存在相同帐号机器人")
+            } else {
+                robotManagerRepository.saveRobotWithUser(robotDO)
             }
+        }
     }
 
     @WithTransaction
@@ -122,6 +121,20 @@ class RobotManagerServiceImpl(
                 remark = robotDO.remark
             }
             robotManagerRepository.updateRobot(modifyRobotDO)
+        }
+    }
+
+    override fun addFeatureFunction(robotId: Long, featureFunction: FeatureFunction): Uni<Unit> {
+        val userId = AuthContext.id.toLongOrNull()
+        requireNonNull(userId, code = CommonCode.ILLEGAL_OPERATION)
+        return robotManagerRepository.existRobotByRobotIdAndUserId(robotId, userId).flatMap {
+            requireTure(it, "非法操作机器人", CommonCode.ILLEGAL_OPERATION)
+            functionService.getUserFunctions()
+        }.map { functionDOs ->
+            val functionDO = functionDOs.associateBy { it.id }[featureFunction.id]
+            requireNonNull(functionDO, "非法添加功能", CommonCode.ILLEGAL_OPERATION)
+        }.flatMap {
+            robotManagerRepository.addFeatureFunctionById(robotId, featureFunction)
         }
     }
 

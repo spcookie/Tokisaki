@@ -23,4 +23,10 @@ class FunctionRepository(
         }
     }
 
+    @WithSession
+    override fun findById(id: Long): Uni<FunctionDO> {
+        return functionDAO.findById(id)
+            .map(functionConverter::functionEntity2functionDO)
+    }
+
 }

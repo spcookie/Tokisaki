@@ -26,4 +26,9 @@ class FunctionServiceImpl(
         }
     }
 
+    @WithTransaction
+    override fun getFunctionById(id: Long): Uni<FunctionDO> {
+        return functionRepository.findById(id)
+    }
+
 }

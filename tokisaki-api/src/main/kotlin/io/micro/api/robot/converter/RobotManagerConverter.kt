@@ -1,7 +1,9 @@
 package io.micro.api.robot.converter
 
+import io.micro.api.robot.dto.FeatureFunctionDTO
 import io.micro.api.robot.dto.RobotDTO
 import io.micro.server.robot.domain.model.entity.RobotDO
+import io.micro.server.robot.domain.model.valobj.FeatureFunction
 import org.mapstruct.BeanMapping
 import org.mapstruct.InheritInverseConfiguration
 import org.mapstruct.Mapper
@@ -16,5 +18,7 @@ interface RobotManagerConverter {
 
     @InheritInverseConfiguration
     fun robotManager2RobotManagerDTO(dto: RobotDO): RobotDTO
+
+    fun featureFunctionDTO2FeatureFunction(featureFunctionDTO: FeatureFunctionDTO): FeatureFunction
 
 }

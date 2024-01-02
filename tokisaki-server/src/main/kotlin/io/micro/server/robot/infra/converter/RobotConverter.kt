@@ -12,18 +12,19 @@ interface RobotConverter {
 
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     @Mapping(source = "userId", target = "user.id")
-    fun robotDO2RobotEntity(robotDO: RobotDO?): RobotEntity?
+    fun robotDO2RobotEntity(robotDO: RobotDO): RobotEntity
 
     @InheritInverseConfiguration(name = "robotDO2RobotEntity")
-    fun robotEntity2RobotDO(robotPO: RobotEntity?): RobotDO?
+    fun robotEntity2RobotDO(robotPO: RobotEntity): RobotDO
 
     @Mapping(source = "function.id", target = "id")
     @Mapping(source = "function.name", target = "name")
-    fun useFunctionEntity2FeatureFunction(useFunctionEntity: UseFunctionEntity?): FeatureFunction?
+    fun useFunctionEntity2FeatureFunction(useFunctionEntity: UseFunctionEntity): FeatureFunction
 
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+    @Mapping(target = "id", ignore = true)
     @InheritInverseConfiguration
-    fun featureFunction2UseFunctionEntity(featureFunction: FeatureFunction?): UseFunctionEntity?
+    fun featureFunction2UseFunctionEntity(featureFunction: FeatureFunction): UseFunctionEntity
 
     @BeanMapping(
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
@@ -39,7 +40,7 @@ interface RobotConverter {
     )
     @Mapping(target = "id", ignore = true)
     fun updateUseFunctionEntity2FeatureFunction(
-        useFunctionEntity: FeatureFunction?,
+        useFunctionEntity: FeatureFunction,
         @MappingTarget featureFunction: UseFunctionEntity
     )
 

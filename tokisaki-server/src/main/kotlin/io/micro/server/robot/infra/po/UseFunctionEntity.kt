@@ -9,7 +9,7 @@ import org.hibernate.proxy.HibernateProxy
 @Entity
 class UseFunctionEntity : BaseEntity() {
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "function_id")
     var function: FunctionEntity? = null
 
