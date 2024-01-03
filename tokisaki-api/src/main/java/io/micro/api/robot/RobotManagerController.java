@@ -53,8 +53,7 @@ public class RobotManagerController {
     @RestStreamElementType(MediaType.TEXT_HTML)
     public Multi<OutboundSseEvent> loginQQRobot(
             @Parameter(description = "机器人ID") @PathParam("id") Long id,
-            @Context Sse sse
-    ) {
+            @Context Sse sse) {
         return robotManagerService.loginQQRobot(id, sse);
     }
 
