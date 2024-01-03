@@ -5,6 +5,7 @@ import io.micro.core.exception.fail
 import io.micro.core.exception.requireNonNull
 import io.micro.core.exception.requireTure
 import io.micro.core.rest.CommonCode
+import io.micro.core.rest.CommonMsg
 import io.micro.core.rest.PageDTO
 import io.micro.core.rest.Pageable
 import io.micro.core.robot.Credential
@@ -80,22 +81,23 @@ class RobotManagerServiceImpl(
     @WithSession
     override fun closeRobot(id: Long): Uni<Unit> {
         return robotManagerRepository.findRobotById(id).flatMap { robotManager ->
-            requireNonNull(robotManager, "未找到机器人", CommonCode.NOT_FOUND)
+            requireNonNull(robotManager, CommonMsg.NOT_FOUND_ROBOT, CommonCode.NOT_FOUND)
             requireTure(value = AuthContext.equalId(robotManager.userId), code = CommonCode.ILLEGAL_OPERATION)
             manager.unregisterRobot(id)
             robotManagerRepository.updateRobotStateById(5, id)
         }.replaceWithUnit()
     }
 
+    @WithSession
     override fun createRobot(robotDO: RobotDO): Uni<RobotDO> {
         val userId = AuthContext.id.toLongOrNull()
-        requireNonNull(userId, "用户ID为空")
+        requireNonNull(userId, CommonMsg.NULL_USER_ID)
         robotDO.userId = userId
         robotDO.paramVerify()
         val existRobot = robotManagerRepository.existRobotByAccountAndUserId(robotDO.account!!, userId)
         return existRobot.flatMap { exist ->
             if (exist) {
-                fail(code = CommonCode.DUPLICATE, detail = "存在相同帐号机器人")
+                fail(code = CommonCode.DUPLICATE, detail = CommonMsg.SAME_ACCOUNT_ROBOT)
             } else {
                 robotManagerRepository.saveRobotWithUser(robotDO)
             }
@@ -103,6 +105,7 @@ class RobotManagerServiceImpl(
     }
 
     @WithTransaction
+    @WithSession
     override fun getRobotList(robotDO: RobotDO, page: Pageable): Uni<PageDTO<RobotDO>> {
         robotDO.userId = AuthContext.id.toLongOrNull()
         return robotManagerRepository.findRobotByExample(robotDO, Page.of(page.current, page.limit))
@@ -110,9 +113,10 @@ class RobotManagerServiceImpl(
     }
 
     @WithTransaction
+    @WithSession
     override fun modifyRobotInfo(robotDO: RobotDO): Uni<RobotDO> {
         return robotManagerRepository.findRobotById(robotDO.id!!).flatMap { robot ->
-            requireNonNull(robot, detail = "未查询到机器人")
+            requireNonNull(robot, detail = CommonMsg.NOT_FOUND_ROBOT)
             requireTure(AuthContext.equalId(robot.userId), code = CommonCode.ILLEGAL_OPERATION)
             val modifyRobotDO = RobotDO().apply {
                 id = robotDO.id
@@ -124,17 +128,38 @@ class RobotManagerServiceImpl(
         }
     }
 
+    @WithSession
     override fun addFeatureFunction(robotId: Long, featureFunction: FeatureFunction): Uni<Unit> {
         val userId = AuthContext.id.toLongOrNull()
         requireNonNull(userId, code = CommonCode.ILLEGAL_OPERATION)
         return robotManagerRepository.existRobotByRobotIdAndUserId(robotId, userId).flatMap {
-            requireTure(it, "非法操作机器人", CommonCode.ILLEGAL_OPERATION)
+            requireTure(it, CommonMsg.ILLEGAL_OPERATE_ROBOT, CommonCode.ILLEGAL_OPERATION)
             functionService.getUserFunctions()
         }.map { functionDOs ->
             val functionDO = functionDOs.associateBy { it.id }[featureFunction.id]
-            requireNonNull(functionDO, "非法添加功能", CommonCode.ILLEGAL_OPERATION)
+            requireNonNull(functionDO, CommonMsg.ILLEGAL_ADD_ROBOT_FEATURE, CommonCode.ILLEGAL_OPERATION)
         }.flatMap {
             robotManagerRepository.addFeatureFunctionById(robotId, featureFunction)
+        }
+    }
+
+    @WithTransaction
+    @WithSession
+    override fun modifyFeatureFunction(robotId: Long, featureFunction: FeatureFunction): Uni<Unit> {
+        return robotManagerRepository.findRobotById(robotId).flatMap { robot ->
+            requireNonNull(robot, CommonMsg.NOT_FOUND_ROBOT, CommonCode.NOT_FOUND)
+            requireTure(
+                AuthContext.equalId(robot.userId),
+                CommonMsg.ILLEGAL_OPERATE_ROBOT,
+                CommonCode.ILLEGAL_OPERATION
+            )
+            robot.functions.associateBy { it.id }[featureFunction.id].also {
+                if (it != null) {
+                    it.remark = featureFunction.remark
+                    it.enabled = featureFunction.enabled
+                }
+            }
+            robotManagerRepository.updateRobot(robot).replaceWithUnit()
         }
     }
 

@@ -1,8 +1,9 @@
 package io.micro.api.robot;
 
 import io.micro.api.robot.converter.RobotManagerConverter;
-import io.micro.api.robot.dto.FeatureFunctionDTO;
-import io.micro.api.robot.dto.RobotDTO;
+import io.micro.api.robot.dto.OperateFeatureFunctionDTO;
+import io.micro.api.robot.dto.OperateRobotDTO;
+import io.micro.api.robot.dto.QueryRobotDTO;
 import io.micro.core.annotation.InitAuthContext;
 import io.micro.core.rest.CommonCode;
 import io.micro.core.rest.PageDTO;
@@ -10,6 +11,7 @@ import io.micro.core.rest.Pageable;
 import io.micro.core.rest.R;
 import io.micro.core.valid.ValidGroup;
 import io.micro.server.robot.domain.model.entity.RobotDO;
+import io.micro.server.robot.domain.model.valobj.FeatureFunction;
 import io.micro.server.robot.domain.service.RobotManagerService;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Multi;
@@ -60,12 +62,11 @@ public class RobotManagerController {
     @POST
     @Path("/example")
     @Authenticated
-    public Uni<R<PageDTO<RobotDTO>>> getRobot(
-            @Parameter(description = "查询样例") RobotDTO robotDTO,
+    public Uni<R<PageDTO<QueryRobotDTO>>> getRobot(
+            @Parameter(description = "查询样例") OperateRobotDTO operateRobotDTO,
             @QueryParam("size") @DefaultValue("10") int size,
-            @QueryParam("page") @DefaultValue("1") int page
-    ) {
-        RobotDO robotManager = robotManagerConverter.robotManagerDTO2RobotManager(robotDTO);
+            @QueryParam("page") @DefaultValue("1") int page) {
+        RobotDO robotManager = robotManagerConverter.operateRobotDTO2RobotManager(operateRobotDTO);
         return robotManagerService.getRobotList(robotManager, Pageable.Companion.of(page, size))
                 .map(robotDOPage -> R.Companion.newInstance(
                         CommonCode.OK.getMsg(),
@@ -74,9 +75,8 @@ public class RobotManagerController {
                                 robotDOPage.getLimit(),
                                 robotDOPage.getRecords()
                                         .stream()
-                                        .map(robotDO -> robotManagerConverter.robotManager2RobotManagerDTO(robotDO))
-                                        .toList()
-                        )
+                                        .map(robotDO -> robotManagerConverter.robotManager2QueryRobotDTO(robotDO))
+                                        .toList())
                 ));
     }
 
@@ -84,10 +84,10 @@ public class RobotManagerController {
     @POST
     @Path("/")
     @Authenticated
-    public Uni<R<RobotDTO>> createRobot(@Parameter(description = "创建信息") @Valid @ConvertGroup(to = ValidGroup.Create.class) RobotDTO robotDTO) {
-        robotDTO.setState(0);
-        return robotManagerService.createRobot(robotManagerConverter.robotManagerDTO2RobotManager(robotDTO))
-                .map(it -> R.Companion.newInstance("创建成功", robotManagerConverter.robotManager2RobotManagerDTO(it)));
+    public Uni<R<QueryRobotDTO>> createRobot(@Parameter(description = "创建信息") @Valid @ConvertGroup(to = ValidGroup.Create.class) OperateRobotDTO operateRobotDTO) {
+        operateRobotDTO.setState(0);
+        return robotManagerService.createRobot(robotManagerConverter.operateRobotDTO2RobotManager(operateRobotDTO))
+                .map(it -> R.Companion.newInstance("创建成功", robotManagerConverter.robotManager2QueryRobotDTO(it)));
     }
 
     @Operation(summary = "机器人关闭")
@@ -102,28 +102,43 @@ public class RobotManagerController {
     @PUT
     @Path("/")
     @Authenticated
-    public Uni<R<RobotDTO>> modifyRobotInfo(
+    public Uni<R<QueryRobotDTO>> modifyRobotInfo(
             @Parameter(description = "机器人信息")
             @Valid
             @ConvertGroup(to = ValidGroup.Update.class)
-            RobotDTO robotDTO
-    ) {
-        RobotDO robotDO = robotManagerConverter.robotManagerDTO2RobotManager(robotDTO);
+            OperateRobotDTO operateRobotDTO) {
+        RobotDO robotDO = robotManagerConverter.operateRobotDTO2RobotManager(operateRobotDTO);
         return robotManagerService.modifyRobotInfo(robotDO)
-                .map(robotManagerConverter::robotManager2RobotManagerDTO)
+                .map(robotManagerConverter::robotManager2QueryRobotDTO)
                 .map(it -> R.Companion.newInstance(CommonCode.OK.getMsg(), it));
     }
 
-    @Operation(summary = "机器人添加功能")
-    @PATCH
+    @Operation(summary = "添加机器人功能")
+    @POST
     @Path("/{id}/function")
     @Authenticated
     public Uni<R<Unit>> addUseFunction(
             @Parameter(description = "机器人ID") @PathParam("id") Long robotId,
-            @Parameter(description = "添加功能信息") FeatureFunctionDTO featureFunctionDTO
-    ) {
-        return robotManagerService.addFeatureFunction(robotId, robotManagerConverter.featureFunctionDTO2FeatureFunction(featureFunctionDTO))
+            @Parameter(description = "添加功能信息") OperateFeatureFunctionDTO operateFeatureFunctionDTO) {
+        return robotManagerService.addFeatureFunction(
+                        robotId,
+                        robotManagerConverter.operateFeatureFunctionDTO2FeatureFunction(operateFeatureFunctionDTO))
                 .map((it) -> R.Companion.newInstance());
+    }
+
+
+    @Operation(summary = "修改机器人功能")
+    @PUT
+    @Path("/{id}/function")
+    @Authenticated
+    public Uni<R<Unit>> modifyUseFunction(
+            @Parameter(description = "机器人ID") @PathParam("id") Long robotId,
+            @Parameter(description = "修改功能信息")
+            @Valid
+            @ConvertGroup(to = ValidGroup.Update.class)
+            OperateFeatureFunctionDTO featureFunctionDTO) {
+        FeatureFunction featureFunction = robotManagerConverter.operateFeatureFunctionDTO2FeatureFunction(featureFunctionDTO);
+        return robotManagerService.modifyFeatureFunction(robotId, featureFunction).map((it) -> R.Companion.newInstance());
     }
 
 }

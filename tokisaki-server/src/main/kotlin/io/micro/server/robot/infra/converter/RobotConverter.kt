@@ -17,7 +17,7 @@ interface RobotConverter {
     @InheritInverseConfiguration(name = "robotDO2RobotEntity")
     fun robotEntity2RobotDO(robotPO: RobotEntity): RobotDO
 
-    @Mapping(source = "function.id", target = "id")
+    @Mapping(source = "function.id", target = "refId")
     @Mapping(source = "function.name", target = "name")
     fun useFunctionEntity2FeatureFunction(useFunctionEntity: UseFunctionEntity): FeatureFunction
 
@@ -39,9 +39,9 @@ interface RobotConverter {
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
     )
     @Mapping(target = "id", ignore = true)
-    fun updateUseFunctionEntity2FeatureFunction(
-        useFunctionEntity: FeatureFunction,
-        @MappingTarget featureFunction: UseFunctionEntity
+    fun featureFunction2UpdateUseFunctionEntity(
+        featureFunction: FeatureFunction,
+        @MappingTarget useFunctionEntity: UseFunctionEntity
     )
 
 }

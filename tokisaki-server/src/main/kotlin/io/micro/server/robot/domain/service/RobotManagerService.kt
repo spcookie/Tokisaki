@@ -32,4 +32,6 @@ interface RobotManagerService {
 
     fun addFeatureFunction(robotId: Long, featureFunction: FeatureFunction): Uni<Unit>
 
+    fun modifyFeatureFunction(robotId: Long, featureFunction: FeatureFunction): Uni<Unit>
+
 }

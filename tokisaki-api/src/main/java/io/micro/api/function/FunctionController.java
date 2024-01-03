@@ -1,7 +1,7 @@
 package io.micro.api.function;
 
 import io.micro.api.function.converter.FunctionConverter;
-import io.micro.api.function.dto.FunctionDTO;
+import io.micro.api.function.dto.QueryFunctionDTO;
 import io.micro.core.annotation.InitAuthContext;
 import io.micro.server.function.domain.service.FunctionService;
 import io.quarkus.security.Authenticated;
@@ -29,7 +29,7 @@ public class FunctionController {
     @GET
     @Path("/available")
     @Authenticated
-    public Uni<List<FunctionDTO>> getUserFunctions() {
+    public Uni<List<QueryFunctionDTO>> getUserFunctions() {
         return functionService.getUserFunctions()
                 .map(functionDOs -> functionDOs.stream()
                         .map(it -> functionConverter.functionDO2functionDTO(it))

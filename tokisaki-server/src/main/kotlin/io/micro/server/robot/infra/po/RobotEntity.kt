@@ -36,7 +36,7 @@ class RobotEntity : BaseEntity() {
     @Column(name = "robot_remark")
     var remark: String? = null
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.PERSIST])
+    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.PERSIST, CascadeType.REFRESH])
     @JoinColumn(name = "robot_id")
     var functions: MutableSet<UseFunctionEntity>? = null
 

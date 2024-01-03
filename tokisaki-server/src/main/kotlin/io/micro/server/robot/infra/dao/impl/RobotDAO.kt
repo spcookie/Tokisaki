@@ -23,6 +23,9 @@ class RobotDAO : IRobotDAO {
         return getSession().flatMap { session ->
             val jpql = jpql {
                 val predicate = buildList {
+                    if (robotEntity.id != null) {
+                        add(path(RobotEntity::id).eq(robotEntity.id))
+                    }
                     if (robotEntity.name != null) {
                         add(path(RobotEntity::name).like("%${robotEntity.name}%"))
                     }

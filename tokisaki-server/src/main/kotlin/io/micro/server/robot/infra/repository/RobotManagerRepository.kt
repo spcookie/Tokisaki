@@ -9,7 +9,6 @@ import io.micro.server.robot.infra.converter.RobotConverter
 import io.micro.server.robot.infra.converter.RobotMapper
 import io.micro.server.robot.infra.dao.IRobotDAO
 import io.micro.server.robot.infra.dao.IUseFunctionDAO
-import io.quarkus.hibernate.reactive.panache.common.WithSession
 import io.quarkus.panache.common.Page
 import io.smallrye.mutiny.Uni
 import io.smallrye.mutiny.replaceWithUnit
@@ -25,7 +24,6 @@ class RobotManagerRepository(
     private val useFunctionDAO: IUseFunctionDAO
 ) : IRobotManagerRepository {
 
-    @WithSession
     override fun saveRobotWithUser(robotDO: RobotDO): Uni<RobotDO> {
         val userId = robotDO.userId
         requireNonNull(userId, "用户ID为空")
@@ -39,19 +37,16 @@ class RobotManagerRepository(
         }
     }
 
-    @WithSession
     override fun findRobotById(id: Long): Uni<RobotDO?> {
         return robotDAO.findById(id)
             .onItem().ifNotNull()
             .transform(robotConverter::robotEntity2RobotDO)
     }
 
-    @WithSession
     override fun existRobotByAccountAndUserId(account: String, id: Long): Uni<Boolean> {
         return robotDAO.existByAccount(account, id)
     }
 
-    @WithSession
     override fun updateRobotStateById(state: Int, id: Long): Uni<Unit> {
         return Uni.createFrom()
             .item(robotMapper.number2State(state))
@@ -63,7 +58,6 @@ class RobotManagerRepository(
             .replaceWithUnit()
     }
 
-    @WithSession
     override fun findRobotByExample(robot: RobotDO, pageable: Page): Uni<List<RobotDO>> {
         return robotConverter.robotDO2RobotEntity(robot).let {
             robotDAO.selectByExample(it, Page(pageable.index, pageable.size))
@@ -75,7 +69,6 @@ class RobotManagerRepository(
         } ?: Uni.createFrom().item(listOf())
     }
 
-    @WithSession
     override fun updateRobot(robot: RobotDO): Uni<RobotDO> {
         return robotDAO.findById(robot.id!!)
             .flatMap { robotEntity ->
@@ -83,7 +76,7 @@ class RobotManagerRepository(
                 val functionMap = robotEntity.functions!!.associateBy { it.id!! }
                 for (function in robot.functions) {
                     functionMap[function.id]?.also {
-                        robotConverter.updateUseFunctionEntity2FeatureFunction(function, it)
+                        robotConverter.featureFunction2UpdateUseFunctionEntity(function, it)
                     }
                 }
                 robotDAO.flush().replaceWith(robotEntity)
@@ -91,7 +84,6 @@ class RobotManagerRepository(
             .map(robotConverter::robotEntity2RobotDO)
     }
 
-    @WithSession
     override fun addFeatureFunctionById(id: Long, featureFunction: FeatureFunction): Uni<Unit> {
         return robotDAO.findById(id).flatMap { robotEntity ->
             val useFunctionEntities = robotEntity.functions ?: mutableListOf()
@@ -105,7 +97,6 @@ class RobotManagerRepository(
         }
     }
 
-    @WithSession
     override fun existRobotByRobotIdAndUserId(robotId: Long, userId: Long): Uni<Boolean> {
         return robotDAO.findById(robotId).map { it.user?.id == userId }
     }

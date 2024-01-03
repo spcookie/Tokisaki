@@ -5,7 +5,6 @@ import io.micro.server.auth.domain.model.entity.WXLoginUserDO
 import io.micro.server.auth.domain.repository.IAuthRepository
 import io.micro.server.auth.infra.converter.AuthConverter
 import io.micro.server.auth.infra.dao.impl.UserDAO
-import io.quarkus.hibernate.reactive.panache.common.WithSession
 import io.smallrye.mutiny.Uni
 import jakarta.enterprise.context.ApplicationScoped
 
@@ -16,7 +15,6 @@ import jakarta.enterprise.context.ApplicationScoped
 @ApplicationScoped
 class AuthRepository(private val userDAO: UserDAO, private val authConverter: AuthConverter) : IAuthRepository {
 
-    @WithSession
     override fun registerUser(wxLoginUserDO: WXLoginUserDO): Uni<WXLoginUserDO> {
         return Uni.createFrom()
             .item { authConverter.wxUserToUser(wxLoginUserDO) }
@@ -25,13 +23,11 @@ class AuthRepository(private val userDAO: UserDAO, private val authConverter: Au
             .replaceWith(wxLoginUserDO)
     }
 
-    @WithSession
     override fun findUserByOpenid(openid: String): Uni<WXLoginUserDO> {
         return userDAO.selectUserByOpenid(openid)
             .onItem().ifNotNull().transform(authConverter::userToWXUser)
     }
 
-    @WithSession
     override fun findAuthorityById(id: Long): Uni<List<AuthorityDO>> {
         return userDAO.findById(id).map { userEntity ->
             userEntity.authorities!!.let { authorities ->

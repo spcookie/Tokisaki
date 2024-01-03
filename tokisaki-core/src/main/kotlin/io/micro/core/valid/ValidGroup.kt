@@ -8,4 +8,8 @@ interface ValidGroup {
 
     interface Update : Default
 
+    interface Select: Default
+
+    interface Delete: Default
+
 }

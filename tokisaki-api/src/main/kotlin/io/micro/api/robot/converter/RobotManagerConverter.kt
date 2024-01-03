@@ -1,7 +1,8 @@
 package io.micro.api.robot.converter
 
-import io.micro.api.robot.dto.FeatureFunctionDTO
-import io.micro.api.robot.dto.RobotDTO
+import io.micro.api.robot.dto.OperateFeatureFunctionDTO
+import io.micro.api.robot.dto.OperateRobotDTO
+import io.micro.api.robot.dto.QueryRobotDTO
 import io.micro.server.robot.domain.model.entity.RobotDO
 import io.micro.server.robot.domain.model.valobj.FeatureFunction
 import org.mapstruct.BeanMapping
@@ -14,11 +15,15 @@ import org.mapstruct.ReportingPolicy
 interface RobotManagerConverter {
 
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
-    fun robotManagerDTO2RobotManager(dto: RobotDTO): RobotDO
+    fun queryRobotDTO2RobotManager(dto: QueryRobotDTO): RobotDO
 
     @InheritInverseConfiguration
-    fun robotManager2RobotManagerDTO(dto: RobotDO): RobotDTO
+    fun robotManager2QueryRobotDTO(dto: RobotDO): QueryRobotDTO
 
-    fun featureFunctionDTO2FeatureFunction(featureFunctionDTO: FeatureFunctionDTO): FeatureFunction
+    @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+    fun operateFeatureFunctionDTO2FeatureFunction(featureFunctionDTO: OperateFeatureFunctionDTO): FeatureFunction
+
+    @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+    fun operateRobotDTO2RobotManager(dto: OperateRobotDTO): RobotDO
 
 }
