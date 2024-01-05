@@ -19,6 +19,7 @@ interface RobotConverter {
 
     @Mapping(source = "function.id", target = "refId")
     @Mapping(source = "function.name", target = "name")
+    @Mapping(source = "function.code", target = "code")
     fun useFunctionEntity2FeatureFunction(useFunctionEntity: UseFunctionEntity): FeatureFunction
 
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)

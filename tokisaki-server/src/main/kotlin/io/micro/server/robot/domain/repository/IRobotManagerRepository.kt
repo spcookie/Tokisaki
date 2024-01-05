@@ -2,6 +2,7 @@ package io.micro.server.robot.domain.repository
 
 import io.micro.server.robot.domain.model.entity.RobotDO
 import io.micro.server.robot.domain.model.valobj.FeatureFunction
+import io.micro.server.robot.domain.model.valobj.Switch
 import io.quarkus.panache.common.Page
 import io.smallrye.mutiny.Uni
 
@@ -22,5 +23,13 @@ interface IRobotManagerRepository {
     fun addFeatureFunctionById(id: Long, featureFunction: FeatureFunction): Uni<Unit>
 
     fun existRobotByRobotIdAndUserId(robotId: Long, userId: Long): Uni<Boolean>
+
+    fun findFeatureFunctionsByRobotId(id: Long): Uni<List<FeatureFunction>>
+
+    fun findSwitchByFunctionId(id: Long): Uni<Switch>
+
+    fun saveOrUpdateSwitchByFunctionId(id: Long, switch: Switch): Uni<Switch>
+
+    fun findRobotByFunctionId(id: Long): Uni<RobotDO>
 
 }

@@ -1,7 +1,7 @@
 package io.micro.function.domain.image.model.entity
 
-import io.micro.core.fundto.Cmd
 import io.micro.core.funsdk.AbstractCmd
+import io.micro.core.funsdk.Cmd
 import io.micro.function.domain.image.model.Image
 import io.net.spcokie.types.QQFace
 import io.smallrye.mutiny.Uni

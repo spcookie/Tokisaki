@@ -6,6 +6,8 @@ data class FeatureFunction(
 
     var refId: Long? = null,
 
+    var code: String? = null,
+
     var name: String? = null,
 
     var remark: String? = null,

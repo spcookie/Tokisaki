@@ -1,9 +1,11 @@
 package io.micro.api.robot;
 
 import io.micro.api.robot.converter.RobotManagerConverter;
+import io.micro.api.robot.converter.SwitchConverter;
 import io.micro.api.robot.dto.OperateFeatureFunctionDTO;
 import io.micro.api.robot.dto.OperateRobotDTO;
 import io.micro.api.robot.dto.QueryRobotDTO;
+import io.micro.api.robot.dto.SwitchDTO;
 import io.micro.core.annotation.InitAuthContext;
 import io.micro.core.rest.CommonCode;
 import io.micro.core.rest.PageDTO;
@@ -45,6 +47,9 @@ public class RobotManagerController {
     @Inject
     public RobotManagerConverter robotManagerConverter;
 
+    @Inject
+    public SwitchConverter switchConverter;
+
     @Operation(summary = "QQ机器人扫码登录")
     @GET
     @Path("login/qq/{id}")
@@ -67,7 +72,7 @@ public class RobotManagerController {
             @QueryParam("page") @DefaultValue("1") int page) {
         RobotDO robotManager = robotManagerConverter.operateRobotDTO2RobotManager(operateRobotDTO);
         return robotManagerService.getRobotList(robotManager, Pageable.Companion.of(page, size))
-                .map(robotDOPage -> R.Companion.newInstance(
+                .map(robotDOPage -> R.newInstance(
                         CommonCode.OK.getMsg(),
                         PageDTO.Companion.of(
                                 robotDOPage.getCurrent(),
@@ -86,7 +91,7 @@ public class RobotManagerController {
     public Uni<R<QueryRobotDTO>> createRobot(@Parameter(description = "创建信息") @Valid @ConvertGroup(to = ValidGroup.Create.class) OperateRobotDTO operateRobotDTO) {
         operateRobotDTO.setState(0);
         return robotManagerService.createRobot(robotManagerConverter.operateRobotDTO2RobotManager(operateRobotDTO))
-                .map(it -> R.Companion.newInstance("创建成功", robotManagerConverter.robotManager2QueryRobotDTO(it)));
+                .map(it -> R.newInstance("创建成功", robotManagerConverter.robotManager2QueryRobotDTO(it)));
     }
 
     @Operation(summary = "机器人关闭")
@@ -94,7 +99,7 @@ public class RobotManagerController {
     @Path("/{id}")
     @Authenticated
     public Uni<R<Unit>> closeRobot(@Parameter(description = "机器人ID") @PathParam("id") Long id) {
-        return robotManagerService.closeRobot(id).map(it -> R.Companion.newInstance());
+        return robotManagerService.closeRobot(id).map(it -> R.newInstance());
     }
 
     @Operation(summary = "修改机器人信息")
@@ -109,7 +114,7 @@ public class RobotManagerController {
         RobotDO robotDO = robotManagerConverter.operateRobotDTO2RobotManager(operateRobotDTO);
         return robotManagerService.modifyRobotInfo(robotDO)
                 .map(robotManagerConverter::robotManager2QueryRobotDTO)
-                .map(it -> R.Companion.newInstance(CommonCode.OK.getMsg(), it));
+                .map(it -> R.newInstance(CommonCode.OK.getMsg(), it));
     }
 
     @Operation(summary = "添加机器人功能")
@@ -122,9 +127,8 @@ public class RobotManagerController {
         return robotManagerService.addFeatureFunction(
                         robotId,
                         robotManagerConverter.operateFeatureFunctionDTO2FeatureFunction(operateFeatureFunctionDTO))
-                .map((it) -> R.Companion.newInstance());
+                .map(it -> R.newInstance());
     }
-
 
     @Operation(summary = "修改机器人功能")
     @PUT
@@ -139,5 +143,26 @@ public class RobotManagerController {
         FeatureFunction featureFunction = robotManagerConverter.operateFeatureFunctionDTO2FeatureFunction(featureFunctionDTO);
         return robotManagerService.modifyFeatureFunction(robotId, featureFunction).map((it) -> R.Companion.newInstance());
     }
+
+    @Operation(summary = "保存或修改机器人功能权限开关")
+    @POST
+    @Path("/function/{id}")
+    @Authenticated
+    public Uni<R<Void>> saveOrUpdateFunctionSwitch(
+            @Parameter(description = "机器人功能权限ID")
+            @PathParam("id")
+            Long id,
+            SwitchDTO switchDTO) {
+        return robotManagerService.addOrModifyFunctionSwitch(id, switchConverter.switchDTO2switch(switchDTO))
+                .map(it -> R.newInstance());
+    }
+
+//    @Operation(summary = "查询机器人功能权限开关")
+//    @GET
+//    @Path("/function/{id}")
+//    @Authenticated
+//    public Uni<R<SwitchDTO>> getFunctionSwitch(Long id) {
+//        return robotManagerService.getFunctionSwitch(id)
+//    }
 
 }

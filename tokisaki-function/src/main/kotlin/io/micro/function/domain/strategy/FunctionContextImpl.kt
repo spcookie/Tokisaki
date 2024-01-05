@@ -1,9 +1,9 @@
 package io.micro.function.domain.strategy
 
 import io.micro.core.context.AuthContext
-import io.micro.core.fundto.Cmd
 import io.micro.core.fundto.Message
 import io.micro.core.fundto.MessageChain
+import io.micro.core.funsdk.Cmd
 import io.micro.core.funsdk.CommandService
 import io.micro.function.domain.image.service.ImageTask
 import io.net.spcokie.common.exception.CmdException
@@ -16,9 +16,9 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 @ApplicationScoped
-class CallContextImpl(
+class FunctionContextImpl(
     @All private val commandServices: MutableList<CommandService>
-) : CallService {
+) : FunctionContext {
 
     private val allocationCommandServices: MutableMap<String, CommandService> = mutableMapOf()
 
@@ -34,14 +34,11 @@ class CallContextImpl(
         }
     }
 
-    override fun call(cmd: String, args: MutableList<String>): Uni<MessageChain> {
-        return if (AuthContext.hasRole(cmd)) {
-            ArgsLengthCheck.check(cmd, args)
-            with(allocationCommandServices[cmd.lowercase()]) {
-                this?.invoke(args) ?: CmdException.nonImplemented()
-            }
-        } else {
-            menu()
+    override fun call(cmd: Cmd, args: MutableList<String>): Uni<MessageChain> {
+        val name = cmd.name
+        ArgsLengthCheck.check(name, args)
+        return with(allocationCommandServices[name.lowercase()]) {
+            this?.invoke(args) ?: CmdException.nonImplemented()
         }
     }
 

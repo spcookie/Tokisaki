@@ -1,6 +1,5 @@
 package io.micro.core.funsdk
 
-import io.micro.core.fundto.Cmd
 import io.micro.core.fundto.MessageChain
 import io.smallrye.mutiny.Uni
 

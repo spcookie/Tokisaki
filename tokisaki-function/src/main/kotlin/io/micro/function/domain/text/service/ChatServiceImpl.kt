@@ -2,8 +2,8 @@ package io.micro.function.domain.text.service
 
 import io.micro.core.annotation.CallCount
 import io.micro.core.context.AuthContext
-import io.micro.core.fundto.Cmd
 import io.micro.core.fundto.MessageChain
+import io.micro.core.funsdk.Cmd
 import io.micro.core.funsdk.CommandService
 import io.micro.function.domain.text.adapter.TextAdapter
 import io.micro.function.domain.text.model.entity.Chat

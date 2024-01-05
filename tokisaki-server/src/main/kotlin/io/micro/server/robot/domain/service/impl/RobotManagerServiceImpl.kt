@@ -4,6 +4,9 @@ import io.micro.core.context.AuthContext
 import io.micro.core.exception.fail
 import io.micro.core.exception.requireNonNull
 import io.micro.core.exception.requireTure
+import io.micro.core.fundto.CardID
+import io.micro.core.fundto.MediaType
+import io.micro.core.funsdk.Cmd
 import io.micro.core.rest.CommonCode
 import io.micro.core.rest.CommonMsg
 import io.micro.core.rest.PageDTO
@@ -13,21 +16,29 @@ import io.micro.core.robot.Robot
 import io.micro.core.robot.qq.QQRobot
 import io.micro.core.robot.qq.QQRobotFactory
 import io.micro.core.robot.qq.QQRobotManager
+import io.micro.function.domain.strategy.FunctionContext
 import io.micro.server.function.domain.service.FunctionService
 import io.micro.server.robot.domain.model.entity.RobotDO
 import io.micro.server.robot.domain.model.valobj.FeatureFunction
+import io.micro.server.robot.domain.model.valobj.Switch
 import io.micro.server.robot.domain.repository.IRobotManagerRepository
 import io.micro.server.robot.domain.service.RobotManagerService
 import io.quarkus.hibernate.reactive.panache.common.WithSession
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction
+import io.quarkus.logging.Log
 import io.quarkus.panache.common.Page
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.Uni
+import io.smallrye.mutiny.coroutines.awaitSuspending
 import io.smallrye.mutiny.replaceWithUnit
 import io.smallrye.mutiny.subscription.MultiEmitter
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.ws.rs.sse.OutboundSseEvent
 import jakarta.ws.rs.sse.Sse
+import net.mamoe.mirai.contact.Contact.Companion.uploadImage
+import net.mamoe.mirai.message.data.PlainText
+import net.mamoe.mirai.message.data.buildMessageChain
+import net.mamoe.mirai.message.data.findIsInstance
 import java.util.*
 
 /**
@@ -39,7 +50,8 @@ class RobotManagerServiceImpl(
     private val factory: QQRobotFactory,
     private val manager: QQRobotManager,
     private val robotManagerRepository: IRobotManagerRepository,
-    private val functionService: FunctionService
+    private val functionService: FunctionService,
+    private val functionContext: FunctionContext
 ) : RobotManagerService {
 
     /**
@@ -163,6 +175,24 @@ class RobotManagerServiceImpl(
         }
     }
 
+    @WithTransaction
+    @WithSession
+    override fun addOrModifyFunctionSwitch(id: Long, switch: Switch): Uni<Switch> {
+        return robotManagerRepository.findRobotByFunctionId(id).flatMap { robotDO ->
+            requireTure(AuthContext.equalId(robotDO.userId), code = CommonCode.ILLEGAL_OPERATION)
+            robotManagerRepository.saveOrUpdateSwitchByFunctionId(id, switch)
+        }
+    }
+
+    @WithTransaction
+    @WithSession
+    override fun getFunctionSwitch(id: Long): Uni<Switch> {
+        return robotManagerRepository.findRobotByFunctionId(id).flatMap { robotDO ->
+            requireTure(AuthContext.equalId(robotDO.userId), code = CommonCode.ILLEGAL_OPERATION)
+            robotManagerRepository.findSwitchByFunctionId(id)
+        }
+    }
+
     /**
      * 通过半长连接开始QQ扫码登录
      * @param robotDO 机器人
@@ -170,12 +200,93 @@ class RobotManagerServiceImpl(
      * @return 消息事件
      */
     private fun qqRobotQRLoginStart(robotDO: RobotDO, sse: Sse): Multi<OutboundSseEvent> {
-        val id = robotDO.id
+        val robotId = robotDO.id
         // 创建QQ机器人
-        val robot = factory.create(Credential(id!!, robotDO.account!!)) as QQRobot
+        val robot = factory.create(Credential(robotId!!, robotDO.account!!)) as QQRobot
         return Multi.createFrom().emitter<String> { em ->
             // 绑定登录回调函数
             qqRobotEventEmitBind(robot, em)
+
+            // 群消息处理
+            robot.onGroupMessage = { event ->
+                Log.debug(event)
+
+                val text = event.message.findIsInstance<PlainText>().toString()
+
+                if (text.startsWith("/")) {
+                    val args = text.split(" ").toMutableList()
+
+                    val cmd = args.removeFirst()
+
+                    val cmdName = cmd.lowercase()
+
+                    val cmdEnum = Cmd.entries.associateBy { it.name }[cmdName]
+
+                    if (cmdEnum != null) {
+                        val functions = robotManagerRepository.findFeatureFunctionsByRobotId(robotId).awaitSuspending()
+                        val featureFunction = functions.associateBy { it.code }[cmdEnum.code]
+                        if (featureFunction != null) {
+                            val (enableGroups, disableGroups, enableMembers, disableMembers) = robotManagerRepository
+                                .findSwitchByFunctionId(featureFunction.id!!)
+                                .awaitSuspending()
+                            var canInvoke = false
+                            if (disableGroups.isNotEmpty()) {
+                                if (!disableGroups.contains(event.group.id)) {
+                                    if (disableMembers.isNotEmpty()) {
+                                        if (!disableMembers.contains(event.sender.id)) {
+                                            canInvoke = true
+                                        }
+                                    } else {
+                                        if (enableMembers.contains(event.sender.id)) {
+                                            canInvoke = true
+                                        }
+                                    }
+                                }
+                            } else {
+                                if (enableGroups.contains(event.group.id)) {
+                                    if (disableMembers.isNotEmpty()) {
+                                        if (!disableMembers.contains(event.sender.id)) {
+                                            canInvoke = true
+                                        }
+                                    } else {
+                                        if (enableMembers.contains(event.sender.id)) {
+                                            canInvoke = true
+                                        }
+                                    }
+                                }
+                            }
+                            if (canInvoke) {
+                                val messageChain = functionContext.call(cmdEnum, args).awaitSuspending()
+
+                                val results = buildMessageChain {
+                                    messageChain.messages.forEach { message ->
+                                        if (message.msg.isNotBlank()) {
+                                            add(PlainText(message.msg))
+                                        }
+                                        if (message.data.type == MediaType.Picture) {
+                                            val image = message.data.bytes
+                                                .inputStream()
+                                                .use { event.sender.uploadImage(it) }
+                                            add(image)
+                                        }
+                                        if (message.card.id == CardID.Music) {
+                                            TODO()
+                                        }
+                                    }
+                                }
+
+                                val receipt = event.group.sendMessage(results)
+
+                                if (messageChain.receipt.recall > 0) {
+                                    receipt.recallIn(messageChain.receipt.recall.toLong())
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+
             // 注册机器人并开始登录
             manager.registerRobot(robot)
         }.map {

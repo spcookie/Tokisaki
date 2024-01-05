@@ -13,6 +13,9 @@ class UseFunctionEntity : BaseEntity() {
     @JoinColumn(name = "function_id")
     var function: FunctionEntity? = null
 
+    @ManyToOne
+    var robot: RobotEntity? = null
+
     @Column(name = "use_function_remark")
     var remark: String? = null
 

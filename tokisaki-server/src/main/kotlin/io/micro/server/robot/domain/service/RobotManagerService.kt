@@ -4,6 +4,7 @@ import io.micro.core.rest.PageDTO
 import io.micro.core.rest.Pageable
 import io.micro.server.robot.domain.model.entity.RobotDO
 import io.micro.server.robot.domain.model.valobj.FeatureFunction
+import io.micro.server.robot.domain.model.valobj.Switch
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.Uni
 import jakarta.ws.rs.sse.OutboundSseEvent
@@ -33,5 +34,9 @@ interface RobotManagerService {
     fun addFeatureFunction(robotId: Long, featureFunction: FeatureFunction): Uni<Unit>
 
     fun modifyFeatureFunction(robotId: Long, featureFunction: FeatureFunction): Uni<Unit>
+
+    fun addOrModifyFunctionSwitch(id: Long, switch: Switch): Uni<Switch>
+
+    fun getFunctionSwitch(id: Long): Uni<Switch>
 
 }

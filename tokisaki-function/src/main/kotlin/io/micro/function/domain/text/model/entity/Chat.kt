@@ -1,8 +1,8 @@
 package io.micro.function.domain.text.model.entity
 
-import io.micro.core.fundto.Cmd
 import io.micro.core.funsdk.AbstractCmd
 import io.micro.core.funsdk.ArgsMergeStrategy
+import io.micro.core.funsdk.Cmd
 import io.micro.function.domain.text.model.valobj.*
 import io.net.spcokie.domain.text.model.Text
 import io.net.spcokie.types.QQFace

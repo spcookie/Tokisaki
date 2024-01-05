@@ -4,9 +4,12 @@ import io.micro.core.exception.requireNonNull
 import io.micro.server.auth.infra.dao.IUserDAO
 import io.micro.server.robot.domain.model.entity.RobotDO
 import io.micro.server.robot.domain.model.valobj.FeatureFunction
+import io.micro.server.robot.domain.model.valobj.Switch
 import io.micro.server.robot.domain.repository.IRobotManagerRepository
+import io.micro.server.robot.infra.cache.SwitchCache
 import io.micro.server.robot.infra.converter.RobotConverter
 import io.micro.server.robot.infra.converter.RobotMapper
+import io.micro.server.robot.infra.converter.SwitchConverter
 import io.micro.server.robot.infra.dao.IRobotDAO
 import io.micro.server.robot.infra.dao.IUseFunctionDAO
 import io.quarkus.panache.common.Page
@@ -21,7 +24,9 @@ class RobotManagerRepository(
     private val robotMapper: RobotMapper,
     private val robotDAO: IRobotDAO,
     private val userDAO: IUserDAO,
-    private val useFunctionDAO: IUseFunctionDAO
+    private val useFunctionDAO: IUseFunctionDAO,
+    private val switchCache: SwitchCache,
+    private val switchConverter: SwitchConverter
 ) : IRobotManagerRepository {
 
     override fun saveRobotWithUser(robotDO: RobotDO): Uni<RobotDO> {
@@ -99,6 +104,24 @@ class RobotManagerRepository(
 
     override fun existRobotByRobotIdAndUserId(robotId: Long, userId: Long): Uni<Boolean> {
         return robotDAO.findById(robotId).map { it.user?.id == userId }
+    }
+
+    override fun findFeatureFunctionsByRobotId(id: Long): Uni<List<FeatureFunction>> {
+        return useFunctionDAO.selectUseFunctionByRobotId(id)
+            .map { it.map(robotConverter::useFunctionEntity2FeatureFunction) }
+    }
+
+    override fun findSwitchByFunctionId(id: Long): Uni<Switch> {
+        return switchCache.loadSwitchConfig(id).map(switchConverter::switchDTO2switch)
+    }
+
+    override fun saveOrUpdateSwitchByFunctionId(id: Long, switch: Switch): Uni<Switch> {
+        return switchCache.setSwitchConfig(id, switchConverter.switch2SwitchDTO(switch))
+            .replaceWith(switch)
+    }
+
+    override fun findRobotByFunctionId(id: Long): Uni<RobotDO> {
+        TODO("Not yet implemented")
     }
 
 }
