@@ -5,6 +5,7 @@ import io.micro.core.exception.requireNonNull
 import io.micro.core.rest.CommonCode
 import io.micro.core.rest.CommonMsg
 import io.micro.server.auth.domain.model.entity.AuthorityDO
+import io.micro.server.auth.domain.model.entity.WXLoginUserDO
 import io.micro.server.auth.domain.repository.IAuthRepository
 import io.micro.server.auth.domain.service.AuthService
 import io.quarkus.hibernate.reactive.panache.common.WithSession
@@ -19,6 +20,11 @@ class AuthServiceImpl(private val authRepository: IAuthRepository) : AuthService
         val id = AuthContext.id.toLongOrNull()
         requireNonNull(id, CommonMsg.NULL_USER_ID, CommonCode.ILLEGAL_STATE)
         return authRepository.findAuthorityById(id)
+    }
+
+    @WithSession
+    override fun getUserById(id: Long): Uni<WXLoginUserDO> {
+        return authRepository.findUserById(id)
     }
 
 }

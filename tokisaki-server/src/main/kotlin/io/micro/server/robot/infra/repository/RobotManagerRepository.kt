@@ -1,7 +1,6 @@
 package io.micro.server.robot.infra.repository
 
-import io.micro.core.exception.requireNonNull
-import io.micro.server.auth.infra.dao.IUserDAO
+import io.micro.server.auth.infra.po.UserEntity
 import io.micro.server.robot.domain.model.entity.RobotDO
 import io.micro.server.robot.domain.model.valobj.FeatureFunction
 import io.micro.server.robot.domain.model.valobj.Switch
@@ -24,23 +23,19 @@ class RobotManagerRepository(
     private val robotConverter: RobotConverter,
     private val robotMapper: RobotMapper,
     private val robotDAO: IRobotDAO,
-    private val userDAO: IUserDAO,
     private val useFunctionDAO: IUseFunctionDAO,
     private val switchCache: SwitchCache,
     private val switchConverter: SwitchConverter
 ) : IRobotManagerRepository {
 
     override fun saveRobotWithUser(robotDO: RobotDO): Uni<RobotDO> {
-        val userId = robotDO.userId
-        requireNonNull(userId, "用户ID为空")
-        return userDAO.findById(userId).flatMap { user ->
-            requireNonNull(user, "用户不存在")
-            val robot = robotConverter.robotDO2RobotEntity(robotDO)
-            robot.user = user
-            robotDAO.persistAndFlush(robot)
-                .invoke { entity -> robotDO.id = entity.id }
-                .replaceWith(robotDO)
-        }
+        val robot = robotConverter.robotDO2RobotEntity(robotDO)
+        robot.id = null
+        robot.user = UserEntity().also { it.id = robotDO.userId }
+        robot.functions = null
+        return robotDAO.persistAndFlush(robot)
+            .invoke { entity -> robotDO.id = entity.id }
+            .replaceWith(robotDO)
     }
 
     override fun findRobotById(id: Long): Uni<RobotDO?> {

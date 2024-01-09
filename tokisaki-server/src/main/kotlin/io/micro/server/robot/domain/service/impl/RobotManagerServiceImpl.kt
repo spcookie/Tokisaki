@@ -17,6 +17,7 @@ import io.micro.core.robot.qq.QQRobot
 import io.micro.core.robot.qq.QQRobotFactory
 import io.micro.core.robot.qq.QQRobotManager
 import io.micro.function.domain.strategy.FunctionContext
+import io.micro.server.auth.domain.service.AuthService
 import io.micro.server.robot.domain.model.entity.RobotDO
 import io.micro.server.robot.domain.model.valobj.FeatureFunction
 import io.micro.server.robot.domain.model.valobj.Switch
@@ -50,6 +51,7 @@ class RobotManagerServiceImpl(
     private val factory: QQRobotFactory,
     private val manager: QQRobotManager,
     private val robotManagerRepository: IRobotManagerRepository,
+    private val authService: AuthService,
     private val functionService: FunctionService,
     private val functionContext: FunctionContext
 ) : RobotManagerService {
@@ -111,7 +113,10 @@ class RobotManagerServiceImpl(
             if (exist) {
                 fail(code = CommonCode.DUPLICATE, detail = CommonMsg.SAME_ACCOUNT_ROBOT)
             } else {
-                robotManagerRepository.saveRobotWithUser(robotDO)
+                authService.getUserById(userId).flatMap { userDO ->
+                    requireNonNull(userDO, CommonMsg.NOT_FOUND_USER, CommonCode.NOT_FOUND)
+                    robotManagerRepository.saveRobotWithUser(robotDO)
+                }
             }
         }
     }

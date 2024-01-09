@@ -16,4 +16,6 @@ interface IAuthRepository {
 
     fun findAuthorityById(id: Long): Uni<List<AuthorityDO>>
 
+    fun findUserById(id: Long): Uni<WXLoginUserDO>
+
 }

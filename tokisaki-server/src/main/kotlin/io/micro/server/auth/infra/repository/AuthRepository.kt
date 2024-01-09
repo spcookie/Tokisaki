@@ -38,4 +38,8 @@ class AuthRepository(private val userDAO: UserDAO, private val authConverter: Au
         }
     }
 
+    override fun findUserById(id: Long): Uni<WXLoginUserDO> {
+        return userDAO.findById(id).map { authConverter.userToWXUser(it) }
+    }
+
 }

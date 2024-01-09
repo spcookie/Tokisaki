@@ -1,7 +1,6 @@
 package io.micro.api.robot.dto
 
 import io.micro.core.valid.ValidGroup
-import jakarta.validation.Valid
 import jakarta.validation.constraints.NotNull
 import kotlinx.serialization.Serializable
 import org.eclipse.microprofile.openapi.annotations.media.Schema
@@ -25,12 +24,13 @@ class OperateRobotDTO {
     @Schema(title = "密码")
     var password: String? = null
 
+    @Schema(title = "类型")
+    var type: Int? = null
+
     @Schema(title = "状态")
     var state: Int? = null
 
     @Schema(title = "备注")
     var remark: String? = null
 
-    @Schema(title = "功能列表")
-    val functions: MutableList<@Valid OperateFeatureFunctionDTO> = mutableListOf()
 }
