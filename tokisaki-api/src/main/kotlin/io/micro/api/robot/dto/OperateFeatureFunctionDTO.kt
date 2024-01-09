@@ -13,6 +13,9 @@ class OperateFeatureFunctionDTO {
     @NotNull(groups = [ValidGroup.Create::class, ValidGroup.Update::class], message = "功能ID不能为空")
     var id: Long? = null
 
+    @Schema(title = "配置")
+    var config: String? = null
+
     @Schema(title = "备注")
     var remark: String? = null
 

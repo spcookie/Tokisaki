@@ -17,11 +17,11 @@ import io.micro.core.robot.qq.QQRobot
 import io.micro.core.robot.qq.QQRobotFactory
 import io.micro.core.robot.qq.QQRobotManager
 import io.micro.function.domain.strategy.FunctionContext
-import io.micro.server.function.domain.service.FunctionService
 import io.micro.server.robot.domain.model.entity.RobotDO
 import io.micro.server.robot.domain.model.valobj.FeatureFunction
 import io.micro.server.robot.domain.model.valobj.Switch
 import io.micro.server.robot.domain.repository.IRobotManagerRepository
+import io.micro.server.robot.domain.service.FunctionService
 import io.micro.server.robot.domain.service.RobotManagerService
 import io.quarkus.hibernate.reactive.panache.common.WithSession
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction
@@ -140,6 +140,7 @@ class RobotManagerServiceImpl(
         }
     }
 
+    @WithTransaction
     @WithSession
     override fun addFeatureFunction(robotId: Long, featureFunction: FeatureFunction): Uni<Unit> {
         val userId = AuthContext.id.toLongOrNull()
@@ -151,7 +152,14 @@ class RobotManagerServiceImpl(
             val functionDO = functionDOs.associateBy { it.id }[featureFunction.id]
             requireNonNull(functionDO, CommonMsg.ILLEGAL_ADD_ROBOT_FEATURE, CommonCode.ILLEGAL_OPERATION)
         }.flatMap {
-            robotManagerRepository.addFeatureFunctionById(robotId, featureFunction)
+            robotManagerRepository.findFeatureFunctionsByRobotId(robotId).flatMap { featureFunctions ->
+                if (featureFunctions.map { it.refId }.contains(featureFunction.refId)) {
+                    Log.info("重复添加机器人功能")
+                    Uni.createFrom().item(Unit)
+                } else {
+                    robotManagerRepository.addFeatureFunctionById(robotId, featureFunction)
+                }
+            }
         }
     }
 
@@ -167,6 +175,7 @@ class RobotManagerServiceImpl(
             )
             robot.functions.associateBy { it.id }[featureFunction.id].also {
                 if (it != null) {
+                    it.config = featureFunction.config
                     it.remark = featureFunction.remark
                     it.enabled = featureFunction.enabled
                 }
@@ -178,7 +187,7 @@ class RobotManagerServiceImpl(
     @WithTransaction
     @WithSession
     override fun addOrModifyFunctionSwitch(id: Long, switch: Switch): Uni<Switch> {
-        return robotManagerRepository.findRobotByFunctionId(id).flatMap { robotDO ->
+        return robotManagerRepository.findRobotByUseFunctionId(id).flatMap { robotDO ->
             requireTure(AuthContext.equalId(robotDO.userId), code = CommonCode.ILLEGAL_OPERATION)
             robotManagerRepository.saveOrUpdateSwitchByFunctionId(id, switch)
         }
@@ -187,9 +196,9 @@ class RobotManagerServiceImpl(
     @WithTransaction
     @WithSession
     override fun getFunctionSwitch(id: Long): Uni<Switch> {
-        return robotManagerRepository.findRobotByFunctionId(id).flatMap { robotDO ->
+        return robotManagerRepository.findRobotByUseFunctionId(id).flatMap { robotDO ->
             requireTure(AuthContext.equalId(robotDO.userId), code = CommonCode.ILLEGAL_OPERATION)
-            robotManagerRepository.findSwitchByFunctionId(id)
+            robotManagerRepository.findSwitchByUseFunctionId(id)
         }
     }
 
@@ -206,10 +215,9 @@ class RobotManagerServiceImpl(
         return Multi.createFrom().emitter<String> { em ->
             // 绑定登录回调函数
             qqRobotEventEmitBind(robot, em)
-
             // 群消息处理
             robot.onGroupMessage = { event ->
-                Log.debug(event)
+                Log.info("bot: ${event.bot.nick}(${event.bot.id}) group: ${event.group.name}(${event.group.id}) sender: ${event.sender.nick}(${event.sender.id}) message: ${event.message}")
 
                 val text = event.message.findIsInstance<PlainText>().toString()
 
@@ -224,10 +232,11 @@ class RobotManagerServiceImpl(
 
                     if (cmdEnum != null) {
                         val functions = robotManagerRepository.findFeatureFunctionsByRobotId(robotId).awaitSuspending()
-                        val featureFunction = functions.associateBy { it.code }[cmdEnum.code]
+                        // TODO 权限控制
+                        val featureFunction = functions.filter { it.enabled }.associateBy { it.code }[cmdEnum.code]
                         if (featureFunction != null) {
                             val (enableGroups, disableGroups, enableMembers, disableMembers) = robotManagerRepository
-                                .findSwitchByFunctionId(featureFunction.id!!)
+                                .findSwitchByUseFunctionId(featureFunction.id!!)
                                 .awaitSuspending()
                             var canInvoke = false
                             if (disableGroups.isNotEmpty()) {

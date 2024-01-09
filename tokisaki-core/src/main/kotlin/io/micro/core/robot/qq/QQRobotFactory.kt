@@ -3,7 +3,6 @@ package io.micro.core.robot.qq
 import io.micro.core.robot.Credential
 import io.micro.core.robot.Robot
 import io.micro.core.robot.RobotFactory
-import io.micro.function.domain.strategy.FunctionContext
 import jakarta.enterprise.context.ApplicationScoped
 import net.mamoe.mirai.BotFactory
 import net.mamoe.mirai.auth.BotAuthorization
@@ -14,9 +13,7 @@ import net.mamoe.mirai.utils.BotConfiguration
  *@since 2023/11/21
  */
 @ApplicationScoped
-class QQRobotFactory(
-    private val functionContext: FunctionContext
-) : RobotFactory {
+class QQRobotFactory : RobotFactory {
 
     override fun create(credential: Credential): Robot {
         // 凭证，这里是QQ号

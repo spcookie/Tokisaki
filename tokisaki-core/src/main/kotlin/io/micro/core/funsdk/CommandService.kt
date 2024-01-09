@@ -8,7 +8,13 @@ import io.smallrye.mutiny.Uni
  *@since 2023/10/10
  */
 interface CommandService {
+
     fun cmd(): Cmd
+
+    fun configHint(): ConfigHint? = null
+
     fun describe(): Uni<String>
+
     fun invoke(args: MutableList<String> = mutableListOf()): Uni<MessageChain>
+
 }

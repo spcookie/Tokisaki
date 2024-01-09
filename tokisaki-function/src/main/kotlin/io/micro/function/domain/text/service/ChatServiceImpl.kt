@@ -5,6 +5,7 @@ import io.micro.core.context.AuthContext
 import io.micro.core.fundto.MessageChain
 import io.micro.core.funsdk.Cmd
 import io.micro.core.funsdk.CommandService
+import io.micro.core.funsdk.ConfigHint
 import io.micro.function.domain.text.adapter.TextAdapter
 import io.micro.function.domain.text.model.entity.Chat
 import io.micro.function.domain.text.model.valobj.ChatConfig
@@ -29,8 +30,13 @@ class ChatServiceImpl(
     private val textAdapter: TextAdapter,
     private val chatConfig: ChatConfig
 ) : CommandService {
+
     override fun cmd(): Cmd {
         return Chat.identify()
+    }
+
+    override fun configHint(): ConfigHint? {
+        return ConfigHint.CHAT
     }
 
     override fun describe(): Uni<String> {

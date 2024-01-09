@@ -5,8 +5,7 @@ plugins {
 }
 
 dependencies {
-    api("cn.hutool:hutool-core:5.8.16")
-    implementation(project(":tokisaki-function"))
+    api("cn.hutool:hutool-core:5.8.24")
     api("io.github.spcookie:mirai-core-jvm:2.16.0")
     api("net.mamoe:mirai-logging-slf4j:2.16.0") {
         exclude("net.mamoe", "mirai-compiler-annotations-jvm")

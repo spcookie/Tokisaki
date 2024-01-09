@@ -5,7 +5,7 @@ import io.micro.api.robot.converter.SwitchConverter;
 import io.micro.api.robot.dto.OperateFeatureFunctionDTO;
 import io.micro.api.robot.dto.OperateRobotDTO;
 import io.micro.api.robot.dto.QueryRobotDTO;
-import io.micro.api.robot.dto.SwitchDTO;
+import io.micro.api.robot.dto.QuerySwitchDTO;
 import io.micro.core.annotation.InitAuthContext;
 import io.micro.core.rest.CommonCode;
 import io.micro.core.rest.PageDTO;
@@ -152,17 +152,19 @@ public class RobotManagerController {
             @Parameter(description = "机器人功能权限ID")
             @PathParam("id")
             Long id,
-            SwitchDTO switchDTO) {
-        return robotManagerService.addOrModifyFunctionSwitch(id, switchConverter.switchDTO2switch(switchDTO))
+            QuerySwitchDTO querySwitchDTO) {
+        return robotManagerService.addOrModifyFunctionSwitch(id, switchConverter.switchDTO2switch(querySwitchDTO))
                 .map(it -> R.newInstance());
     }
 
-//    @Operation(summary = "查询机器人功能权限开关")
-//    @GET
-//    @Path("/function/{id}")
-//    @Authenticated
-//    public Uni<R<SwitchDTO>> getFunctionSwitch(Long id) {
-//        return robotManagerService.getFunctionSwitch(id)
-//    }
+    @Operation(summary = "查询机器人功能权限开关")
+    @GET
+    @Path("/function/{id}")
+    @Authenticated
+    public Uni<R<QuerySwitchDTO>> getFunctionSwitch(@PathParam("id") Long id) {
+        return robotManagerService.getFunctionSwitch(id)
+                .map(switchConverter::switch2SwitchDTO)
+                .map(it -> R.newInstance(CommonCode.OK.getMsg(), it));
+    }
 
 }

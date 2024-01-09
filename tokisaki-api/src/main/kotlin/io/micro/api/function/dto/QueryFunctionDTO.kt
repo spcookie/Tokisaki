@@ -16,7 +16,7 @@ class QueryFunctionDTO {
     @Schema(title = "功能标识")
     var code: String? = null
 
-    @Schema(title = "配置信息")
-    var config: String? = null
+    @Schema(title = "配置字典")
+    var configHint: String? = null
 
 }

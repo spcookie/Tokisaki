@@ -5,6 +5,7 @@ import io.micro.core.fundto.Message
 import io.micro.core.fundto.MessageChain
 import io.micro.core.funsdk.Cmd
 import io.micro.core.funsdk.CommandService
+import io.micro.core.funsdk.ConfigHint
 import io.micro.function.domain.image.service.ImageTask
 import io.net.spcokie.common.exception.CmdException
 import io.quarkus.arc.All
@@ -35,11 +36,15 @@ class FunctionContextImpl(
     }
 
     override fun call(cmd: Cmd, args: MutableList<String>): Uni<MessageChain> {
-        val name = cmd.name
-        ArgsLengthCheck.check(name, args)
-        return with(allocationCommandServices[name.lowercase()]) {
+        val code = cmd.code
+        ArgsLengthCheck.check(code, args)
+        return with(allocationCommandServices[code.lowercase()]) {
             this?.invoke(args) ?: CmdException.nonImplemented()
         }
+    }
+
+    override fun config(cmd: Cmd): ConfigHint? {
+        return with(allocationCommandServices[cmd.code.lowercase()]) { this?.configHint() }
     }
 
     override fun menu(): Uni<MessageChain> {

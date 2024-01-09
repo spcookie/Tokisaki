@@ -10,6 +10,8 @@ data class FeatureFunction(
 
     var name: String? = null,
 
+    var config: String? = null,
+
     var remark: String? = null,
 
     var enabled: Boolean = false

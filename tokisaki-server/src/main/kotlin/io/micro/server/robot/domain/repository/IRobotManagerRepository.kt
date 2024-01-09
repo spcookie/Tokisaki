@@ -26,10 +26,10 @@ interface IRobotManagerRepository {
 
     fun findFeatureFunctionsByRobotId(id: Long): Uni<List<FeatureFunction>>
 
-    fun findSwitchByFunctionId(id: Long): Uni<Switch>
+    fun findSwitchByUseFunctionId(id: Long): Uni<Switch>
 
     fun saveOrUpdateSwitchByFunctionId(id: Long, switch: Switch): Uni<Switch>
 
-    fun findRobotByFunctionId(id: Long): Uni<RobotDO>
+    fun findRobotByUseFunctionId(id: Long): Uni<RobotDO>
 
 }

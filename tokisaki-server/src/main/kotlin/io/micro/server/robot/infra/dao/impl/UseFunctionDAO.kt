@@ -7,7 +7,9 @@ import jakarta.enterprise.context.ApplicationScoped
 
 @ApplicationScoped
 class UseFunctionDAO: IUseFunctionDAO {
+
     override fun selectUseFunctionByRobotId(id: Long): Uni<List<UseFunctionEntity>> {
         return list("robot.id = ?1", id)
     }
+
 }

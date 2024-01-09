@@ -20,6 +20,9 @@ class QueryFeatureFunctionDTO {
     @Schema(title = "名称")
     var name: String? = null
 
+    @Schema(title = "配置")
+    var config: String? = null
+
     @Schema(title = "备注")
     var remark: String? = null
 

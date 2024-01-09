@@ -5,5 +5,7 @@ import io.quarkus.hibernate.reactive.panache.kotlin.PanacheRepository
 import io.smallrye.mutiny.Uni
 
 interface IUseFunctionDAO: PanacheRepository<UseFunctionEntity> {
+
     fun selectUseFunctionByRobotId(id: Long): Uni<List<UseFunctionEntity>>
+
 }
