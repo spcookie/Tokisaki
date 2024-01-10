@@ -40,6 +40,7 @@ import net.mamoe.mirai.contact.Contact.Companion.uploadImage
 import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.buildMessageChain
 import net.mamoe.mirai.message.data.findIsInstance
+import org.hibernate.reactive.mutiny.Mutiny
 import java.util.*
 
 /**
@@ -53,7 +54,8 @@ class RobotManagerServiceImpl(
     private val robotManagerRepository: IRobotManagerRepository,
     private val authService: AuthService,
     private val functionService: FunctionService,
-    private val functionContext: FunctionContext
+    private val functionContext: FunctionContext,
+    private val sessionFactory: Mutiny.SessionFactory
 ) : RobotManagerService {
 
     /**
@@ -62,33 +64,34 @@ class RobotManagerServiceImpl(
     private val oldSse = mutableMapOf<Long, Sse>()
 
     override fun loginQQRobot(id: Long, sse: Sse): Multi<OutboundSseEvent> {
-        return robotManagerRepository.findRobotById(id).onItem().transformToMulti { robotManager ->
-            if (robotManager == null) {
-                Multi.createFrom().items(sse.newEvent("fail#${CommonCode.NOT_FOUND.code}"))
-            } else if (AuthContext.equalId(robotManager.userId)) {
-                Multi.createFrom().items(sse.newEvent("fail#${CommonCode.ILLEGAL_OPERATION.code}"))
-            } else {
-                // 先移除旧的连接
-                oldSse.remove(id)
-                // 再关联新的连接
-                oldSse[id] = sse
-                val robot = manager.getRobot(id)
-                if (robot != null) {
-                    if (robot.state() != Robot.State.Online) {
-                        // 已存在机器人且未登录，则先注销机器人，可以使登录二维码失效
-                        manager.unregisterRobot(id)
-                        // 开始扫码登录
-                        qqRobotQRLoginStart(robotManager, sse)
-                    } else {
-                        // 若机器人已登录，则重置二维码登录
-                        Multi.createFrom().items(sse.newEvent("reset#"))
-                    }
+        return sessionFactory.withSession { robotManagerRepository.findRobotById(id) }
+            .onItem().transformToMulti { robotManager ->
+                if (robotManager == null) {
+                    Multi.createFrom().items(sse.newEvent("fail#${CommonCode.NOT_FOUND.code}"))
+                } else if (!AuthContext.equalId(robotManager.userId)) {
+                    Multi.createFrom().items(sse.newEvent("fail#${CommonCode.ILLEGAL_OPERATION.code}"))
                 } else {
-                    // 若不存在机器人，则直接开始登录
-                    qqRobotQRLoginStart(robotManager, sse)
+                    // 先移除旧的连接
+                    oldSse.remove(id)
+                    // 再关联新的连接
+                    oldSse[id] = sse
+                    val robot = manager.getRobot(id)
+                    if (robot != null) {
+                        if (robot.state() != Robot.State.Online) {
+                            // 已存在机器人且未登录，则先注销机器人，可以使登录二维码失效
+                            manager.unregisterRobot(id)
+                            // 开始扫码登录
+                            qqRobotQRLoginStart(robotManager, sse)
+                        } else {
+                            // 若机器人已登录，则重置二维码登录
+                            Multi.createFrom().items(sse.newEvent("reset#"))
+                        }
+                    } else {
+                        // 若不存在机器人，则直接开始登录
+                        qqRobotQRLoginStart(robotManager, sse)
+                    }
                 }
             }
-        }
     }
 
     @WithTransaction
@@ -154,7 +157,7 @@ class RobotManagerServiceImpl(
             requireTure(it, CommonMsg.ILLEGAL_OPERATE_ROBOT, CommonCode.ILLEGAL_OPERATION)
             functionService.getUserFunctions()
         }.map { functionDOs ->
-            val functionDO = functionDOs.associateBy { it.id }[featureFunction.id]
+            val functionDO = functionDOs.associateBy { it.id }[featureFunction.refId]
             requireNonNull(functionDO, CommonMsg.ILLEGAL_ADD_ROBOT_FEATURE, CommonCode.ILLEGAL_OPERATION)
         }.flatMap {
             robotManagerRepository.findFeatureFunctionsByRobotId(robotId).flatMap { featureFunctions ->

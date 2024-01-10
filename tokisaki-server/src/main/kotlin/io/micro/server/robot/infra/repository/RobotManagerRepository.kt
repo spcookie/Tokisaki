@@ -9,6 +9,7 @@ import io.micro.server.robot.infra.cache.SwitchCache
 import io.micro.server.robot.infra.converter.RobotConverter
 import io.micro.server.robot.infra.converter.RobotMapper
 import io.micro.server.robot.infra.converter.SwitchConverter
+import io.micro.server.robot.infra.dao.IFunctionDAO
 import io.micro.server.robot.infra.dao.IRobotDAO
 import io.micro.server.robot.infra.dao.IUseFunctionDAO
 import io.micro.server.robot.infra.po.UseFunctionEntity
@@ -24,6 +25,7 @@ class RobotManagerRepository(
     private val robotMapper: RobotMapper,
     private val robotDAO: IRobotDAO,
     private val useFunctionDAO: IUseFunctionDAO,
+    private val functionDAO: IFunctionDAO,
     private val switchCache: SwitchCache,
     private val switchConverter: SwitchConverter
 ) : IRobotManagerRepository {
@@ -89,7 +91,7 @@ class RobotManagerRepository(
         return robotDAO.findById(id).flatMap { robotEntity ->
             val useFunctionEntities = robotEntity.functions ?: mutableListOf()
             val functionEntity = robotConverter.featureFunction2UseFunctionEntity(featureFunction)
-            useFunctionDAO.persist(functionEntity)
+            functionDAO.findById(functionEntity.function!!.id!!).map { functionEntity.function = it }
                 .call(Supplier {
                     useFunctionEntities.add(functionEntity)
                     robotDAO.flush()

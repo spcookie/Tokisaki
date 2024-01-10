@@ -10,8 +10,12 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema
 class OperateFeatureFunctionDTO {
 
     @Schema(title = "功能ID")
-    @NotNull(groups = [ValidGroup.Create::class, ValidGroup.Update::class], message = "功能ID不能为空")
+    @NotNull(groups = [ValidGroup.Update::class], message = "功能ID不能为空")
     var id: Long? = null
+
+    @Schema(title = "引用功能ID")
+    @NotNull(groups = [ValidGroup.Create::class], message = "引用功能ID不能为空")
+    var refId: Long? = null
 
     @Schema(title = "配置")
     var config: String? = null
