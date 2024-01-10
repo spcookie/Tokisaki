@@ -4,7 +4,7 @@ package io.micro.function.domain.text.model.valobj
  *@author Augenstern
  *@since 2023/10/20
  */
-class ChatConfig(val map: Map<String, Any>) {
+class ChatConfig(val map: Map<String, *>) {
 
     val model: String by map
 

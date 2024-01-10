@@ -48,7 +48,7 @@ class ChatServiceImpl(
     @WithTransaction
     @Fallback(fallbackMethod = "fallback", applyOn = [RateLimitException::class])
     @RateLimit(value = 9, windowUnit = ChronoUnit.MINUTES, minSpacing = 8)
-    override fun invoke(args: MutableList<String>, config: Map<String, Any>): Uni<MessageChain> {
+    override fun invoke(args: MutableList<String>, config: Map<String, *>): Uni<MessageChain> {
         val chatConfig = ChatConfig(config)
         val tenant = AuthContext.nickname
         return textRepository.requireTenantLock(tenant)

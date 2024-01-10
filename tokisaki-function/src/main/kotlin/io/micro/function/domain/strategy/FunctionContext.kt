@@ -11,7 +11,7 @@ import io.smallrye.mutiny.Uni
  */
 interface FunctionContext {
 
-    fun call(cmd: Cmd, args: MutableList<String>, config: Map<String, Any>): Uni<MessageChain>
+    fun call(cmd: Cmd, args: MutableList<String>, config: Map<String, *>): Uni<MessageChain>
 
     fun config(cmd: Cmd): ConfigHint?
 

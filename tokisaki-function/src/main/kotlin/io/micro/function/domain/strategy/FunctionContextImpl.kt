@@ -35,7 +35,7 @@ class FunctionContextImpl(
         }
     }
 
-    override fun call(cmd: Cmd, args: MutableList<String>, config: Map<String, Any>): Uni<MessageChain> {
+    override fun call(cmd: Cmd, args: MutableList<String>, config: Map<String, *>): Uni<MessageChain> {
         val code = cmd.code
         ArgsLengthCheck.check(code, args)
         return with(allocationCommandServices[code.lowercase()]) {

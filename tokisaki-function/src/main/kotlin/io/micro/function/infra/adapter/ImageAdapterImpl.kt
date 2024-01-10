@@ -95,7 +95,7 @@ class ImageAdapterImpl(
     @Fallback(fallbackMethod = "fetchMidjourneyImageFallback")
     override fun midjourneyGenerate(midjourney: Midjourney): Uni<Void> {
         return midjourneyGateway.fetch(
-            midjourney.config.apiKey(),
+            midjourney.config.apiKey,
             Json.encodeToString(MidjourneyPromptDTO(midjourney.prompt))
         ).flatMap { dto ->
             Log.debug(dto)

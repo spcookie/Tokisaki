@@ -1,5 +1,7 @@
 package io.micro.server.robot.domain.service.impl
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.micro.core.context.AuthContext
 import io.micro.core.exception.fail
 import io.micro.core.exception.requireNonNull
@@ -33,10 +35,10 @@ import io.smallrye.mutiny.Uni
 import io.smallrye.mutiny.coroutines.awaitSuspending
 import io.smallrye.mutiny.replaceWithUnit
 import io.smallrye.mutiny.subscription.MultiEmitter
+import io.vertx.mutiny.core.Vertx
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.ws.rs.sse.OutboundSseEvent
 import jakarta.ws.rs.sse.Sse
-import kotlinx.serialization.json.Json
 import net.mamoe.mirai.contact.Contact.Companion.uploadImage
 import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.buildMessageChain
@@ -57,7 +59,7 @@ class RobotManagerServiceImpl(
     private val functionService: FunctionService,
     private val functionContext: FunctionContext,
     private val sessionFactory: Mutiny.SessionFactory,
-    private val json: Json
+    private val objectMapper: ObjectMapper
 ) : RobotManagerService {
 
     /**
@@ -224,6 +226,7 @@ class RobotManagerServiceImpl(
         val robotId = robotDO.id
         // 创建QQ机器人
         val robot = factory.create(Credential(robotId!!, robotDO.account!!)) as QQRobot
+        val vertxContext = Vertx.currentContext()
         return Multi.createFrom().emitter<String> { em ->
             // 绑定登录回调函数
             qqRobotEventEmitBind(robot, em)
@@ -244,15 +247,19 @@ class RobotManagerServiceImpl(
                     val cmdName = cmd.lowercase()
 
                     val cmdEnum = Cmd.entries.associateBy { it.code }[cmdName]
-
                     if (cmdEnum != null) {
-                        val functions = robotManagerRepository.findFeatureFunctionsByRobotId(robotId).awaitSuspending()
+                        val functions = sessionFactory.withSession {
+                            robotManagerRepository.findFeatureFunctionsByRobotId(robotId)
+                        }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
                         // TODO 权限控制
-                        val featureFunction = functions.filter { it.enabled }.associateBy { it.code }[cmdEnum.code]
+                        val featureFunction = functions.filter { it.enabled }.associateBy { it.code }[cmdEnum.auth]
                         if (featureFunction != null) {
-                            val (enableGroups, disableGroups, enableMembers, disableMembers) = robotManagerRepository
-                                .findSwitchByUseFunctionId(featureFunction.id!!)
-                                .awaitSuspending()
+                            val (enableGroups,
+                                disableGroups,
+                                enableMembers,
+                                disableMembers) = sessionFactory.withSession {
+                                robotManagerRepository.findSwitchByUseFunctionId(featureFunction.id!!)
+                            }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
                             var canInvoke = false
                             if (disableGroups.isNotEmpty()) {
                                 if (!disableGroups.contains(event.group.id)) {
@@ -280,8 +287,9 @@ class RobotManagerServiceImpl(
                                 }
                             }
                             if (canInvoke) {
-                                val configStr = featureFunction.config ?: ""
-                                val config = json.decodeFromString<Map<String, Any>>(configStr)
+                                val configStr = featureFunction.config ?: "{}"
+                                val config =
+                                    objectMapper.readValue(configStr, object : TypeReference<Map<String, *>>() {})
                                 val messageChain = functionContext.call(cmdEnum, args, config).awaitSuspending()
                                 val results = buildMessageChain {
                                     messageChain.messages.forEach { message ->

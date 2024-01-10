@@ -38,7 +38,7 @@ class GirlServiceImpl(
     @WithTransaction
     @Fallback(fallbackMethod = "fallback", applyOn = [RateLimitException::class])
     @RateLimit(value = 20, windowUnit = ChronoUnit.MINUTES, minSpacing = 1)
-    override fun invoke(args: MutableList<String>, config: Map<String, Any>): Uni<MessageChain> {
+    override fun invoke(args: MutableList<String>, config: Map<String, *>): Uni<MessageChain> {
         return imageRepository.findGirlImage()
             .onItem().ifNotNull().call { girl ->
                 imageRepository.modifyImageUsed(girl.id!!)

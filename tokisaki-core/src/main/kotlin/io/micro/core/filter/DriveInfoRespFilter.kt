@@ -25,8 +25,7 @@ class DriveInfoRespFilter : ContainerResponseFilter {
     override fun filter(requestContext: ContainerRequestContext, responseContext: ContainerResponseContext) {
         val driveId = "driveId"
         val cookie = requestContext.cookies[driveId]
-        responseContext.cookies
-        if (cookie == null) {
+        if (cookie == null && reqInfo.driveId != null) {
             response.addCookie(cookie(driveId, reqInfo.driveId))
         }
     }

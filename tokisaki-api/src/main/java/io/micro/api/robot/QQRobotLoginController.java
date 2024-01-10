@@ -5,6 +5,8 @@ import io.micro.server.robot.domain.service.RobotManagerService;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Multi;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -28,12 +30,12 @@ public class QQRobotLoginController {
 
     @Operation(summary = "QQ机器人扫码登录")
     @GET
-    @Path("login/qq/{id}")
+    @Path("/login/{id}")
     @Authenticated
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @RestStreamElementType(MediaType.TEXT_HTML)
     public Multi<OutboundSseEvent> loginQQRobot(
-            @Parameter(description = "机器人ID") @PathParam("id") Long id,
+            @Parameter(description = "机器人ID") @PathParam("id") @Valid @NotNull Long id,
             @Context Sse sse) {
         return robotManagerService.loginQQRobot(id, sse);
     }

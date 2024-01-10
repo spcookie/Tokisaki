@@ -19,6 +19,7 @@ import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.groups.ConvertGroup;
 import jakarta.ws.rs.*;
 import kotlin.Unit;
@@ -80,7 +81,7 @@ public class RobotManagerController {
     @PATCH
     @Path("/{id}")
     @Authenticated
-    public Uni<R<Unit>> closeRobot(@Parameter(description = "机器人ID") @PathParam("id") Long id) {
+    public Uni<R<Unit>> closeRobot(@Parameter(description = "机器人ID") @PathParam("id") @Valid @NotNull Long id) {
         return robotManagerService.closeRobot(id).map(it -> R.newInstance());
     }
 
@@ -89,10 +90,7 @@ public class RobotManagerController {
     @Path("/")
     @Authenticated
     public Uni<R<QueryRobotDTO>> modifyRobotInfo(
-            @Parameter(description = "机器人信息")
-            @Valid
-            @ConvertGroup(to = ValidGroup.Update.class)
-            OperateRobotDTO operateRobotDTO) {
+            @Parameter(description = "机器人信息") @Valid @ConvertGroup(to = ValidGroup.Update.class) OperateRobotDTO operateRobotDTO) {
         RobotDO robotDO = robotManagerConverter.operateRobotDTO2RobotManager(operateRobotDTO);
         return robotManagerService.modifyRobotInfo(robotDO)
                 .map(robotManagerConverter::robotManager2QueryRobotDTO)
@@ -104,7 +102,7 @@ public class RobotManagerController {
     @Path("/{id}/function")
     @Authenticated
     public Uni<R<Unit>> addUseFunction(
-            @Parameter(description = "机器人ID") @PathParam("id") Long robotId,
+            @Parameter(description = "机器人ID") @PathParam("id") @Valid @NotNull Long robotId,
             @Parameter(description = "添加功能信息") OperateFeatureFunctionDTO operateFeatureFunctionDTO) {
         return robotManagerService.addFeatureFunction(
                         robotId,
@@ -117,11 +115,8 @@ public class RobotManagerController {
     @Path("/{id}/function")
     @Authenticated
     public Uni<R<Unit>> modifyUseFunction(
-            @Parameter(description = "机器人ID") @PathParam("id") Long robotId,
-            @Parameter(description = "修改功能信息")
-            @Valid
-            @ConvertGroup(to = ValidGroup.Update.class)
-            OperateFeatureFunctionDTO featureFunctionDTO) {
+            @Parameter(description = "机器人ID") @PathParam("id") @Valid @NotNull Long robotId,
+            @Parameter(description = "修改功能信息") @Valid @ConvertGroup(to = ValidGroup.Update.class) OperateFeatureFunctionDTO featureFunctionDTO) {
         FeatureFunction featureFunction = robotManagerConverter.operateFeatureFunctionDTO2FeatureFunction(featureFunctionDTO);
         return robotManagerService.modifyFeatureFunction(robotId, featureFunction).map((it) -> R.Companion.newInstance());
     }
@@ -131,9 +126,7 @@ public class RobotManagerController {
     @Path("/function/{id}")
     @Authenticated
     public Uni<R<Void>> saveOrUpdateFunctionSwitch(
-            @Parameter(description = "机器人功能权限ID")
-            @PathParam("id")
-            Long id,
+            @Parameter(description = "机器人功能权限ID") @PathParam("id") @Valid @NotNull Long id,
             QuerySwitchDTO querySwitchDTO) {
         return robotManagerService.addOrModifyFunctionSwitch(id, switchConverter.switchDTO2switch(querySwitchDTO))
                 .map(it -> R.newInstance());
@@ -143,7 +136,7 @@ public class RobotManagerController {
     @GET
     @Path("/function/{id}")
     @Authenticated
-    public Uni<R<QuerySwitchDTO>> getFunctionSwitch(@Parameter(description = "机器人功能权限ID") @PathParam("id") Long id) {
+    public Uni<R<QuerySwitchDTO>> getFunctionSwitch(@Parameter(description = "机器人功能权限ID") @PathParam("id") @Valid @NotNull Long id) {
         return robotManagerService.getFunctionSwitch(id)
                 .map(switchConverter::switch2SwitchDTO)
                 .map(it -> R.newInstance(CommonCode.OK.getMsg(), it));

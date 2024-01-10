@@ -16,6 +16,6 @@ interface CommandService {
 
     fun describe(): Uni<String>
 
-    fun invoke(args: MutableList<String>, config: Map<String, Any>): Uni<MessageChain>
+    fun invoke(args: MutableList<String>, config: Map<String, *>): Uni<MessageChain>
 
 }

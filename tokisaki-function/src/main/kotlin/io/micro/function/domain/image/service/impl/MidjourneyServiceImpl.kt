@@ -24,7 +24,6 @@ import java.time.temporal.ChronoUnit
 class MidjourneyServiceImpl(
     private val imageAdapter: ImageAdapter,
     private val imageRepository: ImageRepository,
-    private val midjourneyConfig: MidjourneyConfig
 ) : CommandService {
     override fun cmd() = Midjourney.identify()
 
@@ -44,8 +43,8 @@ class MidjourneyServiceImpl(
         minSpacingUnit = ChronoUnit.MINUTES,
         type = RateLimitType.ROLLING
     )
-    override fun invoke(args: MutableList<String>, config: Map<String, Any>): Uni<MessageChain> {
-        val midjourney = Midjourney.create(midjourneyConfig, Midjourney.args().strategy(args)[0])
+    override fun invoke(args: MutableList<String>, config: Map<String, *>): Uni<MessageChain> {
+        val midjourney = Midjourney.create(MidjourneyConfig(), Midjourney.args().strategy(args)[0])
         return imageAdapter.midjourneyGenerate(midjourney).map {
             MessageChain.image(midjourney.image)
         }
