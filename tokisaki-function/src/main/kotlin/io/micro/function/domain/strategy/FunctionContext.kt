@@ -1,8 +1,8 @@
 package io.micro.function.domain.strategy
 
-import io.micro.core.fundto.MessageChain
-import io.micro.core.funsdk.Cmd
-import io.micro.core.funsdk.ConfigHint
+import io.micro.core.function.ConfigHint
+import io.micro.core.function.dto.MessageChain
+import io.micro.core.function.sdk.Cmd
 import io.smallrye.mutiny.Uni
 
 /**
@@ -11,7 +11,7 @@ import io.smallrye.mutiny.Uni
  */
 interface FunctionContext {
 
-    fun call(cmd: Cmd, args: MutableList<String>): Uni<MessageChain>
+    fun call(cmd: Cmd, args: MutableList<String>, config: Map<String, Any>): Uni<MessageChain>
 
     fun config(cmd: Cmd): ConfigHint?
 

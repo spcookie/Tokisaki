@@ -16,21 +16,15 @@ import io.micro.server.robot.domain.model.entity.RobotDO;
 import io.micro.server.robot.domain.model.valobj.FeatureFunction;
 import io.micro.server.robot.domain.service.RobotManagerService;
 import io.quarkus.security.Authenticated;
-import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.groups.ConvertGroup;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.sse.OutboundSseEvent;
-import jakarta.ws.rs.sse.Sse;
 import kotlin.Unit;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.resteasy.reactive.RestStreamElementType;
 
 /**
  * @author Augenstern
@@ -50,24 +44,12 @@ public class RobotManagerController {
     @Inject
     public SwitchConverter switchConverter;
 
-    @Operation(summary = "QQ机器人扫码登录")
-    @GET
-    @Path("login/qq/{id}")
-    @Authenticated
-    @Produces(MediaType.SERVER_SENT_EVENTS)
-    @RestStreamElementType(MediaType.TEXT_HTML)
-    public Multi<OutboundSseEvent> loginQQRobot(
-            @Parameter(description = "机器人ID") @PathParam("id") Long id,
-            @Context Sse sse) {
-        return robotManagerService.loginQQRobot(id, sse);
-    }
-
-    @Operation(summary = "机器人查询")
+    @Operation(summary = "查询机器人")
     @POST
     @Path("/example")
     @Authenticated
     public Uni<R<PageDTO<QueryRobotDTO>>> getRobot(
-            @Parameter(description = "查询样例") OperateRobotDTO operateRobotDTO,
+            @Parameter(description = "查询样例") @Valid OperateRobotDTO operateRobotDTO,
             @QueryParam("size") @DefaultValue("10") int size,
             @QueryParam("page") @DefaultValue("1") int page) {
         RobotDO robotManager = robotManagerConverter.operateRobotDTO2RobotManager(operateRobotDTO);
@@ -84,7 +66,7 @@ public class RobotManagerController {
                 ));
     }
 
-    @Operation(summary = "机器人创建")
+    @Operation(summary = "创建机器人")
     @POST
     @Path("/")
     @Authenticated
@@ -94,7 +76,7 @@ public class RobotManagerController {
                 .map(it -> R.newInstance("创建成功", robotManagerConverter.robotManager2QueryRobotDTO(it)));
     }
 
-    @Operation(summary = "机器人关闭")
+    @Operation(summary = "关闭机器人")
     @PATCH
     @Path("/{id}")
     @Authenticated
@@ -161,7 +143,7 @@ public class RobotManagerController {
     @GET
     @Path("/function/{id}")
     @Authenticated
-    public Uni<R<QuerySwitchDTO>> getFunctionSwitch(@PathParam("id") Long id) {
+    public Uni<R<QuerySwitchDTO>> getFunctionSwitch(@Parameter(description = "机器人功能权限ID") @PathParam("id") Long id) {
         return robotManagerService.getFunctionSwitch(id)
                 .map(switchConverter::switch2SwitchDTO)
                 .map(it -> R.newInstance(CommonCode.OK.getMsg(), it));

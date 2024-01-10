@@ -1,8 +1,8 @@
 package io.micro.function.domain.text.model.entity
 
-import io.micro.core.funsdk.AbstractCmd
-import io.micro.core.funsdk.ArgsMergeStrategy
-import io.micro.core.funsdk.Cmd
+import io.micro.core.function.sdk.AbstractCmd
+import io.micro.core.function.sdk.ArgsMergeStrategy
+import io.micro.core.function.sdk.Cmd
 import io.micro.function.domain.text.model.valobj.*
 import io.net.spcokie.domain.text.model.Text
 import io.net.spcokie.types.QQFace
@@ -54,7 +54,7 @@ class Chat : Text() {
         if (messages.isNotEmpty()) {
             val totalTokens = messages.sumOf { it.second }
             val nextTokens = totalTokens.div(messages.size.div(2))
-            while (chatConfig.maxTokens() - totalTokens < nextTokens && messages.isNotEmpty()) {
+            while (chatConfig.maxTokens - totalTokens < nextTokens && messages.isNotEmpty()) {
                 messages.removeFirst()
             }
         }
@@ -65,8 +65,8 @@ class Chat : Text() {
         val msg = messages.map { it.first }.toMutableList()
         msg.add(ChatMessage(ChatMessageRole.USER.value(), prompt))
         return ChatCompletionRequest().apply {
-            key = chatConfig.apiKey()
-            model = chatConfig.model()
+            key = chatConfig.apiKey
+            model = chatConfig.model
             messages = msg
         }
     }

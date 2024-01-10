@@ -1,7 +1,7 @@
 package io.micro.core.aop
 
 import io.micro.core.annotation.CallCount
-import io.micro.core.funsdk.CommandService
+import io.micro.core.function.sdk.CommandService
 import io.quarkus.logging.Log
 import io.smallrye.mutiny.Uni
 import jakarta.annotation.Priority

@@ -1,11 +1,11 @@
 package io.micro.function.domain.strategy
 
 import io.micro.core.context.AuthContext
-import io.micro.core.fundto.Message
-import io.micro.core.fundto.MessageChain
-import io.micro.core.funsdk.Cmd
-import io.micro.core.funsdk.CommandService
-import io.micro.core.funsdk.ConfigHint
+import io.micro.core.function.ConfigHint
+import io.micro.core.function.dto.Message
+import io.micro.core.function.dto.MessageChain
+import io.micro.core.function.sdk.Cmd
+import io.micro.core.function.sdk.CommandService
 import io.micro.function.domain.image.service.ImageTask
 import io.net.spcokie.common.exception.CmdException
 import io.quarkus.arc.All
@@ -35,11 +35,11 @@ class FunctionContextImpl(
         }
     }
 
-    override fun call(cmd: Cmd, args: MutableList<String>): Uni<MessageChain> {
+    override fun call(cmd: Cmd, args: MutableList<String>, config: Map<String, Any>): Uni<MessageChain> {
         val code = cmd.code
         ArgsLengthCheck.check(code, args)
         return with(allocationCommandServices[code.lowercase()]) {
-            this?.invoke(args) ?: CmdException.nonImplemented()
+            this?.invoke(args, config) ?: CmdException.nonImplemented()
         }
     }
 

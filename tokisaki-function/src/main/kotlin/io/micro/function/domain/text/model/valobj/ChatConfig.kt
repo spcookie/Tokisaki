@@ -1,16 +1,15 @@
 package io.micro.function.domain.text.model.valobj
 
-import io.smallrye.config.ConfigMapping
-
 /**
  *@author Augenstern
  *@since 2023/10/20
  */
-@ConfigMapping(prefix = "chat")
-interface ChatConfig {
-    fun model(): String
+class ChatConfig(val map: Map<String, Any>) {
 
-    fun maxTokens(): Int
+    val model: String by map
 
-    fun apiKey(): String
+    val maxTokens: Int by map
+
+    val apiKey: String by map
+
 }

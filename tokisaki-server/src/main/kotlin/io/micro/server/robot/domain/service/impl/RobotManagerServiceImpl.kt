@@ -4,9 +4,9 @@ import io.micro.core.context.AuthContext
 import io.micro.core.exception.fail
 import io.micro.core.exception.requireNonNull
 import io.micro.core.exception.requireTure
-import io.micro.core.fundto.CardID
-import io.micro.core.fundto.MediaType
-import io.micro.core.funsdk.Cmd
+import io.micro.core.function.dto.CardID
+import io.micro.core.function.dto.MediaType
+import io.micro.core.function.sdk.Cmd
 import io.micro.core.rest.CommonCode
 import io.micro.core.rest.CommonMsg
 import io.micro.core.rest.PageDTO
@@ -36,6 +36,7 @@ import io.smallrye.mutiny.subscription.MultiEmitter
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.ws.rs.sse.OutboundSseEvent
 import jakarta.ws.rs.sse.Sse
+import kotlinx.serialization.json.Json
 import net.mamoe.mirai.contact.Contact.Companion.uploadImage
 import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.buildMessageChain
@@ -55,7 +56,8 @@ class RobotManagerServiceImpl(
     private val authService: AuthService,
     private val functionService: FunctionService,
     private val functionContext: FunctionContext,
-    private val sessionFactory: Mutiny.SessionFactory
+    private val sessionFactory: Mutiny.SessionFactory,
+    private val json: Json
 ) : RobotManagerService {
 
     /**
@@ -196,6 +198,7 @@ class RobotManagerServiceImpl(
     @WithSession
     override fun addOrModifyFunctionSwitch(id: Long, switch: Switch): Uni<Switch> {
         return robotManagerRepository.findRobotByUseFunctionId(id).flatMap { robotDO ->
+            requireNonNull(robotDO, code = CommonCode.NOT_FOUND)
             requireTure(AuthContext.equalId(robotDO.userId), code = CommonCode.ILLEGAL_OPERATION)
             robotManagerRepository.saveOrUpdateSwitchByFunctionId(id, switch)
         }
@@ -205,6 +208,7 @@ class RobotManagerServiceImpl(
     @WithSession
     override fun getFunctionSwitch(id: Long): Uni<Switch> {
         return robotManagerRepository.findRobotByUseFunctionId(id).flatMap { robotDO ->
+            requireNonNull(robotDO, code = CommonCode.NOT_FOUND)
             requireTure(AuthContext.equalId(robotDO.userId), code = CommonCode.ILLEGAL_OPERATION)
             robotManagerRepository.findSwitchByUseFunctionId(id)
         }
@@ -227,16 +231,19 @@ class RobotManagerServiceImpl(
             robot.onGroupMessage = { event ->
                 Log.info("bot: ${event.bot.nick}(${event.bot.id}) group: ${event.group.name}(${event.group.id}) sender: ${event.sender.nick}(${event.sender.id}) message: ${event.message}")
 
-                val text = event.message.findIsInstance<PlainText>().toString()
+                var text = event.message.findIsInstance<PlainText>().toString()
 
                 if (text.startsWith("/")) {
+
+                    text = text.removePrefix("/")
+
                     val args = text.split(" ").toMutableList()
 
                     val cmd = args.removeFirst()
 
                     val cmdName = cmd.lowercase()
 
-                    val cmdEnum = Cmd.entries.associateBy { it.name }[cmdName]
+                    val cmdEnum = Cmd.entries.associateBy { it.code }[cmdName]
 
                     if (cmdEnum != null) {
                         val functions = robotManagerRepository.findFeatureFunctionsByRobotId(robotId).awaitSuspending()
@@ -273,8 +280,9 @@ class RobotManagerServiceImpl(
                                 }
                             }
                             if (canInvoke) {
-                                val messageChain = functionContext.call(cmdEnum, args).awaitSuspending()
-
+                                val configStr = featureFunction.config ?: ""
+                                val config = json.decodeFromString<Map<String, Any>>(configStr)
+                                val messageChain = functionContext.call(cmdEnum, args, config).awaitSuspending()
                                 val results = buildMessageChain {
                                     messageChain.messages.forEach { message ->
                                         if (message.msg.isNotBlank()) {

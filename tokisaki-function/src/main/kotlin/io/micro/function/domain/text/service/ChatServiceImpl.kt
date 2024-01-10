@@ -2,10 +2,10 @@ package io.micro.function.domain.text.service
 
 import io.micro.core.annotation.CallCount
 import io.micro.core.context.AuthContext
-import io.micro.core.fundto.MessageChain
-import io.micro.core.funsdk.Cmd
-import io.micro.core.funsdk.CommandService
-import io.micro.core.funsdk.ConfigHint
+import io.micro.core.function.ConfigHint
+import io.micro.core.function.dto.MessageChain
+import io.micro.core.function.sdk.Cmd
+import io.micro.core.function.sdk.CommandService
 import io.micro.function.domain.text.adapter.TextAdapter
 import io.micro.function.domain.text.model.entity.Chat
 import io.micro.function.domain.text.model.valobj.ChatConfig
@@ -28,14 +28,13 @@ import java.util.function.Supplier
 class ChatServiceImpl(
     private val textRepository: TextRepository,
     private val textAdapter: TextAdapter,
-    private val chatConfig: ChatConfig
 ) : CommandService {
 
     override fun cmd(): Cmd {
         return Chat.identify()
     }
 
-    override fun configHint(): ConfigHint? {
+    override fun configHint(): ConfigHint {
         return ConfigHint.CHAT
     }
 
@@ -49,7 +48,8 @@ class ChatServiceImpl(
     @WithTransaction
     @Fallback(fallbackMethod = "fallback", applyOn = [RateLimitException::class])
     @RateLimit(value = 9, windowUnit = ChronoUnit.MINUTES, minSpacing = 8)
-    override fun invoke(args: MutableList<String>): Uni<MessageChain> {
+    override fun invoke(args: MutableList<String>, config: Map<String, Any>): Uni<MessageChain> {
+        val chatConfig = ChatConfig(config)
         val tenant = AuthContext.nickname
         return textRepository.requireTenantLock(tenant)
             .flatMap { lock ->
@@ -75,7 +75,11 @@ class ChatServiceImpl(
             .map { MessageChain.text(it.content) }
     }
 
-    fun fallback(args: MutableList<String>, rateLimitException: RateLimitException): Uni<MessageChain> {
+    fun fallback(
+        args: MutableList<String>,
+        config: Map<String, Any>,
+        rateLimitException: RateLimitException
+    ): Uni<MessageChain> {
         return Uni.createFrom().failure(CmdException.failForUni("命令“c”已达到速率限制"))
     }
 }

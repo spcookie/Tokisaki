@@ -1,8 +1,9 @@
-package io.micro.core.funsdk
+package io.micro.core.function
 
+import io.micro.core.function.sdk.Cmd
 import kotlinx.serialization.Serializable
 
-enum class ConfigHint(val cmd: Cmd, val hint: List<Hint>) {
+enum class ConfigHint(val cmd: Cmd, val hints: List<Hint>) {
 
     CHAT(Cmd.Chat, listOf(Hint.MODEL, Hint.MAX_TOKENS, Hint.API_KEY));
 

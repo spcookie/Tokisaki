@@ -1,6 +1,6 @@
 package io.micro.server.robot.domain.service.impl
 
-import io.micro.core.funsdk.Cmd
+import io.micro.core.function.sdk.Cmd
 import io.micro.function.domain.strategy.FunctionContext
 import io.micro.server.auth.domain.model.entity.AuthorityDO
 import io.micro.server.auth.domain.service.AuthService
@@ -35,7 +35,7 @@ class FunctionServiceImpl(
                             if (cmd != null) {
                                 val config = functionContext.config(cmd)
                                 if (config != null) {
-                                    it.configHint = json.encodeToString(config.hint)
+                                    it.configHint = json.encodeToString(config.hints)
                                 }
                             }
                         }

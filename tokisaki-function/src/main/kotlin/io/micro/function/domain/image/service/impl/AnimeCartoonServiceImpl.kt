@@ -1,8 +1,8 @@
 package io.micro.function.domain.image.service.impl
 
 import io.micro.core.annotation.CallCount
-import io.micro.core.fundto.MessageChain
-import io.micro.core.funsdk.CommandService
+import io.micro.core.function.dto.MessageChain
+import io.micro.core.function.sdk.CommandService
 import io.micro.function.domain.image.adapter.ImageAdapter
 import io.micro.function.domain.image.model.entity.AnimeCartoon
 import io.micro.function.domain.image.repository.ImageRepository
@@ -38,7 +38,7 @@ class AnimeCartoonServiceImpl(
     @WithTransaction
     @Fallback(fallbackMethod = "fallback", applyOn = [RateLimitException::class])
     @RateLimit(value = 20, windowUnit = ChronoUnit.MINUTES, minSpacing = 1)
-    override fun invoke(args: MutableList<String>): Uni<MessageChain> {
+    override fun invoke(args: MutableList<String>, config: Map<String, Any>): Uni<MessageChain> {
         return imageRepository.findAnimeImage()
             .onItem().ifNotNull().call { ac ->
                 imageRepository.modifyImageUsed(ac.id!!)
@@ -51,7 +51,11 @@ class AnimeCartoonServiceImpl(
             }
     }
 
-    fun fallback(args: MutableList<String>, rateLimitException: RateLimitException): Uni<MessageChain> {
+    fun fallback(
+        args: MutableList<String>,
+        config: Map<String, Any>,
+        rateLimitException: RateLimitException
+    ): Uni<MessageChain> {
         return Uni.createFrom().failure(CmdException.failForUni("命令“ac”已达到速率限制"))
     }
 

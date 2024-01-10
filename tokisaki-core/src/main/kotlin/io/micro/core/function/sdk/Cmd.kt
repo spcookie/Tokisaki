@@ -1,4 +1,4 @@
-package io.micro.core.funsdk
+package io.micro.core.function.sdk
 
 /**
  *@author Augenstern

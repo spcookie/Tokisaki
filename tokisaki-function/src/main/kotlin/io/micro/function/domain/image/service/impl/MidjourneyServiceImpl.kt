@@ -1,8 +1,8 @@
 package io.micro.function.domain.image.service.impl
 
 import io.micro.core.annotation.CallCount
-import io.micro.core.fundto.MessageChain
-import io.micro.core.funsdk.CommandService
+import io.micro.core.function.dto.MessageChain
+import io.micro.core.function.sdk.CommandService
 import io.micro.function.domain.image.adapter.ImageAdapter
 import io.micro.function.domain.image.model.entity.Midjourney
 import io.micro.function.domain.image.model.valobj.MidjourneyConfig
@@ -44,14 +44,18 @@ class MidjourneyServiceImpl(
         minSpacingUnit = ChronoUnit.MINUTES,
         type = RateLimitType.ROLLING
     )
-    override fun invoke(args: MutableList<String>): Uni<MessageChain> {
+    override fun invoke(args: MutableList<String>, config: Map<String, Any>): Uni<MessageChain> {
         val midjourney = Midjourney.create(midjourneyConfig, Midjourney.args().strategy(args)[0])
         return imageAdapter.midjourneyGenerate(midjourney).map {
             MessageChain.image(midjourney.image)
         }
     }
 
-    fun fallback(args: MutableList<String>, rateLimitException: RateLimitException): Uni<MessageChain> {
+    fun fallback(
+        args: MutableList<String>,
+        config: Map<String, Any>,
+        rateLimitException: RateLimitException
+    ): Uni<MessageChain> {
         return Uni.createFrom().failure(CmdException.failForUni("命令“mj”已达到速率限制"))
     }
 }

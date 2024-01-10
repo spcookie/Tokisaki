@@ -12,7 +12,6 @@ import io.micro.server.robot.infra.converter.SwitchConverter
 import io.micro.server.robot.infra.dao.IFunctionDAO
 import io.micro.server.robot.infra.dao.IRobotDAO
 import io.micro.server.robot.infra.dao.IUseFunctionDAO
-import io.micro.server.robot.infra.po.UseFunctionEntity
 import io.quarkus.panache.common.Page
 import io.smallrye.mutiny.Uni
 import io.smallrye.mutiny.replaceWithUnit
@@ -118,10 +117,10 @@ class RobotManagerRepository(
             .replaceWith(switch)
     }
 
-    override fun findRobotByUseFunctionId(id: Long): Uni<RobotDO> {
+    override fun findRobotByUseFunctionId(id: Long): Uni<RobotDO?> {
         return useFunctionDAO.findById(id)
-            .map(UseFunctionEntity::robot)
-            .map { robotConverter.robotEntity2RobotDO(it!!) }
+            .onItem().ifNotNull()
+            .transform { robotConverter.robotEntity2RobotDO(it.robot!!) }
     }
 
 }

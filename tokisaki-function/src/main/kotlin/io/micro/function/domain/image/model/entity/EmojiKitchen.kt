@@ -1,9 +1,9 @@
 package io.micro.function.domain.image.model.entity
 
 import com.vdurmont.emoji.EmojiParser
-import io.micro.core.funsdk.AbstractCmd
-import io.micro.core.funsdk.ArgsMergeStrategy
-import io.micro.core.funsdk.Cmd
+import io.micro.core.function.sdk.AbstractCmd
+import io.micro.core.function.sdk.ArgsMergeStrategy
+import io.micro.core.function.sdk.Cmd
 import io.micro.function.domain.image.model.Image
 import io.micro.function.domain.image.model.valobj.EmojiCombination
 import io.micro.function.domain.image.model.valobj.EmojiData

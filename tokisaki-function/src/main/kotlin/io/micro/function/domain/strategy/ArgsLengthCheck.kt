@@ -1,7 +1,7 @@
 package io.micro.function.domain.strategy
 
 import com.vdurmont.emoji.EmojiParser
-import io.micro.core.funsdk.Cmd
+import io.micro.core.function.sdk.Cmd
 import io.net.spcokie.common.exception.CmdException
 import io.quarkus.arc.Arc
 import io.quarkus.arc.Unremovable

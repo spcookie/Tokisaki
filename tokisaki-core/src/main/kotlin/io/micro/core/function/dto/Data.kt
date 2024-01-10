@@ -1,4 +1,4 @@
-package io.micro.core.fundto
+package io.micro.core.function.dto
 
 
 /**

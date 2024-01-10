@@ -30,6 +30,6 @@ interface IRobotManagerRepository {
 
     fun saveOrUpdateSwitchByFunctionId(id: Long, switch: Switch): Uni<Switch>
 
-    fun findRobotByUseFunctionId(id: Long): Uni<RobotDO>
+    fun findRobotByUseFunctionId(id: Long): Uni<RobotDO?>
 
 }
