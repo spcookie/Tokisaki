@@ -1,22 +1,20 @@
 quarkus:
+  profile: dev
+  package:
+    type: uber-jar # 打包über-jar
+  #    type: legacy-jar # 打包legacy-jar
   banner:
     path: tokisaki.txt
   application:
     name: tokisaki
   log:
     level: INFO
-    min-level: TRACE
-#    category:
-#      "org.hibernate.orm.jdbc.bind":
-#        level: TRACE
   http:
     cors:
       ~: true
       origins: /.*/
       methods: GET,PUT,POST,DELETE
       access-control-allow-credentials: true
-    access-log:
-      enabled: true
   rest-client:
     midjourney:
       read-timeout: 900000
@@ -24,25 +22,6 @@ quarkus:
       read-timeout: 900000
     xyz:
       follow-redirects: true
-  datasource:
-    db-kind: postgresql
-    username: postgres
-    password: root
-    reactive:
-      url: vertx-reactive:postgresql://localhost:5432/Tokisaki
-  hibernate-orm:
-    database:
-      generation: update
-    log:
-      sql: true
-  redis:
-    hosts: redis://localhost:6379
-  minio:
-    url: http://localhost:9000
-    access-key: minioadmin
-    secret-key: minioadmin
-  package:
-    type: uber-jar # 打包über-jar
 smallrye:
   jwt:
     sign:

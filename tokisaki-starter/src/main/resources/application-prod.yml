@@ -1,0 +1,16 @@
+quarkus:
+  datasource:
+    db-kind: postgresql
+    username: postgres
+    password: root
+    reactive:
+      url: vertx-reactive:postgresql://localhost:5432/Tokisaki
+  hibernate-orm:
+    database:
+      generation: none
+  redis:
+    hosts: redis://localhost:6379
+  minio:
+    url: http://localhost:9000
+    access-key: minioadmin
+    secret-key: minioadmin
