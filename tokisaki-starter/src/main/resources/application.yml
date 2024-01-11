@@ -1,7 +1,7 @@
 quarkus:
   profile: dev
   package:
-    type: uber-jar # 打包über-jar
+  #    type: uber-jar # 打包über-jar
   #    type: legacy-jar # 打包legacy-jar
   banner:
     path: tokisaki.txt
