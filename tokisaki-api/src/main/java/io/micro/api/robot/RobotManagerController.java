@@ -7,7 +7,6 @@ import io.micro.api.robot.dto.OperateRobotDTO;
 import io.micro.api.robot.dto.QueryRobotDTO;
 import io.micro.api.robot.dto.QuerySwitchDTO;
 import io.micro.core.annotation.InitAuthContext;
-import io.micro.core.rest.CommonCode;
 import io.micro.core.rest.PageDTO;
 import io.micro.core.rest.Pageable;
 import io.micro.core.rest.R;
@@ -54,10 +53,9 @@ public class RobotManagerController {
             @QueryParam("size") @DefaultValue("10") int size,
             @QueryParam("page") @DefaultValue("1") int page) {
         RobotDO robotManager = robotManagerConverter.operateRobotDTO2RobotManager(operateRobotDTO);
-        return robotManagerService.getRobotList(robotManager, Pageable.Companion.of(page, size))
+        return robotManagerService.getRobotList(robotManager, Pageable.of(page, size))
                 .map(robotDOPage -> R.newInstance(
-                        CommonCode.OK.getMsg(),
-                        PageDTO.Companion.of(
+                        PageDTO.of(
                                 robotDOPage.getCurrent(),
                                 robotDOPage.getLimit(),
                                 robotDOPage.getRecords()
@@ -74,7 +72,7 @@ public class RobotManagerController {
     public Uni<R<QueryRobotDTO>> createRobot(@Parameter(description = "创建信息") @Valid @ConvertGroup(to = ValidGroup.Create.class) OperateRobotDTO operateRobotDTO) {
         operateRobotDTO.setState(0);
         return robotManagerService.createRobot(robotManagerConverter.operateRobotDTO2RobotManager(operateRobotDTO))
-                .map(it -> R.newInstance("创建成功", robotManagerConverter.robotManager2QueryRobotDTO(it)));
+                .map(it -> R.newInstance(robotManagerConverter.robotManager2QueryRobotDTO(it)));
     }
 
     @Operation(summary = "关闭机器人")
@@ -94,7 +92,7 @@ public class RobotManagerController {
         RobotDO robotDO = robotManagerConverter.operateRobotDTO2RobotManager(operateRobotDTO);
         return robotManagerService.modifyRobotInfo(robotDO)
                 .map(robotManagerConverter::robotManager2QueryRobotDTO)
-                .map(it -> R.newInstance(CommonCode.OK.getMsg(), it));
+                .map(R::newInstance);
     }
 
     @Operation(summary = "添加机器人功能")
@@ -118,7 +116,7 @@ public class RobotManagerController {
             @Parameter(description = "机器人ID") @PathParam("id") @Valid @NotNull Long robotId,
             @Parameter(description = "修改功能信息") @Valid @ConvertGroup(to = ValidGroup.Update.class) OperateFeatureFunctionDTO featureFunctionDTO) {
         FeatureFunction featureFunction = robotManagerConverter.operateFeatureFunctionDTO2FeatureFunction(featureFunctionDTO);
-        return robotManagerService.modifyFeatureFunction(robotId, featureFunction).map((it) -> R.Companion.newInstance());
+        return robotManagerService.modifyFeatureFunction(robotId, featureFunction).map((it) -> R.newInstance());
     }
 
     @Operation(summary = "保存或修改机器人功能权限开关")
@@ -139,7 +137,7 @@ public class RobotManagerController {
     public Uni<R<QuerySwitchDTO>> getFunctionSwitch(@Parameter(description = "机器人功能权限ID") @PathParam("id") @Valid @NotNull Long id) {
         return robotManagerService.getFunctionSwitch(id)
                 .map(switchConverter::switch2SwitchDTO)
-                .map(it -> R.newInstance(CommonCode.OK.getMsg(), it));
+                .map(R::newInstance);
     }
 
 }

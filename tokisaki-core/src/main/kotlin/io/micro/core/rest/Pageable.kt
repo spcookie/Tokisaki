@@ -10,6 +10,7 @@ open class Pageable {
     var limit: Int = 0
 
     companion object {
+        @JvmStatic
         fun of(current: Int, limit: Int) = Pageable().also {
             it.current = current
             it.limit = limit

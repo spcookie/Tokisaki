@@ -10,6 +10,7 @@ class PageDTO<T> : Pageable() {
     var records: List<T> = listOf()
 
     companion object {
+        @JvmStatic
         fun <E> of(current: Int, limit: Int, records: List<E>) = PageDTO<E>().also {
             it.current = current
             it.limit = limit

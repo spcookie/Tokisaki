@@ -23,7 +23,7 @@ class R<T> {
     companion object {
         @JvmStatic
         @JvmOverloads
-        fun <E> newInstance(msg: String = CommonCode.OK.msg, data: E? = null): R<E> {
+        fun <E> newInstance(data: E? = null, msg: String = CommonCode.OK.msg): R<E> {
             return R<E>().apply {
                 this.message = msg
                 this.data = data
