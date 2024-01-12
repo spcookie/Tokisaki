@@ -8,4 +8,6 @@ interface SystemDictService {
 
     fun findDictPage(pageable: Pageable): Uni<Pair<List<SystemDictDO>, Long>>
 
+    fun saveOrUpdateDict(systemDictDO: SystemDictDO): Uni<SystemDictDO>
+
 }

@@ -2,11 +2,8 @@ package io.micro.server.dict.infra.converter
 
 import io.micro.server.dict.domain.model.entity.SystemDictDO
 import io.micro.server.dict.infra.po.SystemDictEntity
-import org.mapstruct.BeanMapping
-import org.mapstruct.InheritConfiguration
-import org.mapstruct.Mapper
+import org.mapstruct.*
 import org.mapstruct.MappingConstants.ComponentModel
-import org.mapstruct.ReportingPolicy
 
 @Mapper(componentModel = ComponentModel.CDI)
 interface SystemDictConverter {
@@ -15,6 +12,9 @@ interface SystemDictConverter {
 
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     @InheritConfiguration
-    fun systemDictDO2SystemDictEntity(systemDictEntity: SystemDictDO?): SystemDictEntity?
+    fun systemDictDO2SystemDictEntity(systemDictDO: SystemDictDO): SystemDictEntity
+
+    @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+    fun systemDictDO2SystemDictEntity(systemDictDO: SystemDictDO?, @MappingTarget systemDictEntity: SystemDictEntity)
 
 }

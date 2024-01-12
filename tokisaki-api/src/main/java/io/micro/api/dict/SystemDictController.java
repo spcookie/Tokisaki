@@ -9,10 +9,8 @@ import io.micro.core.rest.R;
 import io.micro.server.dict.domain.service.SystemDictService;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.DefaultValue;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.QueryParam;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
@@ -39,6 +37,14 @@ public class SystemDictController {
                             .toList();
                     return R.newInstance(PageDTO.of(page, size, paged.getSecond(), list));
                 });
+    }
+
+    @Operation(summary = "新增或修改系统数据字典")
+    @POST
+    public Uni<R<QuerySystemDictDTO>> addOrUpdateSystemDict(@Valid QuerySystemDictDTO querySystemDictDTO) {
+        return systemDictService.saveOrUpdateDict(systemDictConverter.querySystemDictDTO2SystemDictDO(querySystemDictDTO))
+                .map(systemDictConverter::systemDictDO2QuerySystemDictDTO)
+                .map(R::newInstance);
     }
 
 }
