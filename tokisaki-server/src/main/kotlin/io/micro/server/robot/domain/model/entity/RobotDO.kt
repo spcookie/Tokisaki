@@ -3,7 +3,6 @@ package io.micro.server.robot.domain.model.entity
 import io.micro.core.entity.BaseDomainEntity
 import io.micro.core.exception.requireTure
 import io.micro.core.rest.CommonCode
-import io.micro.server.robot.domain.model.valobj.FeatureFunction
 
 class RobotDO : BaseDomainEntity() {
 
@@ -21,7 +20,9 @@ class RobotDO : BaseDomainEntity() {
 
     var remark: String? = null
 
-    val functions: MutableList<FeatureFunction> = mutableListOf()
+    val functions: MutableList<FeatureFunctionDO> = mutableListOf()
+
+    var cmdPrefix: String? = null
 
     private fun isValidType() = validTypeIds.contains(type)
 
@@ -30,6 +31,12 @@ class RobotDO : BaseDomainEntity() {
     fun paramVerify() {
         requireTure("非法的机器人类型", CommonCode.ILLEGAL_STATE, ::isValidType)
         requireTure("非法的机器人状态", CommonCode.ILLEGAL_STATE, ::isValidState)
+    }
+
+    fun ensureCmdPrefix() {
+        if (cmdPrefix == null) {
+            cmdPrefix = "/"
+        }
     }
 
     companion object {

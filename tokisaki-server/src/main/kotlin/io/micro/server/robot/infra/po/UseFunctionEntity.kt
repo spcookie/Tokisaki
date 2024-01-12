@@ -23,4 +23,7 @@ class UseFunctionEntity : BaseEntity() {
     @Column(name = "use_function_enabled", nullable = false)
     var enabled: Boolean = false
 
+    @Column(name = "use_function_cmd_alias")
+    var cmdAlias: String? = null
+
 }

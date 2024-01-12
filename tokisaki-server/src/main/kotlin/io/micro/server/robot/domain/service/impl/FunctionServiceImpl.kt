@@ -31,7 +31,7 @@ class FunctionServiceImpl(
                 .invoke { functionDOs ->
                     functionDOs.filter { auth.contains(it.code) }
                         .map {
-                            val cmd = Cmd.byAuth(it.code)
+                            val cmd = Cmd.byCode(it.code)
                             if (cmd != null) {
                                 val config = functionContext.config(cmd)
                                 if (config != null) {

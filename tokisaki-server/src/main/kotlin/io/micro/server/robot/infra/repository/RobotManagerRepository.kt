@@ -1,8 +1,8 @@
 package io.micro.server.robot.infra.repository
 
 import io.micro.server.auth.infra.po.UserEntity
+import io.micro.server.robot.domain.model.entity.FeatureFunctionDO
 import io.micro.server.robot.domain.model.entity.RobotDO
-import io.micro.server.robot.domain.model.valobj.FeatureFunction
 import io.micro.server.robot.domain.model.valobj.Switch
 import io.micro.server.robot.domain.repository.IRobotManagerRepository
 import io.micro.server.robot.infra.cache.SwitchCache
@@ -92,10 +92,10 @@ class RobotManagerRepository(
             .map(robotConverter::robotEntity2RobotDO)
     }
 
-    override fun addFeatureFunctionById(id: Long, featureFunction: FeatureFunction): Uni<Unit> {
+    override fun addFeatureFunctionById(id: Long, featureFunctionDO: FeatureFunctionDO): Uni<Unit> {
         return robotDAO.findById(id).flatMap { robotEntity ->
             val useFunctionEntities = robotEntity.functions ?: mutableListOf()
-            val functionEntity = robotConverter.featureFunction2UseFunctionEntity(featureFunction)
+            val functionEntity = robotConverter.featureFunction2UseFunctionEntity(featureFunctionDO)
             functionDAO.findById(functionEntity.function!!.id!!).map { functionEntity.function = it }
                 .call(Supplier {
                     useFunctionEntities.add(functionEntity)
@@ -109,7 +109,7 @@ class RobotManagerRepository(
         return robotDAO.findById(robotId).map { it.user?.id == userId }
     }
 
-    override fun findFeatureFunctionsByRobotId(id: Long): Uni<List<FeatureFunction>> {
+    override fun findFeatureFunctionsByRobotId(id: Long): Uni<List<FeatureFunctionDO>> {
         return useFunctionDAO.selectUseFunctionByRobotId(id)
             .map { it.map(robotConverter::useFunctionEntity2FeatureFunction) }
     }

@@ -40,8 +40,8 @@ class RobotEntity : BaseEntity() {
     @JoinColumn(name = "robot_id")
     var functions: MutableSet<UseFunctionEntity>? = null
 
-//    @Column(name = "robot_cmd_prefix", nullable = false)
-//    var cmdPrefix: String? = null
+    @Column(name = "robot_cmd_prefix", nullable = false)
+    var cmdPrefix: String? = null
 
     enum class Type { QQ }
 

@@ -11,8 +11,8 @@ import io.micro.core.rest.PageDTO;
 import io.micro.core.rest.Pageable;
 import io.micro.core.rest.R;
 import io.micro.core.valid.ValidGroup;
+import io.micro.server.robot.domain.model.entity.FeatureFunctionDO;
 import io.micro.server.robot.domain.model.entity.RobotDO;
-import io.micro.server.robot.domain.model.valobj.FeatureFunction;
 import io.micro.server.robot.domain.service.RobotManagerService;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
@@ -113,8 +113,8 @@ public class RobotManagerController {
     public Uni<R<Unit>> modifyUseFunction(
             @Parameter(description = "机器人ID") @PathParam("id") @Valid @NotNull Long robotId,
             @Parameter(description = "修改功能信息") @Valid @ConvertGroup(to = ValidGroup.Update.class) OperateFeatureFunctionDTO featureFunctionDTO) {
-        FeatureFunction featureFunction = robotManagerConverter.operateFeatureFunctionDTO2FeatureFunction(featureFunctionDTO);
-        return robotManagerService.modifyFeatureFunction(robotId, featureFunction).map((it) -> R.newInstance());
+        FeatureFunctionDO featureFunctionDO = robotManagerConverter.operateFeatureFunctionDTO2FeatureFunction(featureFunctionDTO);
+        return robotManagerService.modifyFeatureFunction(robotId, featureFunctionDO).map((it) -> R.newInstance());
     }
 
     @Operation(summary = "保存或修改机器人功能权限开关")

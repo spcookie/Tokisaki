@@ -18,9 +18,8 @@ import io.micro.core.robot.qq.QQRobot
 import io.micro.core.robot.qq.QQRobotFactory
 import io.micro.core.robot.qq.QQRobotManager
 import io.micro.function.domain.strategy.FunctionContext
-import io.micro.server.auth.domain.service.AuthService
+import io.micro.server.robot.domain.model.entity.FeatureFunctionDO
 import io.micro.server.robot.domain.model.entity.RobotDO
-import io.micro.server.robot.domain.model.valobj.FeatureFunction
 import io.micro.server.robot.domain.model.valobj.Switch
 import io.micro.server.robot.domain.repository.IRobotManagerRepository
 import io.micro.server.robot.domain.service.FunctionService
@@ -54,7 +53,6 @@ class RobotManagerServiceImpl(
     private val factory: QQRobotFactory,
     private val manager: QQRobotManager,
     private val robotManagerRepository: IRobotManagerRepository,
-    private val authService: AuthService,
     private val functionService: FunctionService,
     private val functionContext: FunctionContext,
     private val sessionFactory: Mutiny.SessionFactory,
@@ -65,6 +63,11 @@ class RobotManagerServiceImpl(
      * QQ号与半长连接的映射
      */
     private val oldSse = mutableMapOf<Long, Sse>()
+
+    companion object {
+        const val SPACE = " "
+        const val BRACES = "{}"
+    }
 
     override fun loginQQRobot(id: Long, sse: Sse): Multi<OutboundSseEvent> {
         return sessionFactory.withSession { robotManagerRepository.findRobotById(id) }
@@ -101,7 +104,7 @@ class RobotManagerServiceImpl(
     @WithSession
     override fun closeRobot(id: Long): Uni<Unit> {
         return robotManagerRepository.findRobotById(id).flatMap { robotManager ->
-            requireNonNull(robotManager, CommonMsg.NOT_FOUND_ROBOT, CommonCode.NOT_FOUND)
+            requireNonNull(robotManager, CommonMsg.NOT_FOUND_ROBOT)
             requireTure(value = AuthContext.equalId(robotManager.userId), code = CommonCode.ILLEGAL_OPERATION)
             manager.unregisterRobot(id)
             robotManagerRepository.updateRobotStateById(5, id)
@@ -114,15 +117,13 @@ class RobotManagerServiceImpl(
         requireNonNull(userId, CommonMsg.NULL_USER_ID)
         robotDO.userId = userId
         robotDO.paramVerify()
+        robotDO.ensureCmdPrefix()
         val existRobot = robotManagerRepository.existRobotByAccountAndUserId(robotDO.account!!, userId)
         return existRobot.flatMap { exist ->
             if (exist) {
                 fail(code = CommonCode.DUPLICATE, detail = CommonMsg.SAME_ACCOUNT_ROBOT)
             } else {
-                authService.getUserById(userId).flatMap { userDO ->
-                    requireNonNull(userDO, CommonMsg.NOT_FOUND_USER, CommonCode.NOT_FOUND)
-                    robotManagerRepository.saveRobotWithUser(robotDO)
-                }
+                robotManagerRepository.saveRobotWithUser(robotDO)
             }
         }
     }
@@ -150,6 +151,7 @@ class RobotManagerServiceImpl(
                 name = robotDO.name
                 password = robotDO.password
                 remark = robotDO.remark
+                robotDO.cmdPrefix?.also { cmdPrefix = it }
             }
             robotManagerRepository.updateRobot(modifyRobotDO)
         }
@@ -157,22 +159,25 @@ class RobotManagerServiceImpl(
 
     @WithTransaction
     @WithSession
-    override fun addFeatureFunction(robotId: Long, featureFunction: FeatureFunction): Uni<Unit> {
+    override fun addFeatureFunction(robotId: Long, featureFunctionDO: FeatureFunctionDO): Uni<Unit> {
         val userId = AuthContext.id.toLongOrNull()
         requireNonNull(userId, code = CommonCode.ILLEGAL_OPERATION)
         return robotManagerRepository.existRobotByRobotIdAndUserId(robotId, userId).flatMap {
             requireTure(it, CommonMsg.ILLEGAL_OPERATE_ROBOT, CommonCode.ILLEGAL_OPERATION)
             functionService.getUserFunctions()
         }.map { functionDOs ->
-            val functionDO = functionDOs.associateBy { it.id }[featureFunction.refId]
+            val functionDO = functionDOs.associateBy { it.id }[featureFunctionDO.refId]
             requireNonNull(functionDO, CommonMsg.ILLEGAL_ADD_ROBOT_FEATURE, CommonCode.ILLEGAL_OPERATION)
+            val code = functionDO.code
+            requireNonNull(code)
+            featureFunctionDO.ensureCmdAlias(code)
         }.flatMap {
             robotManagerRepository.findFeatureFunctionsByRobotId(robotId).flatMap { featureFunctions ->
-                if (featureFunctions.map { it.refId }.contains(featureFunction.refId)) {
+                if (featureFunctions.map { it.refId }.contains(featureFunctionDO.refId)) {
                     Log.info("重复添加机器人功能")
                     Uni.createFrom().item(Unit)
                 } else {
-                    robotManagerRepository.addFeatureFunctionById(robotId, featureFunction)
+                    robotManagerRepository.addFeatureFunctionById(robotId, featureFunctionDO)
                 }
             }
         }
@@ -180,19 +185,22 @@ class RobotManagerServiceImpl(
 
     @WithTransaction
     @WithSession
-    override fun modifyFeatureFunction(robotId: Long, featureFunction: FeatureFunction): Uni<Unit> {
+    override fun modifyFeatureFunction(robotId: Long, featureFunctionDO: FeatureFunctionDO): Uni<Unit> {
         return robotManagerRepository.findRobotById(robotId).flatMap { robot ->
-            requireNonNull(robot, CommonMsg.NOT_FOUND_ROBOT, CommonCode.NOT_FOUND)
+            requireNonNull(robot, CommonMsg.NOT_FOUND_ROBOT)
             requireTure(
                 AuthContext.equalId(robot.userId),
                 CommonMsg.ILLEGAL_OPERATE_ROBOT,
                 CommonCode.ILLEGAL_OPERATION
             )
-            robot.functions.associateBy { it.id }[featureFunction.id].also {
+            robot.functions.associateBy { it.id }[featureFunctionDO.id].also {
                 if (it != null) {
-                    it.config = featureFunction.config
-                    it.remark = featureFunction.remark
-                    it.enabled = featureFunction.enabled
+                    it.config = featureFunctionDO.config
+                    it.remark = featureFunctionDO.remark
+                    it.enabled = featureFunctionDO.enabled
+                    featureFunctionDO.cmdAlias?.also { alias ->
+                        it.cmdAlias = alias
+                    }
                 }
             }
             robotManagerRepository.updateRobot(robot).replaceWithUnit()
@@ -203,7 +211,7 @@ class RobotManagerServiceImpl(
     @WithSession
     override fun addOrModifyFunctionSwitch(id: Long, switch: Switch): Uni<Switch> {
         return robotManagerRepository.findRobotByUseFunctionId(id).flatMap { robotDO ->
-            requireNonNull(robotDO, code = CommonCode.NOT_FOUND)
+            requireNonNull(robotDO)
             requireTure(AuthContext.equalId(robotDO.userId), code = CommonCode.ILLEGAL_OPERATION)
             robotManagerRepository.saveOrUpdateSwitchByFunctionId(id, switch)
         }
@@ -213,7 +221,7 @@ class RobotManagerServiceImpl(
     @WithSession
     override fun getFunctionSwitch(id: Long): Uni<Switch> {
         return robotManagerRepository.findRobotByUseFunctionId(id).flatMap { robotDO ->
-            requireNonNull(robotDO, code = CommonCode.NOT_FOUND)
+            requireNonNull(robotDO)
             requireTure(AuthContext.equalId(robotDO.userId), code = CommonCode.ILLEGAL_OPERATION)
             robotManagerRepository.findSwitchByUseFunctionId(id)
         }
@@ -235,27 +243,24 @@ class RobotManagerServiceImpl(
             qqRobotEventEmitBind(robot, em)
             // 群消息处理
             robot.onGroupMessage = { event ->
-                Log.info("bot: ${event.bot.nick}(${event.bot.id}) group: ${event.group.name}(${event.group.id}) sender: ${event.sender.nick}(${event.sender.id}) message: ${event.message}")
+                Log.info(event.message)
 
+                val latestRobot = sessionFactory.withSession {
+                    robotManagerRepository.findRobotById(robotId)
+                }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
+                requireNonNull(latestRobot)
                 var text = event.message.findIsInstance<PlainText>().toString()
-
-                if (text.startsWith("/")) {
-
-                    text = text.removePrefix("/")
-
-                    val args = text.split(" ").toMutableList()
-
+                val prefix = latestRobot.cmdPrefix
+                requireNonNull(prefix)
+                if (text.startsWith(prefix)) {
+                    text = text.removePrefix(prefix)
+                    val args = text.split(SPACE).toMutableList()
                     val cmd = args.removeFirst()
-
                     val cmdName = cmd.lowercase()
-
                     val cmdEnum = Cmd.entries.associateBy { it.code }[cmdName]
                     if (cmdEnum != null) {
-                        val functions = sessionFactory.withSession {
-                            robotManagerRepository.findFeatureFunctionsByRobotId(robotId)
-                        }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
-                        // TODO 权限控制
-                        val featureFunction = functions.filter { it.enabled }.associateBy { it.code }[cmdEnum.auth]
+                        val featureFunction =
+                            latestRobot.functions.filter { it.enabled }.associateBy { it.code }[cmdEnum.code]
                         if (featureFunction != null) {
                             val (enableGroups,
                                 disableGroups,
@@ -290,7 +295,7 @@ class RobotManagerServiceImpl(
                                 }
                             }
                             if (canInvoke) {
-                                val configStr = featureFunction.config ?: "{}"
+                                val configStr = featureFunction.config ?: BRACES
                                 val config =
                                     objectMapper.readValue(configStr, object : TypeReference<Map<String, *>>() {})
                                 val messageChain = functionContext.call(cmdEnum, args, config).awaitSuspending()

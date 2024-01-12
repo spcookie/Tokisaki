@@ -1,7 +1,7 @@
 package io.micro.server.robot.infra.converter
 
+import io.micro.server.robot.domain.model.entity.FeatureFunctionDO
 import io.micro.server.robot.domain.model.entity.RobotDO
-import io.micro.server.robot.domain.model.valobj.FeatureFunction
 import io.micro.server.robot.infra.po.RobotEntity
 import io.micro.server.robot.infra.po.UseFunctionEntity
 import org.mapstruct.*
@@ -20,12 +20,12 @@ interface RobotConverter {
     @Mapping(source = "function.id", target = "refId")
     @Mapping(source = "function.name", target = "name")
     @Mapping(source = "function.code", target = "code")
-    fun useFunctionEntity2FeatureFunction(useFunctionEntity: UseFunctionEntity): FeatureFunction
+    fun useFunctionEntity2FeatureFunction(useFunctionEntity: UseFunctionEntity): FeatureFunctionDO
 
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @InheritInverseConfiguration
-    fun featureFunction2UseFunctionEntity(featureFunction: FeatureFunction): UseFunctionEntity
+    fun featureFunction2UseFunctionEntity(featureFunctionDO: FeatureFunctionDO): UseFunctionEntity
 
     @BeanMapping(
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
@@ -41,7 +41,7 @@ interface RobotConverter {
     )
     @Mapping(target = "id", ignore = true)
     fun featureFunction2UpdateUseFunctionEntity(
-        featureFunction: FeatureFunction,
+        featureFunctionDO: FeatureFunctionDO,
         @MappingTarget useFunctionEntity: UseFunctionEntity
     )
 

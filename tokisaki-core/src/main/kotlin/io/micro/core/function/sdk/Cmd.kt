@@ -4,7 +4,7 @@ package io.micro.core.function.sdk
  *@author Augenstern
  *@since 2023/10/10
  */
-enum class Cmd(val code: String, val auth: String) {
+enum class Cmd(val cmd: String, val code: String) {
     Girl("g", "FUN:GIRL"),
     Mj("mj", "FUN:MJ"),
     Chat("c", "FUN:CHAT"),
@@ -13,12 +13,12 @@ enum class Cmd(val code: String, val auth: String) {
 
     companion object {
 
-        fun byCode(code: String?): Cmd? {
-            return Cmd.entries.filter { it.code == code }.firstOrNull()
+        fun byCmd(cmd: String?): Cmd? {
+            return Cmd.entries.filter { it.cmd == cmd }.firstOrNull()
         }
 
-        fun byAuth(auth: String?): Cmd? {
-            return Cmd.entries.filter { it.auth == auth }.firstOrNull()
+        fun byCode(code: String?): Cmd? {
+            return Cmd.entries.filter { it.code == code }.firstOrNull()
         }
 
     }
