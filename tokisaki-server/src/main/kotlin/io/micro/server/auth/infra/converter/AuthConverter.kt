@@ -1,6 +1,7 @@
 package io.micro.server.auth.infra.converter
 
 import io.micro.server.auth.domain.model.entity.AuthorityDO
+import io.micro.server.auth.domain.model.entity.UserDO
 import io.micro.server.auth.domain.model.entity.WXLoginUserDO
 import io.micro.server.auth.infra.po.AuthorityEntity
 import io.micro.server.auth.infra.po.UserEntity
@@ -28,4 +29,6 @@ interface AuthConverter {
     fun authorityToString(string: MutableSet<AuthorityEntity>): MutableSet<String>
 
     fun authorityDAO2authorityDO(authority: AuthorityEntity): AuthorityDO
+
+    fun userEntity2UserDO(userEntity: UserEntity): UserDO
 }

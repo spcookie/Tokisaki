@@ -10,4 +10,6 @@ interface SystemDictService {
 
     fun saveOrUpdateDict(systemDictDO: SystemDictDO): Uni<SystemDictDO>
 
+    fun findDictByKey(key: String): Uni<SystemDictDO>
+
 }

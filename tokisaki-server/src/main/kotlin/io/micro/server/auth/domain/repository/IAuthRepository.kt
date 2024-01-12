@@ -1,6 +1,7 @@
 package io.micro.server.auth.domain.repository
 
 import io.micro.server.auth.domain.model.entity.AuthorityDO
+import io.micro.server.auth.domain.model.entity.UserDO
 import io.micro.server.auth.domain.model.entity.WXLoginUserDO
 import io.smallrye.mutiny.Uni
 
@@ -10,12 +11,14 @@ import io.smallrye.mutiny.Uni
  */
 interface IAuthRepository {
 
-    fun registerUser(wxLoginUserDO: WXLoginUserDO): Uni<WXLoginUserDO>
+    fun registerWXLoginUser(wxLoginUserDO: WXLoginUserDO): Uni<WXLoginUserDO>
 
-    fun findUserByOpenid(openid: String): Uni<WXLoginUserDO>
+    fun findWXLoginUserByOpenid(openid: String): Uni<WXLoginUserDO>
 
     fun findAuthorityById(id: Long): Uni<List<AuthorityDO>>
 
-    fun findUserById(id: Long): Uni<WXLoginUserDO>
+    fun findWXLoginUserById(id: Long): Uni<WXLoginUserDO>
+
+    fun findUserById(id: Long): Uni<UserDO>
 
 }

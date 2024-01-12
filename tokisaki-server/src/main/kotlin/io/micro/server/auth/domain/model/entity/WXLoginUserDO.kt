@@ -46,8 +46,8 @@ class WXLoginUserDO(
             return loginLinkCache.linkPool.getIfPresent(code) != null
         }
 
-        fun defaultUser(openId: String): WXLoginUserDO {
-            return WXLoginUserDO(DefaultName.generate(), openId, mutableSetOf())
+        fun defaultUser(openId: String, authorities: MutableSet<String>): WXLoginUserDO {
+            return WXLoginUserDO(DefaultName.generate(), openId, authorities)
         }
     }
 

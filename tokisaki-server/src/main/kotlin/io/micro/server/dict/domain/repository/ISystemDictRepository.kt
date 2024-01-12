@@ -16,4 +16,6 @@ interface ISystemDictRepository {
 
     fun save(systemDictDO: SystemDictDO): Uni<SystemDictDO>
 
+    fun findByKey(key: String): Uni<SystemDictDO>
+
 }

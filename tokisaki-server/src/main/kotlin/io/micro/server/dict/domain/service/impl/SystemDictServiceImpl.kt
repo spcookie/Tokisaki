@@ -34,4 +34,9 @@ class SystemDictServiceImpl(private val systemDictRepository: ISystemDictReposit
         }
     }
 
+    @WithSession
+    override fun findDictByKey(key: String): Uni<SystemDictDO> {
+        return systemDictRepository.findByKey(key)
+    }
+
 }

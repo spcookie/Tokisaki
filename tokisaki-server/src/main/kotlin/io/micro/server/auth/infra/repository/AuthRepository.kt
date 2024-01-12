@@ -1,6 +1,7 @@
 package io.micro.server.auth.infra.repository
 
 import io.micro.server.auth.domain.model.entity.AuthorityDO
+import io.micro.server.auth.domain.model.entity.UserDO
 import io.micro.server.auth.domain.model.entity.WXLoginUserDO
 import io.micro.server.auth.domain.repository.IAuthRepository
 import io.micro.server.auth.infra.converter.AuthConverter
@@ -15,7 +16,7 @@ import jakarta.enterprise.context.ApplicationScoped
 @ApplicationScoped
 class AuthRepository(private val userDAO: UserDAO, private val authConverter: AuthConverter) : IAuthRepository {
 
-    override fun registerUser(wxLoginUserDO: WXLoginUserDO): Uni<WXLoginUserDO> {
+    override fun registerWXLoginUser(wxLoginUserDO: WXLoginUserDO): Uni<WXLoginUserDO> {
         return Uni.createFrom()
             .item { authConverter.wxUserToUser(wxLoginUserDO) }
             .flatMap { user -> userDAO.persistAndFlush(user) }
@@ -23,7 +24,7 @@ class AuthRepository(private val userDAO: UserDAO, private val authConverter: Au
             .replaceWith(wxLoginUserDO)
     }
 
-    override fun findUserByOpenid(openid: String): Uni<WXLoginUserDO> {
+    override fun findWXLoginUserByOpenid(openid: String): Uni<WXLoginUserDO> {
         return userDAO.selectUserByOpenid(openid)
             .onItem().ifNotNull().transform(authConverter::userToWXUser)
     }
@@ -38,8 +39,12 @@ class AuthRepository(private val userDAO: UserDAO, private val authConverter: Au
         }
     }
 
-    override fun findUserById(id: Long): Uni<WXLoginUserDO> {
+    override fun findWXLoginUserById(id: Long): Uni<WXLoginUserDO> {
         return userDAO.findById(id).map { authConverter.userToWXUser(it) }
+    }
+
+    override fun findUserById(id: Long): Uni<UserDO> {
+        return userDAO.findById(id).map(authConverter::userEntity2UserDO)
     }
 
 }

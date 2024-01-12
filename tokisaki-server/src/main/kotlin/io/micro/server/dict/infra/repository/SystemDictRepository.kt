@@ -48,4 +48,9 @@ class SystemDictRepository(
             .map(systemDictConverter::systemDictEntity2SystemDictDO)
     }
 
+    override fun findByKey(key: String): Uni<SystemDictDO> {
+        return systemDictDAO.selectByKey(key)
+            .map(systemDictConverter::systemDictEntity2SystemDictDO)
+    }
+
 }

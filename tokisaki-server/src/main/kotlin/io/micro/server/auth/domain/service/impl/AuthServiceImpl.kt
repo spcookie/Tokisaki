@@ -5,6 +5,7 @@ import io.micro.core.exception.requireNonNull
 import io.micro.core.rest.CommonCode
 import io.micro.core.rest.CommonMsg
 import io.micro.server.auth.domain.model.entity.AuthorityDO
+import io.micro.server.auth.domain.model.entity.UserDO
 import io.micro.server.auth.domain.model.entity.WXLoginUserDO
 import io.micro.server.auth.domain.repository.IAuthRepository
 import io.micro.server.auth.domain.service.AuthService
@@ -24,7 +25,12 @@ class AuthServiceImpl(private val authRepository: IAuthRepository) : AuthService
 
     @WithSession
     override fun getUserById(id: Long): Uni<WXLoginUserDO> {
-        return authRepository.findUserById(id)
+        return authRepository.findWXLoginUserById(id)
+    }
+
+    override fun updateUserById(userDO: UserDO): Uni<UserDO> {
+//        authRepository.findUserById()
+        TODO("Not yet implemented")
     }
 
 }
