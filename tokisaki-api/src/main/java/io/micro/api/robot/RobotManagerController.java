@@ -54,11 +54,9 @@ public class RobotManagerController {
             @QueryParam("page") @DefaultValue("1") int page) {
         RobotDO robotManager = robotManagerConverter.operateRobotDTO2RobotManager(operateRobotDTO);
         return robotManagerService.getRobotList(robotManager, Pageable.of(page, size))
-                .map(robotDOPage -> R.newInstance(
-                        PageDTO.of(
-                                robotDOPage.getCurrent(),
-                                robotDOPage.getLimit(),
-                                robotDOPage.getRecords()
+                .map(it -> R.newInstance(
+                        PageDTO.of(page, size, it.getSecond(),
+                                it.getFirst()
                                         .stream()
                                         .map(robotDO -> robotManagerConverter.robotManager2QueryRobotDTO(robotDO))
                                         .toList())

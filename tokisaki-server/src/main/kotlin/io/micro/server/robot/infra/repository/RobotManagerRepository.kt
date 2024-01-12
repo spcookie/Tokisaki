@@ -71,6 +71,12 @@ class RobotManagerRepository(
         } ?: Uni.createFrom().item(listOf())
     }
 
+    override fun countRobotByExample(robot: RobotDO, pageable: Page): Uni<Long> {
+        return robotConverter.robotDO2RobotEntity(robot).let {
+            robotDAO.countByExample(it, Page(pageable.index, pageable.size))
+        }
+    }
+
     override fun updateRobot(robot: RobotDO): Uni<RobotDO> {
         return robotDAO.findById(robot.id!!)
             .flatMap { robotEntity ->

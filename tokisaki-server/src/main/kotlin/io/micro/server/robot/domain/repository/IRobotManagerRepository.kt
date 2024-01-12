@@ -18,6 +18,8 @@ interface IRobotManagerRepository {
 
     fun findRobotByExample(robot: RobotDO, pageable: Page): Uni<List<RobotDO>>
 
+    fun countRobotByExample(robot: RobotDO, pageable: Page): Uni<Long>
+
     fun updateRobot(robot: RobotDO): Uni<RobotDO>
 
     fun addFeatureFunctionById(id: Long, featureFunction: FeatureFunction): Uni<Unit>

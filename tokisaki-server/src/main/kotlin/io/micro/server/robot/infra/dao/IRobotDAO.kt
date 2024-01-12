@@ -11,4 +11,6 @@ interface IRobotDAO : PanacheRepository<RobotEntity> {
 
     fun selectByExample(robotEntity: RobotEntity, page: Page): Uni<List<RobotEntity>>
 
+    fun countByExample(robotEntity: RobotEntity, page: Page): Uni<Long>
+
 }
