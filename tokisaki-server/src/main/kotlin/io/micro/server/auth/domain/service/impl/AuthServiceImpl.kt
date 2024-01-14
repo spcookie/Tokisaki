@@ -10,6 +10,7 @@ import io.micro.server.auth.domain.model.entity.WXLoginUserDO
 import io.micro.server.auth.domain.repository.IAuthRepository
 import io.micro.server.auth.domain.service.AuthService
 import io.quarkus.hibernate.reactive.panache.common.WithSession
+import io.quarkus.hibernate.reactive.panache.common.WithTransaction
 import io.smallrye.mutiny.Uni
 import jakarta.enterprise.context.ApplicationScoped
 
@@ -28,9 +29,10 @@ class AuthServiceImpl(private val authRepository: IAuthRepository) : AuthService
         return authRepository.findWXLoginUserById(id)
     }
 
+    @WithTransaction
+    @WithSession
     override fun updateUserById(userDO: UserDO): Uni<UserDO> {
-//        authRepository.findUserById()
-        TODO("Not yet implemented")
+        return authRepository.updateUserById(userDO)
     }
 
 }

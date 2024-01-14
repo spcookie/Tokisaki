@@ -26,20 +26,20 @@ class FunctionRegistry {
                 .flatMap {
                     val functions = it.first.map { it.code }
                     val authorities = it.second.map { it.value }
-                    val newFunctionCode = Cmd.entries.filter { !functions.contains(it.auth) }
-                    val newAuthorityValue = Cmd.entries.filter { !authorities.contains(it.auth) }
+                    val newFunctionCode = Cmd.entries.filter { !functions.contains(it.code) }
+                    val newAuthorityValue = Cmd.entries.filter { !authorities.contains(it.code) }
 
                     val functionEntities = buildList {
                         newFunctionCode.forEach { cmd ->
                             add(FunctionEntity().apply {
                                 name = cmd.name
-                                code = cmd.auth
+                                code = cmd.code
                             })
                         }
                     }.toTypedArray()
 
                     val authorityEntities = buildList {
-                        newAuthorityValue.forEach { cmd -> add(AuthorityEntity().apply { value = cmd.auth }) }
+                        newAuthorityValue.forEach { cmd -> add(AuthorityEntity().apply { value = cmd.code }) }
                     }.toTypedArray()
 
                     Uni.combine().all()

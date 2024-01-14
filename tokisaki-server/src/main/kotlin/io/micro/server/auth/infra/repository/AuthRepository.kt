@@ -47,4 +47,11 @@ class AuthRepository(private val userDAO: UserDAO, private val authConverter: Au
         return userDAO.findById(id).map(authConverter::userEntity2UserDO)
     }
 
+    override fun updateUserById(userDO: UserDO): Uni<UserDO> {
+        return userDAO.findById(userDO.id!!).map {
+            authConverter.userDO2UserEntity(userDO, it)
+            userDO
+        }
+    }
+
 }

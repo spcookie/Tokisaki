@@ -5,11 +5,8 @@ import io.micro.server.auth.domain.model.entity.UserDO
 import io.micro.server.auth.domain.model.entity.WXLoginUserDO
 import io.micro.server.auth.infra.po.AuthorityEntity
 import io.micro.server.auth.infra.po.UserEntity
-import org.mapstruct.BeanMapping
-import org.mapstruct.InheritInverseConfiguration
-import org.mapstruct.Mapper
+import org.mapstruct.*
 import org.mapstruct.MappingConstants.ComponentModel.CDI
-import org.mapstruct.ReportingPolicy
 
 /**
  *@author Augenstern
@@ -31,4 +28,8 @@ interface AuthConverter {
     fun authorityDAO2authorityDO(authority: AuthorityEntity): AuthorityDO
 
     fun userEntity2UserDO(userEntity: UserEntity): UserDO
+
+    @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+    @Mapping(target = "authorities", ignore = true)
+    fun userDO2UserEntity(userDO: UserDO, @MappingTarget userEntity: UserEntity)
 }

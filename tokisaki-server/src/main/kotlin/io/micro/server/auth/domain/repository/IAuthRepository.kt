@@ -21,4 +21,6 @@ interface IAuthRepository {
 
     fun findUserById(id: Long): Uni<UserDO>
 
+    fun updateUserById(userDO: UserDO): Uni<UserDO>
+
 }
