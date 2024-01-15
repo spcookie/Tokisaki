@@ -28,7 +28,7 @@ class FunctionContextImpl(
     @PostConstruct
     fun allocateCommandServices() {
         for (commandService in commandServices) {
-            allocationCommandServices[commandService.cmd().code] = commandService
+            allocationCommandServices[commandService.cmd().cmd] = commandService
             if (commandService is ImageTask) {
                 allocationImageTask[commandService.cmd()] = commandService
             }
@@ -36,15 +36,15 @@ class FunctionContextImpl(
     }
 
     override fun call(cmd: Cmd, args: MutableList<String>, config: Map<String, *>): Uni<MessageChain> {
-        val code = cmd.code
-        ArgsLengthCheck.check(code, args)
-        return with(allocationCommandServices[code.lowercase()]) {
+        val cmd = cmd.cmd
+        ArgsLengthCheck.check(cmd, args)
+        return with(allocationCommandServices[cmd.lowercase()]) {
             this?.invoke(args, config) ?: CmdException.nonImplemented()
         }
     }
 
     override fun config(cmd: Cmd): ConfigHint? {
-        return with(allocationCommandServices[cmd.code.lowercase()]) { this?.configHint() }
+        return with(allocationCommandServices[cmd.cmd.lowercase()]) { this?.configHint() }
     }
 
     override fun menu(): Uni<MessageChain> {

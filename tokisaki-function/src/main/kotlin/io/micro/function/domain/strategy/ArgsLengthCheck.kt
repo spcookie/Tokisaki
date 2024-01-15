@@ -24,9 +24,9 @@ class ArgsLengthCheck {
                 val inspector = instance.get()
                 try {
                     when {
-                        cmd.lowercase() == Cmd.Mj.code -> inspector.mj(args)
-                        cmd.lowercase() == Cmd.Chat.code -> inspector.chat(args)
-                        cmd.lowercase() == Cmd.Emoji.code -> inspector.emoji(args)
+                        cmd.lowercase() == Cmd.Mj.cmd -> inspector.mj(args)
+                        cmd.lowercase() == Cmd.Chat.cmd -> inspector.chat(args)
+                        cmd.lowercase() == Cmd.Emoji.cmd -> inspector.emoji(args)
                     }
                 } catch (ex: ConstraintViolationException) {
                     CmdException.fail(ex)
