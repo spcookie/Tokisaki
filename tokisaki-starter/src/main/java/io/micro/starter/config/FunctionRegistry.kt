@@ -1,4 +1,4 @@
-package io.micro.starter
+package io.micro.starter.config
 
 import io.micro.core.function.sdk.Cmd
 import io.micro.server.auth.infra.po.AuthorityEntity
