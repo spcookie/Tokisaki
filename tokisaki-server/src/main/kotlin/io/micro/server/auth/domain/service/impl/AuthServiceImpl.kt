@@ -37,6 +37,7 @@ class AuthServiceImpl(private val authRepository: IAuthRepository) : AuthService
         return authRepository.updateUserById(userDO)
     }
 
+    @WithSession
     override fun getUserPage(pageable: Pageable): Uni<PageDO<UserDO>> {
         return authRepository.findUserPage(pageable).flatMap { list ->
             authRepository.countUser().map { PageDO.of(pageable, it, list) }

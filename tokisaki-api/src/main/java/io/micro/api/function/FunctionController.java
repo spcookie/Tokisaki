@@ -3,6 +3,8 @@ package io.micro.api.function;
 import io.micro.api.function.converter.FunctionConverter;
 import io.micro.api.function.dto.QueryFunctionDTO;
 import io.micro.core.annotation.InitAuthContext;
+import io.micro.core.rest.R;
+import io.micro.core.util.ConverterKt;
 import io.micro.server.robot.domain.service.FunctionService;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
@@ -29,12 +31,10 @@ public class FunctionController {
     @GET
     @Path("/available")
     @Authenticated
-    public Uni<List<QueryFunctionDTO>> getUserFunctions() {
+    public Uni<R<List<QueryFunctionDTO>>> getUserFunctions() {
         return functionService.getUserFunctions()
-                .map(functionDOs -> functionDOs.stream()
-                        .map(it -> functionConverter.functionDO2functionDTO(it))
-                        .toList()
-                );
+                .map(list -> ConverterKt.converter(list, functionConverter::functionDO2functionDTO))
+                .map(R::newInstance);
     }
 
 }
