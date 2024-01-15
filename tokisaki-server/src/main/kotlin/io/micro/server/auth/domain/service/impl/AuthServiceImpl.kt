@@ -4,6 +4,8 @@ import io.micro.core.context.AuthContext
 import io.micro.core.exception.requireNonNull
 import io.micro.core.rest.CommonCode
 import io.micro.core.rest.CommonMsg
+import io.micro.core.rest.PageDO
+import io.micro.core.rest.Pageable
 import io.micro.server.auth.domain.model.entity.AuthorityDO
 import io.micro.server.auth.domain.model.entity.UserDO
 import io.micro.server.auth.domain.model.entity.WXLoginUserDO
@@ -33,6 +35,12 @@ class AuthServiceImpl(private val authRepository: IAuthRepository) : AuthService
     @WithSession
     override fun updateUserById(userDO: UserDO): Uni<UserDO> {
         return authRepository.updateUserById(userDO)
+    }
+
+    override fun getUserPage(pageable: Pageable): Uni<PageDO<UserDO>> {
+        return authRepository.findUserPage(pageable).flatMap { list ->
+            authRepository.countUser().map { PageDO.of(pageable, it, list) }
+        }
     }
 
 }

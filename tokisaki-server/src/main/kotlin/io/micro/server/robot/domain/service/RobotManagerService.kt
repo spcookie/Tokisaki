@@ -1,5 +1,6 @@
 package io.micro.server.robot.domain.service
 
+import io.micro.core.rest.PageDO
 import io.micro.core.rest.Pageable
 import io.micro.server.robot.domain.model.entity.FeatureFunctionDO
 import io.micro.server.robot.domain.model.entity.RobotDO
@@ -26,7 +27,7 @@ interface RobotManagerService {
 
     fun createRobot(robotDO: RobotDO): Uni<RobotDO>
 
-    fun getRobotList(robotDO: RobotDO, page: Pageable): Uni<Pair<List<RobotDO>, Long>>
+    fun getRobotList(robotDO: RobotDO, pageable: Pageable): Uni<PageDO<RobotDO>>
 
     fun modifyRobotInfo(robotDO: RobotDO): Uni<RobotDO>
 

@@ -8,7 +8,7 @@ import org.mapstruct.MappingConstants.ComponentModel
 @Mapper(componentModel = ComponentModel.CDI)
 interface SystemDictConverter {
 
-    fun systemDictEntity2SystemDictDO(systemDictEntity: SystemDictEntity?): SystemDictDO?
+    fun systemDictEntity2SystemDictDO(systemDictEntity: SystemDictEntity): SystemDictDO
 
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     @InheritConfiguration

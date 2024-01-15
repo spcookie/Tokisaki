@@ -54,13 +54,8 @@ public class RobotManagerController {
             @QueryParam("page") @DefaultValue("1") int page) {
         RobotDO robotManager = robotManagerConverter.operateRobotDTO2RobotManager(operateRobotDTO);
         return robotManagerService.getRobotList(robotManager, Pageable.of(page, size))
-                .map(it -> R.newInstance(
-                        PageDTO.of(page, size, it.getSecond(),
-                                it.getFirst()
-                                        .stream()
-                                        .map(robotDO -> robotManagerConverter.robotManager2QueryRobotDTO(robotDO))
-                                        .toList())
-                ));
+                .map(it -> PageDTO.converter(it, robotManagerConverter::robotManager2QueryRobotDTO))
+                .map(R::newInstance);
     }
 
     @Operation(summary = "创建机器人")
@@ -89,7 +84,7 @@ public class RobotManagerController {
             @Parameter(description = "机器人信息") @Valid @ConvertGroup(to = ValidGroup.Update.class) OperateRobotDTO operateRobotDTO) {
         RobotDO robotDO = robotManagerConverter.operateRobotDTO2RobotManager(operateRobotDTO);
         return robotManagerService.modifyRobotInfo(robotDO)
-                .map(robotManagerConverter::robotManager2QueryRobotDTO)
+                .map(dto -> robotManagerConverter.robotManager2QueryRobotDTO(dto))
                 .map(R::newInstance);
     }
 

@@ -5,7 +5,7 @@ import io.micro.core.function.sdk.ArgsMergeStrategy
 import io.micro.core.function.sdk.Cmd
 import io.micro.function.domain.image.model.Image
 import io.micro.function.domain.image.model.valobj.MidjourneyConfig
-import io.net.spcokie.types.QQFace
+import io.micro.function.types.QQFace
 import io.smallrye.mutiny.Uni
 
 /**

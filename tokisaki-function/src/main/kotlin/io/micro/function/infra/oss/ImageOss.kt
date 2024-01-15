@@ -1,4 +1,4 @@
-package io.net.spcokie.infra.oss
+package io.micro.function.infra.oss
 
 import io.minio.*
 import io.minio.messages.DeleteObject

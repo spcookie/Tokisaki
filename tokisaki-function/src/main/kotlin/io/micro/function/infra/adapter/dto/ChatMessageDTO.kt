@@ -17,7 +17,7 @@ import kotlinx.serialization.Serializable
 data class ChatMessageDTO(
     /**
      * Must be either 'system', 'user', 'assistant' or 'function'.<br></br>
-     * You may use [ChatMessageRole] enum.
+     * You may use [ChatMessageRoleDTO] enum.
      */
     var role: String? = null,
 

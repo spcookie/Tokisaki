@@ -1,4 +1,4 @@
-package io.net.spcokie.infra.converter
+package io.micro.function.infra.converter
 
 import io.micro.function.domain.text.model.valobj.ChatCompletionRequest
 import io.micro.function.domain.text.model.valobj.ChatCompletionResult

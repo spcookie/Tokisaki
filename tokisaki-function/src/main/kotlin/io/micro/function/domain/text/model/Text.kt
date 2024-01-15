@@ -1,4 +1,4 @@
-package io.net.spcokie.domain.text.model
+package io.micro.function.domain.text.model
 
 import io.micro.core.entity.BaseDomainEntity
 

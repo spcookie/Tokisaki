@@ -1,5 +1,6 @@
 package io.micro.server.robot.infra.repository
 
+import io.micro.core.util.converter
 import io.micro.server.robot.domain.model.entity.FunctionDO
 import io.micro.server.robot.domain.repository.IFunctionRepository
 import io.micro.server.robot.infra.converter.FunctionConverter
@@ -15,9 +16,7 @@ class FunctionRepository(
 
     override fun findAllFunctions(): Uni<List<FunctionDO>> {
         return functionDAO.findAll().list().map { functionEntities ->
-            functionEntities.map {
-                functionConverter.functionEntity2functionDO(it)
-            }
+            functionEntities.converter(functionConverter::functionEntity2functionDO)
         }
     }
 

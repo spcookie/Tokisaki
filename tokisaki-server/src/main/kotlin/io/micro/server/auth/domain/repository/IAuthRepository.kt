@@ -1,5 +1,6 @@
 package io.micro.server.auth.domain.repository
 
+import io.micro.core.rest.Pageable
 import io.micro.server.auth.domain.model.entity.AuthorityDO
 import io.micro.server.auth.domain.model.entity.UserDO
 import io.micro.server.auth.domain.model.entity.WXLoginUserDO
@@ -22,5 +23,9 @@ interface IAuthRepository {
     fun findUserById(id: Long): Uni<UserDO>
 
     fun updateUserById(userDO: UserDO): Uni<UserDO>
+
+    fun findUserPage(pageable: Pageable): Uni<List<UserDO>>
+
+    fun countUser(): Uni<Long>
 
 }

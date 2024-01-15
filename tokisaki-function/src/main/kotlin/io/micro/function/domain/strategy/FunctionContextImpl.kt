@@ -1,13 +1,13 @@
 package io.micro.function.domain.strategy
 
 import io.micro.core.context.AuthContext
+import io.micro.core.exception.CmdException
 import io.micro.core.function.ConfigHint
 import io.micro.core.function.dto.Message
 import io.micro.core.function.dto.MessageChain
 import io.micro.core.function.sdk.Cmd
 import io.micro.core.function.sdk.CommandService
 import io.micro.function.domain.image.service.ImageTask
-import io.net.spcokie.common.exception.CmdException
 import io.quarkus.arc.All
 import io.smallrye.mutiny.Uni
 import jakarta.annotation.PostConstruct

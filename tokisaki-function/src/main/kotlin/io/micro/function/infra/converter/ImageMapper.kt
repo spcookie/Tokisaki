@@ -1,10 +1,10 @@
-package io.net.spcokie.infra.converter
+package io.micro.function.infra.converter
 
 import io.micro.function.domain.image.model.Image
 import io.micro.function.domain.image.model.entity.AnimeCartoon
 import io.micro.function.domain.image.model.entity.Girl
-import io.net.spcokie.infra.po.ImagePO
-import io.net.spcokie.types.ImageCategory
+import io.micro.function.infra.po.ImagePO
+import io.micro.function.types.ImageCategory
 import jakarta.inject.Singleton
 import org.mapstruct.AfterMapping
 import org.mapstruct.MappingTarget

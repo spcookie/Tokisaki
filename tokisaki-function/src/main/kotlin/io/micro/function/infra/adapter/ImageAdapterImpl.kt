@@ -1,5 +1,7 @@
 package io.micro.function.infra.adapter
 
+import io.micro.core.exception.CmdException
+import io.micro.core.exception.RetryableException
 import io.micro.function.domain.image.adapter.ImageAdapter
 import io.micro.function.domain.image.model.entity.AnimeCartoon
 import io.micro.function.domain.image.model.entity.EmojiKitchen
@@ -9,8 +11,6 @@ import io.micro.function.infra.adapter.dto.MidjourneyPromptDTO
 import io.micro.function.infra.adapter.gateway.EmojiKitchenGateway
 import io.micro.function.infra.adapter.gateway.MidjourneyGateway
 import io.micro.function.infra.adapter.gateway.XyzImageGateway
-import io.net.spcokie.common.exception.CmdException
-import io.net.spcokie.common.exception.RetryableException
 import io.quarkus.logging.Log
 import io.smallrye.mutiny.Uni
 import io.vertx.ext.web.client.WebClient

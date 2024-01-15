@@ -51,7 +51,7 @@ fun requireFalse(value: Boolean, detail: String? = null, code: CommonCode = Comm
     if (value) {
         fail(detail, code)
     } else {
-        return value
+        return false
     }
 }
 

@@ -1,4 +1,4 @@
-package io.net.spcokie.infra.cache
+package io.micro.function.infra.cache
 
 import io.micro.function.infra.adapter.dto.ChatMessageDTO
 import io.quarkus.redis.datasource.ReactiveRedisDataSource

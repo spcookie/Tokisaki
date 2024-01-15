@@ -1,11 +1,14 @@
 package io.micro.server.auth.infra.repository
 
+import io.micro.core.rest.Pageable
+import io.micro.core.util.converter
 import io.micro.server.auth.domain.model.entity.AuthorityDO
 import io.micro.server.auth.domain.model.entity.UserDO
 import io.micro.server.auth.domain.model.entity.WXLoginUserDO
 import io.micro.server.auth.domain.repository.IAuthRepository
 import io.micro.server.auth.infra.converter.AuthConverter
 import io.micro.server.auth.infra.dao.impl.UserDAO
+import io.quarkus.panache.common.Page
 import io.smallrye.mutiny.Uni
 import jakarta.enterprise.context.ApplicationScoped
 
@@ -31,11 +34,7 @@ class AuthRepository(private val userDAO: UserDAO, private val authConverter: Au
 
     override fun findAuthorityById(id: Long): Uni<List<AuthorityDO>> {
         return userDAO.findById(id).map { userEntity ->
-            userEntity.authorities!!.let { authorities ->
-                authorities.map {
-                    authConverter.authorityDAO2authorityDO(it)
-                }
-            }
+            userEntity.authorities!!.converter(authConverter::authorityDAO2authorityDO)
         }
     }
 
@@ -52,6 +51,17 @@ class AuthRepository(private val userDAO: UserDAO, private val authConverter: Au
             authConverter.userDO2UserEntity(userDO, it)
             userDO
         }
+    }
+
+    override fun findUserPage(pageable: Pageable): Uni<List<UserDO>> {
+        return userDAO.findAll()
+            .page(Page.of(pageable.current - 1, pageable.limit))
+            .list()
+            .map { it.converter(authConverter::userEntity2UserDO) }
+    }
+
+    override fun countUser(): Uni<Long> {
+        return userDAO.count()
     }
 
 }

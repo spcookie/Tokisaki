@@ -2,6 +2,7 @@ package io.micro.function.domain.text.service
 
 import io.micro.core.annotation.CallCount
 import io.micro.core.context.AuthContext
+import io.micro.core.exception.CmdException
 import io.micro.core.function.ConfigHint
 import io.micro.core.function.dto.MessageChain
 import io.micro.core.function.sdk.Cmd
@@ -10,7 +11,6 @@ import io.micro.function.domain.text.adapter.TextAdapter
 import io.micro.function.domain.text.model.entity.Chat
 import io.micro.function.domain.text.model.valobj.ChatConfig
 import io.micro.function.domain.text.repository.TextRepository
-import io.net.spcokie.common.exception.CmdException
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction
 import io.smallrye.faulttolerance.api.RateLimit
 import io.smallrye.faulttolerance.api.RateLimitException

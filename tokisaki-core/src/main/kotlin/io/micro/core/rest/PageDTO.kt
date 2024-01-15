@@ -10,6 +10,7 @@ class PageDTO<T> : Pageable() {
     var records: List<T> = listOf()
 
     companion object {
+
         @JvmStatic
         fun <E> of(current: Int, limit: Int, total: Long, records: List<E>) = PageDTO<E>().also {
             it.current = current
@@ -17,6 +18,13 @@ class PageDTO<T> : Pageable() {
             it.records = records
             it.total = total
         }
+
+        @JvmStatic
+        fun <E, R> converter(pageDO: PageDO<E>, converter: (E) -> R): PageDTO<R> {
+            val rs = pageDO.records.map { converter(it) }
+            return PageDTO.of(pageDO.current, pageDO.limit, pageDO.total, rs)
+        }
+
     }
 
 }

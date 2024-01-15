@@ -18,7 +18,7 @@ interface RobotManagerConverter {
     fun queryRobotDTO2RobotManager(dto: QueryRobotDTO): RobotDO
 
     @InheritInverseConfiguration
-    fun robotManager2QueryRobotDTO(dto: RobotDO): QueryRobotDTO
+    fun robotManager2QueryRobotDTO(robotDO: RobotDO): QueryRobotDTO
 
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     fun operateFeatureFunctionDTO2FeatureFunction(featureFunctionDTO: OperateFeatureFunctionDTO): FeatureFunctionDO

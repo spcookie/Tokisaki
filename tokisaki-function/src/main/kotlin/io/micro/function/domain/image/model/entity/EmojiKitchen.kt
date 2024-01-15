@@ -1,6 +1,7 @@
 package io.micro.function.domain.image.model.entity
 
 import com.vdurmont.emoji.EmojiParser
+import io.micro.core.exception.CmdException
 import io.micro.core.function.sdk.AbstractCmd
 import io.micro.core.function.sdk.ArgsMergeStrategy
 import io.micro.core.function.sdk.Cmd
@@ -9,8 +10,7 @@ import io.micro.function.domain.image.model.valobj.EmojiCombination
 import io.micro.function.domain.image.model.valobj.EmojiData
 import io.micro.function.domain.image.model.valobj.EmojiMetadata
 import io.micro.function.domain.image.model.valobj.GoogleRequestParam
-import io.net.spcokie.common.exception.CmdException
-import io.net.spcokie.types.QQFace
+import io.micro.function.types.QQFace
 import io.smallrye.mutiny.Uni
 
 /**

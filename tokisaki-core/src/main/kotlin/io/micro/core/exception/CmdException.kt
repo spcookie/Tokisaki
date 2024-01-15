@@ -1,4 +1,4 @@
-package io.net.spcokie.common.exception
+package io.micro.core.exception
 
 import jakarta.validation.ConstraintViolationException
 

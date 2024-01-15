@@ -4,7 +4,7 @@ import io.micro.function.domain.text.adapter.TextAdapter
 import io.micro.function.domain.text.model.valobj.ChatCompletionRequest
 import io.micro.function.domain.text.model.valobj.ChatCompletionResult
 import io.micro.function.infra.adapter.gateway.ChatGateway
-import io.net.spcokie.infra.converter.TextConverter
+import io.micro.function.infra.converter.TextConverter
 import io.quarkus.logging.Log
 import io.smallrye.mutiny.Uni
 import jakarta.enterprise.context.ApplicationScoped

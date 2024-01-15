@@ -1,5 +1,6 @@
 package io.micro.server.robot.infra.repository
 
+import io.micro.core.util.converter
 import io.micro.server.auth.infra.po.UserEntity
 import io.micro.server.robot.domain.model.entity.FeatureFunctionDO
 import io.micro.server.robot.domain.model.entity.RobotDO
@@ -63,11 +64,7 @@ class RobotManagerRepository(
     override fun findRobotByExample(robot: RobotDO, pageable: Page): Uni<List<RobotDO>> {
         return robotConverter.robotDO2RobotEntity(robot).let {
             robotDAO.selectByExample(it, Page(pageable.index, pageable.size))
-                .map { robots ->
-                    robots.map { robot ->
-                        robotConverter.robotEntity2RobotDO(robot)
-                    }
-                }
+                .map { robots -> robots.converter(robotConverter::robotEntity2RobotDO) }
         } ?: Uni.createFrom().item(listOf())
     }
 

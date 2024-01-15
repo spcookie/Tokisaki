@@ -7,7 +7,7 @@ data class ChatCompletionChoice(
     var index: Int? = null,
 
     /**
-     * The [ChatMessageRole.assistant] message or delta (when streaming) which was generated
+     * The [ChatMessageRole.ASSISTANT] message or delta (when streaming) which was generated
      */
     var message: ChatMessage? = null,
 

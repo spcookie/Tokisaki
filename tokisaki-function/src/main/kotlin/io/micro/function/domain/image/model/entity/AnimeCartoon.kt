@@ -3,7 +3,7 @@ package io.micro.function.domain.image.model.entity
 import io.micro.core.function.sdk.AbstractCmd
 import io.micro.core.function.sdk.Cmd
 import io.micro.function.domain.image.model.Image
-import io.net.spcokie.types.QQFace
+import io.micro.function.types.QQFace
 import io.smallrye.mutiny.Uni
 
 /**

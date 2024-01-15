@@ -14,7 +14,7 @@ data class ChatCompletionChoiceDTO(
     var index: Int? = null,
 
     /**
-     * The [ChatMessageRole.assistant] message or delta (when streaming) which was generated
+     * The [ChatMessageRoleDTO.ASSISTANT] message or delta (when streaming) which was generated
      */
     @JsonNames("delta")
     var message: ChatMessageDTO? = null,

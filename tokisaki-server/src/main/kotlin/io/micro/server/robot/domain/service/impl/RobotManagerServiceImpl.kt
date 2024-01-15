@@ -11,6 +11,7 @@ import io.micro.core.function.dto.MediaType
 import io.micro.core.function.sdk.Cmd
 import io.micro.core.rest.CommonCode
 import io.micro.core.rest.CommonMsg
+import io.micro.core.rest.PageDO
 import io.micro.core.rest.Pageable
 import io.micro.core.robot.Credential
 import io.micro.core.robot.Robot
@@ -130,13 +131,13 @@ class RobotManagerServiceImpl(
 
     @WithTransaction
     @WithSession
-    override fun getRobotList(robotDO: RobotDO, page: Pageable): Uni<Pair<List<RobotDO>, Long>> {
+    override fun getRobotList(robotDO: RobotDO, pageable: Pageable): Uni<PageDO<RobotDO>> {
         robotDO.userId = AuthContext.id.toLongOrNull()
-        val paged = Page.of(page.current, page.limit)
+        val paged = Page.of(pageable.current, pageable.limit)
         return robotManagerRepository.findRobotByExample(robotDO, paged)
-            .flatMap { robotDOS ->
+            .flatMap { robots ->
                 robotManagerRepository.countRobotByExample(robotDO, paged)
-                    .map { count -> robotDOS to count }
+                    .map { count -> PageDO.of(pageable, count, robots) }
             }
     }
 

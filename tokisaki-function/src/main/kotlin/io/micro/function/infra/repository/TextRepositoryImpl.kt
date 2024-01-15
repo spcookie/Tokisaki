@@ -1,10 +1,10 @@
-package io.net.spcokie.infra.repository
+package io.micro.function.infra.repository
 
 import io.micro.core.aop.CommandCache
 import io.micro.function.domain.text.model.valobj.ChatMessage
 import io.micro.function.domain.text.repository.TextRepository
-import io.net.spcokie.infra.cache.TextCache
-import io.net.spcokie.infra.converter.TextConverter
+import io.micro.function.infra.cache.TextCache
+import io.micro.function.infra.converter.TextConverter
 import io.smallrye.mutiny.Uni
 import jakarta.enterprise.context.ApplicationScoped
 

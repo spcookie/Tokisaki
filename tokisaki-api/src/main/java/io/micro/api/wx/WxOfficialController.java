@@ -64,6 +64,7 @@ public class WxOfficialController {
                 .transform(user -> {
                     ReplyMessageDTO replyMessageDTO = new ReplyMessageDTO();
                     replyMessageDTO.setFromUserName(wxMessageDTO.getToUserName());
+                    replyMessageDTO.setToUserName(wxMessageDTO.getFromUserName());
                     replyMessageDTO.setCreateTime(String.valueOf(System.currentTimeMillis()));
                     replyMessageDTO.setMsgType("text");
                     replyMessageDTO.setContent("登陆成功，" + user.getName());

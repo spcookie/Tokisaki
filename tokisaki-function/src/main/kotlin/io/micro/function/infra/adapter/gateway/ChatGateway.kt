@@ -1,7 +1,7 @@
 package io.micro.function.infra.adapter.gateway
 
+import io.micro.core.exception.CmdException
 import io.micro.function.infra.adapter.dto.ChatCompletionResultDTO
-import io.net.spcokie.common.exception.CmdException
 import io.quarkus.rest.client.reactive.ClientExceptionMapper
 import io.smallrye.mutiny.Uni
 import jakarta.ws.rs.HeaderParam

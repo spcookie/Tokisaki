@@ -1,6 +1,6 @@
-package io.net.spcokie.infra.po
+package io.micro.function.infra.po
 
-import io.net.spcokie.types.ImageCategory
+import io.micro.function.types.ImageCategory
 import io.quarkus.hibernate.reactive.panache.kotlin.PanacheCompanion
 import io.quarkus.hibernate.reactive.panache.kotlin.PanacheEntity
 import io.smallrye.mutiny.Uni
