@@ -26,4 +26,7 @@ class UseFunctionEntity : BaseEntity() {
     @Column(name = "use_function_cmd_alias")
     var cmdAlias: String? = null
 
+    @Column(name = "use_function_require_quota", nullable = false)
+    var requireQuota: Boolean = false
+
 }

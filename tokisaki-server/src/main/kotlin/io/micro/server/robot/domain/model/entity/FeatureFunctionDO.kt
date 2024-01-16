@@ -22,6 +22,8 @@ class FeatureFunctionDO {
 
     var cmdAlias: String? = null
 
+    var requireQuota: Boolean? = null
+
     fun ensureCmdAlias(cmdCode: String) {
         if (cmdAlias == null) {
             val cmd = Cmd.byCode(cmdCode)

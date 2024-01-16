@@ -40,6 +40,7 @@ import jakarta.enterprise.context.ApplicationScoped
 import jakarta.ws.rs.sse.OutboundSseEvent
 import jakarta.ws.rs.sse.Sse
 import net.mamoe.mirai.contact.Contact.Companion.uploadImage
+import net.mamoe.mirai.message.data.MessageSource.Key.quote
 import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.buildMessageChain
 import net.mamoe.mirai.message.data.findIsInstance
@@ -201,6 +202,7 @@ class RobotManagerServiceImpl(
                     it.config = featureFunctionDO.config
                     it.remark = featureFunctionDO.remark
                     it.enabled = featureFunctionDO.enabled
+                    it.requireQuota = featureFunctionDO.requireQuota
                     featureFunctionDO.cmdAlias?.also { alias ->
                         it.cmdAlias = alias
                     }
@@ -260,7 +262,7 @@ class RobotManagerServiceImpl(
                     val args = text.split(SPACE).toMutableList()
                     val cmd = args.removeFirst()
                     val cmdName = cmd.lowercase()
-                    val cmdEnum = Cmd.entries.associateBy { it.code }[cmdName]
+                    val cmdEnum = Cmd.entries.associateBy { it.cmd }[cmdName]
                     if (cmdEnum != null) {
                         val featureFunction = latestRobot.functions
                             .filter { it.enabled }
@@ -306,8 +308,13 @@ class RobotManagerServiceImpl(
                                     val configStr = featureFunction.config ?: BRACES
                                     val config =
                                         objectMapper.readValue(configStr, object : TypeReference<Map<String, *>>() {})
+                                    // TODO 处理CmdException
                                     val messageChain = functionContext.call(cmdEnum, args, config).awaitSuspending()
+                                    val requireQuota = featureFunction.requireQuota
                                     val results = buildMessageChain {
+                                        if (requireQuota == true) {
+                                            add(event.message.quote())
+                                        }
                                         messageChain.messages.forEach { message ->
                                             if (message.msg.isNotBlank()) {
                                                 add(PlainText(message.msg))

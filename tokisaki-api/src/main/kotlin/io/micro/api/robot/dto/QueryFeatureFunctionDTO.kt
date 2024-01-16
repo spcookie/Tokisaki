@@ -27,6 +27,12 @@ class QueryFeatureFunctionDTO {
     var remark: String? = null
 
     @Schema(title = "是否开启")
-    var enabled: Boolean = false
+    var enabled: Boolean? = null
+
+    @Schema(title = "功能别名")
+    var cmdAlias: String? = null
+
+    @Schema(title = "是否引用回复消息")
+    var requireQuota: Boolean? = null
 
 }
