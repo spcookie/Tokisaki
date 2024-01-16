@@ -83,6 +83,19 @@ fun <T> requireNonNull(value: T, detail: String? = null, code: CommonCode = Comm
 }
 
 @JvmOverloads
+@OptIn(ExperimentalContracts::class)
+fun <T> requireNull(value: T, detail: String? = null, code: CommonCode = CommonCode.FAIL): T? {
+    contract {
+        returns() implies (value == null)
+    }
+    if (!Objects.isNull(value)) {
+        fail(detail, code)
+    } else {
+        return null
+    }
+}
+
+@JvmOverloads
 fun failWith(detail: String? = null, code: CommonCode = CommonCode.FAIL): BusinessException {
     return BusinessException(code, detail)
 }
