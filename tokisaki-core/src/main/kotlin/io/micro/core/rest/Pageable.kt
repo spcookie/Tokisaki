@@ -9,6 +9,9 @@ open class Pageable {
 
     var limit: Int = 0
 
+    val index: Int
+        get() = current - 1
+
     companion object {
         @JvmStatic
         fun of(current: Int, limit: Int) = Pageable().also {
