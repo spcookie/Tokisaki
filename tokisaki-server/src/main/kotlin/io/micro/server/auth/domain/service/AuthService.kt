@@ -16,4 +16,13 @@ interface AuthService {
     fun updateUserById(userDO: UserDO): Uni<UserDO>
 
     fun getUserPage(pageable: Pageable): Uni<PageDO<UserDO>>
+
+    fun enabledAuthority(authorityDO: AuthorityDO): Uni<Unit>
+
+    fun getAuthorityPage(pageable: Pageable): Uni<PageDO<AuthorityDO>>
+
+    fun getAuthorityByCode(code: String): Uni<AuthorityDO>
+
+    fun addAuthority(authorityDO: AuthorityDO): Uni<AuthorityDO>
+
 }

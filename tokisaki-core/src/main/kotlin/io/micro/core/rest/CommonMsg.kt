@@ -7,4 +7,5 @@ object CommonMsg {
     const val SAME_ACCOUNT_ROBOT = "存在相同帐号机器人"
     const val ILLEGAL_OPERATE_ROBOT = "非法操作机器人"
     const val ILLEGAL_ADD_ROBOT_FEATURE = "非法添加机器人功能"
+    const val SAME_AUTHORITY_VALUE = "存在相同权限值"
 }

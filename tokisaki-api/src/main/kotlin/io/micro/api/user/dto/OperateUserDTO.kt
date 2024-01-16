@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull
 import kotlinx.serialization.Serializable
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 
-@Schema(title = "用户")
+@Schema(title = "操作用户")
 @Serializable
 class OperateUserDTO {
 

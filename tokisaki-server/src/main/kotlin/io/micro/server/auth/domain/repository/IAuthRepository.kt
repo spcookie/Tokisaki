@@ -16,7 +16,7 @@ interface IAuthRepository {
 
     fun findWXLoginUserByOpenid(openid: String): Uni<WXLoginUserDO>
 
-    fun findAuthorityById(id: Long): Uni<List<AuthorityDO>>
+    fun findAuthorityByUserId(id: Long): Uni<List<AuthorityDO>>
 
     fun findWXLoginUserById(id: Long): Uni<WXLoginUserDO>
 
@@ -24,8 +24,20 @@ interface IAuthRepository {
 
     fun updateUserById(userDO: UserDO): Uni<UserDO>
 
-    fun findUserPage(pageable: Pageable): Uni<List<UserDO>>
+    fun findUser(pageable: Pageable): Uni<List<UserDO>>
 
     fun countUser(): Uni<Long>
+
+    fun findAuthorityById(id: Long): Uni<AuthorityDO>
+
+    fun switchAuthorityById(id: Long): Uni<Long>
+
+    fun findAuthority(pageable: Pageable): Uni<List<AuthorityDO>>
+
+    fun countAuthority(): Uni<Long>
+
+    fun findAuthorityByExample(authorityDO: AuthorityDO): Uni<List<AuthorityDO>>
+
+    fun saveAuthority(authorityDO: AuthorityDO): Uni<AuthorityDO>
 
 }

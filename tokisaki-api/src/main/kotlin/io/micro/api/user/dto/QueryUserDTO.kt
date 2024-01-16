@@ -3,7 +3,7 @@ package io.micro.api.user.dto
 import kotlinx.serialization.Serializable
 import org.eclipse.microprofile.openapi.annotations.media.Schema
 
-@Schema(title = "用户")
+@Schema(title = "查询用户")
 @Serializable
 class QueryUserDTO {
 

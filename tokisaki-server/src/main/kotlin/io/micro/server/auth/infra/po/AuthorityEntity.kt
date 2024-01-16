@@ -15,11 +15,17 @@ import org.hibernate.proxy.HibernateProxy
 @Entity
 class AuthorityEntity : BaseEntity() {
 
-    @Column(name = "authority_value")
+    @Column(name = "authority_value", nullable = false)
     var value: String? = null
 
     @ManyToMany(mappedBy = "authorities")
     var users: MutableSet<UserEntity>? = null
+
+    @Column(name = "authority_enabled", nullable = false)
+    var enabled: Boolean = true
+
+    @Column(name = "authority_remark")
+    var remark: String? = null
 
     final override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -25,11 +25,15 @@ interface AuthConverter {
     @InheritInverseConfiguration
     fun authorityToString(string: MutableSet<AuthorityEntity>): MutableSet<String>
 
-    fun authorityDAO2authorityDO(authority: AuthorityEntity): AuthorityDO
+    fun authorityEntity2authorityDO(authority: AuthorityEntity): AuthorityDO
+
+    @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+    fun authorityDO2authorityEntity(authority: AuthorityDO): AuthorityEntity
 
     fun userEntity2UserDO(userEntity: UserEntity): UserDO
 
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     @Mapping(target = "authorities", ignore = true)
     fun userDO2UserEntity(userDO: UserDO, @MappingTarget userEntity: UserEntity)
+
 }

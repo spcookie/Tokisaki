@@ -7,6 +7,7 @@ import io.micro.server.auth.domain.model.entity.UserDO
 import io.micro.server.auth.domain.model.entity.WXLoginUserDO
 import io.micro.server.auth.domain.repository.IAuthRepository
 import io.micro.server.auth.infra.converter.AuthConverter
+import io.micro.server.auth.infra.dao.impl.AuthorityDAO
 import io.micro.server.auth.infra.dao.impl.UserDAO
 import io.quarkus.panache.common.Page
 import io.smallrye.mutiny.Uni
@@ -17,7 +18,11 @@ import jakarta.enterprise.context.ApplicationScoped
  *@since 2023/11/25
  */
 @ApplicationScoped
-class AuthRepository(private val userDAO: UserDAO, private val authConverter: AuthConverter) : IAuthRepository {
+class AuthRepository(
+    private val userDAO: UserDAO,
+    private val authConverter: AuthConverter,
+    private val authorityDAO: AuthorityDAO
+) : IAuthRepository {
 
     override fun registerWXLoginUser(wxLoginUserDO: WXLoginUserDO): Uni<WXLoginUserDO> {
         return Uni.createFrom()
@@ -32,9 +37,9 @@ class AuthRepository(private val userDAO: UserDAO, private val authConverter: Au
             .onItem().ifNotNull().transform(authConverter::userToWXUser)
     }
 
-    override fun findAuthorityById(id: Long): Uni<List<AuthorityDO>> {
+    override fun findAuthorityByUserId(id: Long): Uni<List<AuthorityDO>> {
         return userDAO.findById(id).map { userEntity ->
-            userEntity.authorities!!.converter(authConverter::authorityDAO2authorityDO)
+            userEntity.authorities!!.converter(authConverter::authorityEntity2authorityDO)
         }
     }
 
@@ -53,7 +58,7 @@ class AuthRepository(private val userDAO: UserDAO, private val authConverter: Au
         }
     }
 
-    override fun findUserPage(pageable: Pageable): Uni<List<UserDO>> {
+    override fun findUser(pageable: Pageable): Uni<List<UserDO>> {
         return userDAO.findAll()
             .page(Page.of(pageable.current - 1, pageable.limit))
             .list()
@@ -62,6 +67,36 @@ class AuthRepository(private val userDAO: UserDAO, private val authConverter: Au
 
     override fun countUser(): Uni<Long> {
         return userDAO.count()
+    }
+
+    override fun findAuthorityById(id: Long): Uni<AuthorityDO> {
+        return authorityDAO.findById(id)
+            .map(authConverter::authorityEntity2authorityDO)
+    }
+
+    override fun switchAuthorityById(id: Long): Uni<Long> {
+        return authorityDAO.switchAuthorityById(id)
+    }
+
+    override fun findAuthority(pageable: Pageable): Uni<List<AuthorityDO>> {
+        return authorityDAO.findAll()
+            .page(Page.of(pageable.index, pageable.limit))
+            .list()
+            .map { it.map(authConverter::authorityEntity2authorityDO) }
+    }
+
+    override fun countAuthority(): Uni<Long> {
+        return authorityDAO.count()
+    }
+
+    override fun findAuthorityByExample(authorityDO: AuthorityDO): Uni<List<AuthorityDO>> {
+        return authorityDAO.findAuthorityByExample(authConverter.authorityDO2authorityEntity(authorityDO))
+            .map { it.converter(authConverter::authorityEntity2authorityDO) }
+    }
+
+    override fun saveAuthority(authorityDO: AuthorityDO): Uni<AuthorityDO> {
+        val entity = authConverter.authorityDO2authorityEntity(authorityDO).also { it.id = null }
+        return authorityDAO.persist(entity).map(authConverter::authorityEntity2authorityDO)
     }
 
 }
