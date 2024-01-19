@@ -3,6 +3,7 @@ package io.micro.server.robot.domain.service.impl
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micro.core.context.AuthContext
+import io.micro.core.exception.CmdException
 import io.micro.core.exception.fail
 import io.micro.core.exception.requireNonNull
 import io.micro.core.exception.requireTure
@@ -35,6 +36,7 @@ import io.smallrye.mutiny.Uni
 import io.smallrye.mutiny.coroutines.awaitSuspending
 import io.smallrye.mutiny.replaceWithUnit
 import io.smallrye.mutiny.subscription.MultiEmitter
+import io.vertx.mutiny.core.Context
 import io.vertx.mutiny.core.Vertx
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.ws.rs.sse.OutboundSseEvent
@@ -247,107 +249,118 @@ class RobotManagerServiceImpl(
             // 绑定登录回调函数
             qqRobotEventEmitBind(robot, em)
             // 群消息处理
-            robot.onGroupMessage = { event ->
-                Log.info(event.message)
-
-                val latestRobot = sessionFactory.withSession {
-                    robotManagerRepository.findRobotById(robotId)
-                }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
-                requireNonNull(latestRobot)
-                var text = event.message.findIsInstance<PlainText>().toString()
-                val prefix = latestRobot.cmdPrefix
-                requireNonNull(prefix)
-                if (text.startsWith(prefix)) {
-                    text = text.removePrefix(prefix)
-                    val args = text.split(SPACE).toMutableList()
-                    val cmd = args.removeFirst()
-                    val cmdName = cmd.lowercase()
-                    val cmdEnum = Cmd.entries.associateBy { it.cmd }[cmdName]
-                    if (cmdEnum != null) {
-                        val featureFunction = latestRobot.functions
-                            .filter { it.enabled }
-                            .associateBy { it.code }[cmdEnum.code]
-                        if (featureFunction != null) {
-                            val authority = sessionFactory.withSession {
-                                authService.getAuthorityByCode(featureFunction.code!!)
-                            }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
-                            if (authority != null && authority.enabled == true) {
-                                val (enableGroups,
-                                    disableGroups,
-                                    enableMembers,
-                                    disableMembers) = sessionFactory.withSession {
-                                    robotManagerRepository.findSwitchByUseFunctionId(featureFunction.id!!)
-                                }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
-                                var canInvoke = false
-                                if (disableGroups.isNotEmpty()) {
-                                    if (!disableGroups.contains(event.group.id)) {
-                                        if (disableMembers.isNotEmpty()) {
-                                            if (!disableMembers.contains(event.sender.id)) {
-                                                canInvoke = true
-                                            }
-                                        } else {
-                                            if (enableMembers.contains(event.sender.id)) {
-                                                canInvoke = true
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    if (enableGroups.contains(event.group.id)) {
-                                        if (disableMembers.isNotEmpty()) {
-                                            if (!disableMembers.contains(event.sender.id)) {
-                                                canInvoke = true
-                                            }
-                                        } else {
-                                            if (enableMembers.contains(event.sender.id)) {
-                                                canInvoke = true
-                                            }
-                                        }
-                                    }
-                                }
-                                if (canInvoke) {
-                                    val configStr = featureFunction.config ?: BRACES
-                                    val config =
-                                        objectMapper.readValue(configStr, object : TypeReference<Map<String, *>>() {})
-                                    // TODO 处理CmdException
-                                    val messageChain = functionContext.call(cmdEnum, args, config).awaitSuspending()
-                                    val requireQuota = featureFunction.requireQuota
-                                    val results = buildMessageChain {
-                                        if (requireQuota == true) {
-                                            add(event.message.quote())
-                                        }
-                                        messageChain.messages.forEach { message ->
-                                            if (message.msg.isNotBlank()) {
-                                                add(PlainText(message.msg))
-                                            }
-                                            if (message.data.type == MediaType.Picture) {
-                                                val image = message.data.bytes
-                                                    .inputStream()
-                                                    .use { event.sender.uploadImage(it) }
-                                                add(image)
-                                            }
-                                            if (message.card.id == CardID.Music) {
-                                                TODO()
-                                            }
-                                        }
-                                    }
-
-                                    val receipt = event.group.sendMessage(results)
-
-                                    if (messageChain.receipt.recall > 0) {
-                                        receipt.recallIn(messageChain.receipt.recall.toLong())
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
+            onGroupMessage(robot, robotId, vertxContext)
             // 注册机器人并开始登录
             manager.registerRobot(robot)
         }.map {
             // 发送消息事件
             sse.newEvent(it)
+        }
+    }
+
+    private fun onGroupMessage(robot: QQRobot, robotId: Long, vertxContext: Context) {
+        robot.onGroupMessage = { event ->
+            Log.info(event.message)
+
+            val latestRobot = sessionFactory.withSession {
+                robotManagerRepository.findRobotById(robotId)
+            }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
+            requireNonNull(latestRobot)
+            var text = event.message.findIsInstance<PlainText>().toString()
+            val prefix = latestRobot.cmdPrefix
+            requireNonNull(prefix)
+            if (text.startsWith(prefix)) {
+                text = text.removePrefix(prefix)
+                val args = text.split(SPACE).toMutableList()
+                val cmd = args.removeFirst()
+                val cmdName = cmd.lowercase()
+                val cmdEnum = Cmd.entries.associateBy { it.cmd }[cmdName]
+                if (cmdEnum != null) {
+                    val featureFunction = latestRobot.functions
+                        .filter { it.enabled }
+                        .associateBy { it.code }[cmdEnum.code]
+                    if (featureFunction != null) {
+                        val authority = sessionFactory.withSession {
+                            authService.getAuthorityByCode(featureFunction.code!!)
+                        }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
+                        if (authority != null && authority.enabled == true) {
+                            val (enableGroups,
+                                disableGroups,
+                                enableMembers,
+                                disableMembers) = sessionFactory.withSession {
+                                robotManagerRepository.findSwitchByUseFunctionId(featureFunction.id!!)
+                            }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
+                            var canInvoke = false
+                            if (disableGroups.isNotEmpty()) {
+                                if (!disableGroups.contains(event.group.id)) {
+                                    if (disableMembers.isNotEmpty()) {
+                                        if (!disableMembers.contains(event.sender.id)) {
+                                            canInvoke = true
+                                        }
+                                    } else {
+                                        if (enableMembers.contains(event.sender.id)) {
+                                            canInvoke = true
+                                        }
+                                    }
+                                }
+                            } else {
+                                if (enableGroups.contains(event.group.id)) {
+                                    if (disableMembers.isNotEmpty()) {
+                                        if (!disableMembers.contains(event.sender.id)) {
+                                            canInvoke = true
+                                        }
+                                    } else {
+                                        if (enableMembers.contains(event.sender.id)) {
+                                            canInvoke = true
+                                        }
+                                    }
+                                }
+                            }
+                            if (canInvoke) {
+                                val configStr = featureFunction.config ?: BRACES
+                                val config =
+                                    objectMapper.readValue(configStr, object : TypeReference<Map<String, *>>() {})
+                                runCatching { functionContext.call(cmdEnum, args, config).awaitSuspending() }
+                                    .onSuccess { messageChain ->
+                                        val requireQuota = featureFunction.requireQuota
+                                        val results = buildMessageChain {
+                                            if (requireQuota == true) {
+                                                add(event.message.quote())
+                                            }
+                                            messageChain.messages.forEach { message ->
+                                                if (message.msg.isNotBlank()) {
+                                                    add(PlainText(message.msg))
+                                                }
+                                                if (message.data.type == MediaType.Picture) {
+                                                    val image = message.data.bytes
+                                                        .inputStream()
+                                                        .use { event.sender.uploadImage(it) }
+                                                    add(image)
+                                                }
+                                                if (message.card.id == CardID.Music) {
+                                                    TODO()
+                                                }
+                                            }
+                                        }
+
+                                        val receipt = event.group.sendMessage(results)
+
+                                        if (messageChain.receipt.recall > 0) {
+                                            receipt.recallIn(messageChain.receipt.recall.toLong())
+                                        }
+                                    }
+                                    .onFailure {
+                                        if (it is CmdException) {
+                                            event.group.sendMessage(it.message.toString())
+                                        } else {
+                                            Log.error("function异常：", it)
+                                        }
+                                    }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
