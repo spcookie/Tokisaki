@@ -32,3 +32,16 @@ mp:
     verify:
       publickey:
         location: publicKey.pem
+  messaging:
+    incoming:
+      robot-login-success:
+        connector: smallrye-rabbitmq
+        routing-keys: robot.login.success
+        queue:
+          name: queue.robot.login.success
+        exchange:
+          name: exchange.robot.login
+    outgoing:
+      robot-login:
+        exchange:
+          name: exchange.robot.login
