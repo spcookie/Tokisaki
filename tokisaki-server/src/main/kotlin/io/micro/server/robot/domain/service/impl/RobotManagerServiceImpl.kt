@@ -275,7 +275,7 @@ class RobotManagerServiceImpl(
                     if (switched) {
                         runCatching {
                             functionContext.call(
-                                featureFunction.cmd,
+                                featureFunction.cmd!!,
                                 featureFunction.args,
                                 featureFunction.getConfigMap(objectMapper)
                             ).awaitSuspending()

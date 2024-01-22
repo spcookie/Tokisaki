@@ -2,7 +2,6 @@ package io.micro.server.robot.infra.event.dto
 
 import io.micro.core.function.sdk.Cmd
 import io.micro.server.robot.domain.model.valobj.Switch
-import kotlin.properties.Delegates
 
 class FeatureFunctionDTO {
 
@@ -24,14 +23,14 @@ class FeatureFunctionDTO {
 
     var requireQuota: Boolean? = null
 
-    var cmd: Cmd by Delegates.notNull()
+    var cmd: Cmd? = null
 
     var args: MutableList<String> = mutableListOf()
 
     var switch: Switch = Switch()
 
-    var groupId: Long by Delegates.notNull()
+    var groupId: Long? = null
 
-    var memberId: Long by Delegates.notNull()
+    var memberId: Long? = null
 
 }

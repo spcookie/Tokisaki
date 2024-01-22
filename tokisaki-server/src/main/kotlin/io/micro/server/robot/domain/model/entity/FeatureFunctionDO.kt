@@ -6,7 +6,6 @@ import io.micro.core.exception.requireNonNull
 import io.micro.core.function.sdk.Cmd
 import io.micro.core.rest.CommonCode
 import io.micro.server.robot.domain.model.valobj.Switch
-import kotlin.properties.Delegates
 
 class FeatureFunctionDO {
 
@@ -28,15 +27,15 @@ class FeatureFunctionDO {
 
     var requireQuota: Boolean? = null
 
-    var cmd: Cmd by Delegates.notNull()
+    var cmd: Cmd? = null
 
     var args: MutableList<String> = mutableListOf()
 
     var switch: Switch = Switch()
 
-    var groupId: Long by Delegates.notNull()
+    var groupId: Long? = null
 
-    var memberId: Long by Delegates.notNull()
+    var memberId: Long? = null
 
     companion object {
         const val BRACES = "{}"
