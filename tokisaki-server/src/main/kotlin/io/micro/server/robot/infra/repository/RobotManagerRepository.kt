@@ -13,6 +13,7 @@ import io.micro.server.robot.infra.converter.SwitchConverter
 import io.micro.server.robot.infra.dao.IFunctionDAO
 import io.micro.server.robot.infra.dao.IRobotDAO
 import io.micro.server.robot.infra.dao.IUseFunctionDAO
+import io.quarkus.cache.CacheResult
 import io.quarkus.panache.common.Page
 import io.smallrye.mutiny.Uni
 import io.smallrye.mutiny.replaceWithUnit
@@ -40,10 +41,15 @@ class RobotManagerRepository(
             .replaceWith(robotDO)
     }
 
-    override fun findRobotById(id: Long): Uni<RobotDO?> {
+    override fun findRobotById(id: Long): Uni<RobotDO> {
         return robotDAO.findById(id)
             .onItem().ifNotNull()
             .transform(robotConverter::robotEntity2RobotDO)
+    }
+
+    @CacheResult(cacheName = "robot")
+    override fun findRobotCacheableById(id: Long): Uni<RobotDO> {
+        return findRobotById(id)
     }
 
     override fun existRobotByAccountAndUserId(account: String, id: Long): Uni<Boolean> {
@@ -111,7 +117,7 @@ class RobotManagerRepository(
             .map { it.map(robotConverter::useFunctionEntity2FeatureFunction) }
     }
 
-    override fun findSwitchByUseFunctionId(id: Long): Uni<Switch> {
+    override fun findSwitchCacheByUseFunctionId(id: Long): Uni<Switch> {
         return switchCache.loadSwitchConfig(id).map(switchConverter::switchDTO2switch)
     }
 
@@ -120,7 +126,7 @@ class RobotManagerRepository(
             .replaceWith(switch)
     }
 
-    override fun findRobotByUseFunctionId(id: Long): Uni<RobotDO?> {
+    override fun findRobotByUseFunctionId(id: Long): Uni<RobotDO> {
         return useFunctionDAO.findById(id)
             .onItem().ifNotNull()
             .transform { robotConverter.robotEntity2RobotDO(it.robot!!) }

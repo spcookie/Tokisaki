@@ -17,6 +17,7 @@ interface RobotConverter {
     @InheritInverseConfiguration(name = "robotDO2RobotEntity")
     fun robotEntity2RobotDO(robotPO: RobotEntity): RobotDO
 
+    @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     @Mapping(source = "function.id", target = "refId")
     @Mapping(source = "function.name", target = "name")
     @Mapping(source = "function.code", target = "code")

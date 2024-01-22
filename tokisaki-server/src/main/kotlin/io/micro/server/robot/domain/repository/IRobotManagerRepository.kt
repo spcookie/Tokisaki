@@ -10,7 +10,9 @@ interface IRobotManagerRepository {
 
     fun saveRobotWithUser(robotDO: RobotDO): Uni<RobotDO>
 
-    fun findRobotById(id: Long): Uni<RobotDO?>
+    fun findRobotById(id: Long): Uni<RobotDO>
+
+    fun findRobotCacheableById(id: Long): Uni<RobotDO>
 
     fun existRobotByAccountAndUserId(account: String, id: Long): Uni<Boolean>
 
@@ -28,10 +30,10 @@ interface IRobotManagerRepository {
 
     fun findFeatureFunctionsByRobotId(id: Long): Uni<List<FeatureFunctionDO>>
 
-    fun findSwitchByUseFunctionId(id: Long): Uni<Switch>
+    fun findSwitchCacheByUseFunctionId(id: Long): Uni<Switch>
 
     fun saveOrUpdateSwitchByFunctionId(id: Long, switch: Switch): Uni<Switch>
 
-    fun findRobotByUseFunctionId(id: Long): Uni<RobotDO?>
+    fun findRobotByUseFunctionId(id: Long): Uni<RobotDO>
 
 }

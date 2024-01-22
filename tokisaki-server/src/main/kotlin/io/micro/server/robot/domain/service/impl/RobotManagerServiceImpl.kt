@@ -223,7 +223,7 @@ class RobotManagerServiceImpl(
         return robotManagerRepository.findRobotByUseFunctionId(id).flatMap { robotDO ->
             requireNonNull(robotDO)
             requireTure(AuthContext.equalId(robotDO.userId), code = CommonCode.ILLEGAL_OPERATION)
-            robotManagerRepository.findSwitchByUseFunctionId(id)
+            robotManagerRepository.findSwitchCacheByUseFunctionId(id)
         }
     }
 
@@ -256,10 +256,10 @@ class RobotManagerServiceImpl(
             Log.info(event.message)
 
             val latestRobot = sessionFactory.withSession {
-                robotManagerRepository.findRobotById(robotId)
+                robotManagerRepository.findRobotCacheableById(robotId)
             }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
             requireNonNull(latestRobot)
-            var text = event.message.findIsInstance<PlainText>().toString()
+            val text = event.message.findIsInstance<PlainText>().toString()
             val featureFunction = latestRobot.resolveCommand(event.group.id, event.sender.id, text)
             if (featureFunction != null) {
                 val authority = sessionFactory.withSession {
@@ -267,7 +267,7 @@ class RobotManagerServiceImpl(
                 }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
                 if (authority != null && authority.enabled == true) {
                     val switch = sessionFactory.withSession {
-                        robotManagerRepository.findSwitchByUseFunctionId(featureFunction.id!!)
+                        robotManagerRepository.findSwitchCacheByUseFunctionId(featureFunction.id!!)
                     }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
                     val switched = featureFunction.also { it.switch = switch }.switched()
                     if (switched) {
