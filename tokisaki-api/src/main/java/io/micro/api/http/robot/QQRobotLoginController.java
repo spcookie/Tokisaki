@@ -1,4 +1,4 @@
-package io.micro.api.robot;
+package io.micro.api.http.robot;
 
 import io.micro.core.annotation.InitAuthContext;
 import io.micro.server.robot.domain.service.RobotManagerService;

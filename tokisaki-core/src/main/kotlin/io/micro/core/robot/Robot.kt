@@ -28,7 +28,7 @@ interface Robot {
      */
     fun close()
 
-    fun setStateChangeListener(block: (event: Event) -> Unit)
+    fun addStateChangeListener(block: suspend (event: Event) -> Unit)
 
     interface LifeCycle {
 

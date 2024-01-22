@@ -25,6 +25,7 @@ import io.micro.server.robot.domain.model.valobj.Switch
 import io.micro.server.robot.domain.repository.IRobotManagerRepository
 import io.micro.server.robot.domain.service.FunctionService
 import io.micro.server.robot.domain.service.RobotManagerService
+import io.micro.server.robot.infra.event.RobotEvent
 import io.quarkus.hibernate.reactive.panache.common.WithSession
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction
 import io.quarkus.logging.Log
@@ -60,7 +61,8 @@ class RobotManagerServiceImpl(
     private val functionContext: FunctionContext,
     private val sessionFactory: Mutiny.SessionFactory,
     private val objectMapper: ObjectMapper,
-    private val authService: AuthService
+    private val authService: AuthService,
+    private val robotEvent: RobotEvent
 ) : RobotManagerService {
 
     /**
@@ -240,7 +242,7 @@ class RobotManagerServiceImpl(
         val vertxContext = Vertx.currentContext()
         return Multi.createFrom().emitter<String> { em ->
             // 绑定登录回调函数
-            qqRobotEventEmitBind(robot, em)
+            qqRobotEventEmitBind(robotDO, robot, em)
             // 群消息处理
             onGroupMessage(robot, robotId, vertxContext)
             // 注册机器人并开始登录
@@ -324,9 +326,9 @@ class RobotManagerServiceImpl(
      * @param robot QQ机器人
      * @param em 事件触发器
      */
-    private fun qqRobotEventEmitBind(robot: QQRobot, em: MultiEmitter<in String?>) {
+    private fun qqRobotEventEmitBind(robotDO: RobotDO, robot: QQRobot, em: MultiEmitter<in String?>) {
         val id = robot.id()
-        robot.setStateChangeListener { event ->
+        robot.addStateChangeListener { event ->
             when (event) {
                 is QQRobot.QRCodeStartEvent -> {
                     val qrCode = Base64.getEncoder().encodeToString(event.qr)
@@ -339,7 +341,10 @@ class RobotManagerServiceImpl(
                     manager.unregisterRobot(id)
                 }
 
-                is QQRobot.LoginSuccessEvent -> em.emit("success#")
+                is QQRobot.LoginSuccessEvent -> {
+                    robotEvent.publishRobotLoginSuccess(robotDO).awaitSuspending()
+                    em.emit("success#")
+                }
                 is QQRobot.LoginFailEvent -> em.emit("fail#${event.ex.message}")
             }
         }

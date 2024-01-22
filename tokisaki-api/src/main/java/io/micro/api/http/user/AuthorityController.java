@@ -1,4 +1,4 @@
-package io.micro.api.user;
+package io.micro.api.http.user;
 
 import io.micro.api.user.converter.AuthorityConverter;
 import io.micro.api.user.dto.OperateAuthorityDTO;

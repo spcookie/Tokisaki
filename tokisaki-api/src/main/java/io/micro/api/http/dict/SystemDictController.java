@@ -1,4 +1,4 @@
-package io.micro.api.dict;
+package io.micro.api.http.dict;
 
 import io.micro.api.dict.converter.SystemDictConverter;
 import io.micro.api.dict.dto.QuerySystemDictDTO;

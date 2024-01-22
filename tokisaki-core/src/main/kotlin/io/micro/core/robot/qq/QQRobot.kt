@@ -48,7 +48,7 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
      */
     var onGroupMessage: (suspend (GroupMessageEvent) -> Unit)? = null
 
-    private var onStateChange: ((Robot.Event) -> Unit)? = null
+    private var onStateChangeList: MutableList<suspend (Robot.Event) -> Unit> = mutableListOf()
 
     /**
      * 二维码获取开始事件
@@ -116,8 +116,8 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
         bot.close()
     }
 
-    override fun setStateChangeListener(block: (event: Robot.Event) -> Unit) {
-        onStateChange = block
+    override fun addStateChangeListener(block: suspend (event: Robot.Event) -> Unit) {
+        onStateChangeList += block
     }
 
     /**
@@ -126,43 +126,44 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
     private fun canLogin() = state != Robot.State.LoggingIn || state != Robot.State.Online
 
     override fun loggingInListener(event: Robot.Event) {
-        val handle = onStateChange
-        if (handle != null) {
-            when (event) {
-                is QRCodeStartEvent -> {
-                    try {
-                        handle(event)
-                    } catch (ex: Exception) {
-                        this.state = Robot.State.LoggingFail
-                        loggingInListener(LoginFailEvent(ex))
+        scope.launch {
+            onStateChangeList.forEach { handle ->
+                when (event) {
+                    is QRCodeStartEvent -> {
+                        try {
+                            handle(event)
+                        } catch (ex: Exception) {
+                            this@QQRobot.state = Robot.State.LoggingFail
+                            loggingInListener(LoginFailEvent(ex))
+                        }
                     }
-                }
 
-                is LoginSuccessEvent -> {
-                    try {
-                        handle(event)
-                    } catch (ex: Exception) {
-                        Log.error(ex)
+                    is LoginSuccessEvent -> {
+                        try {
+                            handle(event)
+                        } catch (ex: Exception) {
+                            Log.error(ex)
+                        }
+                        state = Robot.State.Online
                     }
-                    state = Robot.State.Online
-                }
 
-                is LoginFailEvent -> {
-                    try {
-                        handle(event)
-                    } catch (ex: Exception) {
-                        Log.error(ex)
+                    is LoginFailEvent -> {
+                        try {
+                            handle(event)
+                        } catch (ex: Exception) {
+                            Log.error(ex)
+                        }
+                        state = Robot.State.LoggingFail
                     }
-                    state = Robot.State.LoggingFail
-                }
 
-                is LoginTimeoutEvent -> {
-                    state = Robot.State.Closed
-                    bot.close()
-                    try {
-                        handle(event)
-                    } catch (ex: Exception) {
-                        Log.error(ex)
+                    is LoginTimeoutEvent -> {
+                        state = Robot.State.Closed
+                        bot.close()
+                        try {
+                            handle(event)
+                        } catch (ex: Exception) {
+                            Log.error(ex)
+                        }
                     }
                 }
             }

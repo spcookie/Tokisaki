@@ -19,3 +19,21 @@ quarkus:
     url: http://localhost:9000
     access-key: minioadmin
     secret-key: minioadmin
+rabbitmq-host: localhost
+rabbitmq-port: 5672
+rabbitmq-username: tokisaki
+rabbitmq-password: 123456
+mp:
+  messaging:
+    incoming:
+      robot-login-success:
+        connector: smallrye-rabbitmq
+        routing-keys: robot.login.success
+        queue:
+          name: robot-login-success
+    outgoing:
+      robot-login:
+        connector: smallrye-rabbitmq
+        default-roting-key: robot.login.*
+        exchange:
+          name: robot-login

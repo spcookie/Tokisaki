@@ -28,6 +28,7 @@ subprojects {
     dependencies {
         implementation(platform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
         implementation("io.quarkus:quarkus-smallrye-openapi")
+        implementation("io.quarkus:quarkus-smallrye-reactive-messaging-rabbitmq")
         implementation("io.quarkus:quarkus-resteasy-reactive-jaxb")
         implementation("io.quarkus:quarkus-rest-client-reactive-kotlin-serialization")
         implementation("io.quarkus:quarkus-resteasy-reactive")

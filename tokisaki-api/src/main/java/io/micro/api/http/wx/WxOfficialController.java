@@ -1,4 +1,4 @@
-package io.micro.api.wx;
+package io.micro.api.http.wx;
 
 import io.micro.api.wx.convert.WxMessageConvert;
 import io.micro.api.wx.dto.AccessInfoDTO;

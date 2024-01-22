@@ -1,4 +1,4 @@
-package io.micro.api.robot;
+package io.micro.api.http.robot;
 
 import io.micro.api.robot.converter.RobotManagerConverter;
 import io.micro.api.robot.converter.SwitchConverter;

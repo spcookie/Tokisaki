@@ -34,7 +34,6 @@ class RobotDO : BaseDomainEntity() {
         val validTypeIds = listOf(0)
         val validStateIds = listOf(0, 1, 2, 3, 4, 5, 6, 7)
         const val SPACE = " "
-        const val BRACES = "{}"
     }
 
     fun paramVerify() {

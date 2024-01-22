@@ -2,6 +2,7 @@ package io.micro.server.robot.infra.converter
 
 import io.micro.server.robot.domain.model.entity.FeatureFunctionDO
 import io.micro.server.robot.domain.model.entity.RobotDO
+import io.micro.server.robot.infra.event.dto.RobotDTO
 import io.micro.server.robot.infra.po.RobotEntity
 import io.micro.server.robot.infra.po.UseFunctionEntity
 import org.mapstruct.*
@@ -45,5 +46,7 @@ interface RobotConverter {
         featureFunctionDO: FeatureFunctionDO,
         @MappingTarget useFunctionEntity: UseFunctionEntity
     )
+
+    fun robotDO2RobotDTO(robotDO: RobotDO): RobotDTO
 
 }

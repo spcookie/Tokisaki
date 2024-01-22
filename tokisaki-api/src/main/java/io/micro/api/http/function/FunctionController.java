@@ -1,4 +1,4 @@
-package io.micro.api.function;
+package io.micro.api.http.function;
 
 import io.micro.api.function.converter.FunctionConverter;
 import io.micro.api.function.dto.QueryFunctionDTO;
