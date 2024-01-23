@@ -57,7 +57,7 @@ fun requireFalse(value: Boolean, detail: String? = null, code: CommonCode = Comm
 
 @JvmOverloads
 @OptIn(ExperimentalContracts::class)
-fun <T> requireNonNull(detail: String? = null, code: CommonCode = CommonCode.FAIL, block: () -> T): T {
+fun <T> requireNonNull(detail: String? = null, code: CommonCode = CommonCode.NOT_FOUND, block: () -> T): T {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
@@ -71,7 +71,7 @@ fun <T> requireNonNull(detail: String? = null, code: CommonCode = CommonCode.FAI
 
 @JvmOverloads
 @OptIn(ExperimentalContracts::class)
-fun <T> requireNonNull(value: T, detail: String? = null, code: CommonCode = CommonCode.FAIL): T {
+fun <T> requireNonNull(value: T, detail: String? = null, code: CommonCode = CommonCode.NOT_FOUND): T {
     contract {
         returns() implies (value != null)
     }
