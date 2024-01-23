@@ -22,7 +22,10 @@ quarkus:
       read-timeout: 900000
     xyz:
       follow-redirects: true
-smallrye:
+  cache:
+    redis:
+      robot:
+        expire-after-write: 1m
   jwt:
     sign:
       key:
@@ -43,5 +46,6 @@ mp:
           name: exchange.robot.login
     outgoing:
       robot-login:
+        connector: smallrye-rabbitmq
         exchange:
           name: exchange.robot.login
