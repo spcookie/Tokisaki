@@ -2,12 +2,14 @@ package io.micro.core.robot.qq
 
 import io.micro.core.exception.fail
 import io.micro.core.rest.CommonCode
+import io.micro.core.robot.Contacts
 import io.micro.core.robot.Robot
 import io.quarkus.logging.Log
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.mamoe.mirai.Bot
+import net.mamoe.mirai.contact.Member
 import net.mamoe.mirai.event.events.GroupMessageEvent
 
 /**
@@ -118,6 +120,19 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
 
     override fun addStateChangeListener(block: suspend (event: Robot.Event) -> Unit) {
         onStateChangeList += block
+    }
+
+    override fun loadContacts(): Contacts {
+        val friends = buildMap {
+            bot.friends.forEach { put(it.id, it.nick) }
+        }
+        val groups = buildMap {
+            bot.groups.forEach { put(it.id, it.members.map(Member::id)) }
+        }
+        val groupName = buildMap {
+            bot.groups.forEach { put(it.id, it.name) }
+        }
+        return Contacts(groupName, groups, friends)
     }
 
     /**

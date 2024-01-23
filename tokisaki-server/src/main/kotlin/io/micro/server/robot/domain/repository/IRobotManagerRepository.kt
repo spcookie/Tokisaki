@@ -12,7 +12,7 @@ interface IRobotManagerRepository {
 
     fun findRobotById(id: Long): Uni<RobotDO>
 
-    fun findRobotCacheableById(id: Long): Uni<RobotDO>
+    fun findRobotCacheById(id: Long): Uni<RobotDO>
 
     fun existRobotByAccountAndUserId(account: String, id: Long): Uni<Boolean>
 

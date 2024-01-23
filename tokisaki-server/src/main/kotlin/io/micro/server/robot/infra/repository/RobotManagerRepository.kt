@@ -48,7 +48,7 @@ class RobotManagerRepository(
     }
 
     @CacheResult(cacheName = "robot")
-    override fun findRobotCacheableById(id: Long): Uni<RobotDO> {
+    override fun findRobotCacheById(id: Long): Uni<RobotDO> {
         return findRobotById(id)
     }
 

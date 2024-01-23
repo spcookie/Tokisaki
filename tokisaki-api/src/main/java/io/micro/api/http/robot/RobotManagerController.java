@@ -2,10 +2,7 @@ package io.micro.api.http.robot;
 
 import io.micro.api.robot.converter.RobotManagerConverter;
 import io.micro.api.robot.converter.SwitchConverter;
-import io.micro.api.robot.dto.OperateFeatureFunctionDTO;
-import io.micro.api.robot.dto.OperateRobotDTO;
-import io.micro.api.robot.dto.QueryRobotDTO;
-import io.micro.api.robot.dto.QuerySwitchDTO;
+import io.micro.api.robot.dto.*;
 import io.micro.core.annotation.InitAuthContext;
 import io.micro.core.rest.PageDTO;
 import io.micro.core.rest.Pageable;
@@ -130,6 +127,16 @@ public class RobotManagerController {
     public Uni<R<QuerySwitchDTO>> getFunctionSwitch(@Parameter(description = "机器人功能权限ID") @PathParam("id") @Valid @NotNull Long id) {
         return robotManagerService.getFunctionSwitch(id)
                 .map(switchConverter::switch2SwitchDTO)
+                .map(R::newInstance);
+    }
+
+    @Operation(summary = "查询机器人联系人")
+    @GET
+    @Path("/{id}/contact")
+    @Authenticated
+    public Uni<R<QueryRobotContactsDTO>> loadRobotContacts(@Parameter(description = "机器人ID") @PathParam("id") @Valid @NotNull Long id) {
+        return robotManagerService.loadContacts(id)
+                .map(robotManagerConverter::robotContact2QueryRobotContactDTO)
                 .map(R::newInstance);
     }
 

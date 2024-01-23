@@ -21,6 +21,7 @@ import io.micro.function.domain.strategy.FunctionContext
 import io.micro.server.auth.domain.service.AuthService
 import io.micro.server.robot.domain.model.entity.FeatureFunctionDO
 import io.micro.server.robot.domain.model.entity.RobotDO
+import io.micro.server.robot.domain.model.valobj.RobotContacts
 import io.micro.server.robot.domain.model.valobj.Switch
 import io.micro.server.robot.domain.repository.IRobotManagerRepository
 import io.micro.server.robot.domain.service.FunctionService
@@ -229,6 +230,17 @@ class RobotManagerServiceImpl(
         }
     }
 
+    override fun loadContacts(id: Long): Uni<RobotContacts> {
+        requireNonNull(id)
+        val robot = manager.getRobot(id)
+        if (robot == null || robot.state() != Robot.State.Online) {
+            fail(CommonMsg.BOT_NOT_LOGGED_IN)
+        }
+        return Uni.createFrom().item {
+            robot.loadContacts().run { RobotContacts(groupName, groups, friends) }
+        }
+    }
+
     /**
      * 通过半长连接开始QQ扫码登录
      * @param robotDO 机器人
@@ -258,7 +270,7 @@ class RobotManagerServiceImpl(
             Log.info(event.message)
 
             val latestRobot = sessionFactory.withSession {
-                robotManagerRepository.findRobotCacheableById(robotId)
+                robotManagerRepository.findRobotCacheById(robotId)
             }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
             requireNonNull(latestRobot)
             val text = event.message.findIsInstance<PlainText>().toString()
@@ -345,6 +357,7 @@ class RobotManagerServiceImpl(
                     robotEvent.publishRobotLoginSuccess(robotDO).awaitSuspending()
                     em.emit("success#")
                 }
+
                 is QQRobot.LoginFailEvent -> em.emit("fail#${event.ex.message}")
             }
         }

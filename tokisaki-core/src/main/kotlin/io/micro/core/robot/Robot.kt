@@ -30,6 +30,8 @@ interface Robot {
 
     fun addStateChangeListener(block: suspend (event: Event) -> Unit)
 
+    fun loadContacts(): Contacts
+
     interface LifeCycle {
 
         /**

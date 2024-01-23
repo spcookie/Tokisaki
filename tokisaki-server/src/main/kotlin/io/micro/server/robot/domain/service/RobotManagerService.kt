@@ -4,6 +4,7 @@ import io.micro.core.rest.PageDO
 import io.micro.core.rest.Pageable
 import io.micro.server.robot.domain.model.entity.FeatureFunctionDO
 import io.micro.server.robot.domain.model.entity.RobotDO
+import io.micro.server.robot.domain.model.valobj.RobotContacts
 import io.micro.server.robot.domain.model.valobj.Switch
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.Uni
@@ -38,5 +39,7 @@ interface RobotManagerService {
     fun addOrModifyFunctionSwitch(id: Long, switch: Switch): Uni<Switch>
 
     fun getFunctionSwitch(id: Long): Uni<Switch>
+
+    fun loadContacts(id: Long): Uni<RobotContacts>
 
 }
