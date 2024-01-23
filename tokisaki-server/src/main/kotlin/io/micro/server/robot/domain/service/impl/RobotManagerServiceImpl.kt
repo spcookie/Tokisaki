@@ -252,16 +252,16 @@ class RobotManagerServiceImpl(
         // 创建QQ机器人
         val robot = factory.create(Credential(robotId!!, robotDO.account!!)) as QQRobot
         val vertxContext = Vertx.currentContext()
-        return Multi.createFrom().emitter<String> { em ->
+        return Multi.createFrom().emitter { em ->
             // 绑定登录回调函数
             qqRobotEventEmitBind(robotDO, robot, em)
             // 群消息处理
             onGroupMessage(robot, robotId, vertxContext)
             // 注册机器人并开始登录
             manager.registerRobot(robot)
-        }.map {
+        }.map { str ->
             // 发送消息事件
-            sse.newEvent(it)
+            sse.newEvent(str)
         }
     }
 
@@ -338,7 +338,7 @@ class RobotManagerServiceImpl(
      * @param robot QQ机器人
      * @param em 事件触发器
      */
-    private fun qqRobotEventEmitBind(robotDO: RobotDO, robot: QQRobot, em: MultiEmitter<in String?>) {
+    private fun qqRobotEventEmitBind(robotDO: RobotDO, robot: QQRobot, em: MultiEmitter<in String>) {
         val id = robot.id()
         robot.addStateChangeListener { event ->
             when (event) {
@@ -347,8 +347,24 @@ class RobotManagerServiceImpl(
                     em.emit("qr#$qrCode")
                 }
 
+                is QQRobot.QRCodeWaitingConfirmEvent -> {
+                    em.emit("waiting_confirm#")
+                }
+
+                is QQRobot.QRCodeConfirmedEvent -> {
+                    em.emit("confirmed#")
+                }
+
+                is QQRobot.QRCodeCancelledEvent -> {
+                    em.emit("cancelled#")
+                }
+
+                is QQRobot.QRCodeTimeoutEvent -> {
+                    em.emit("qr_timeout#")
+                }
+
                 is QQRobot.LoginTimeoutEvent -> {
-                    em.emit("timeout#")
+                    em.emit("login_timeout#")
                     em.complete()
                     manager.unregisterRobot(id)
                 }

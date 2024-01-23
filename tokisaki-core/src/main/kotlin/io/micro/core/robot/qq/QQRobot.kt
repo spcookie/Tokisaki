@@ -20,8 +20,8 @@ import net.mamoe.mirai.event.events.GroupMessageEvent
 class QQRobot(private val id: Long, private val account: String) : Robot, Robot.LifeCycle {
 
     companion object {
-        // 登录超时时间 2m
-        private const val LOGIN_TIMEOUT = 1000 * 60 * 1L
+        // 登录超时时间 5m
+        private const val LOGIN_TIMEOUT = 1000 * 60 * 5L
     }
 
     /**
@@ -56,6 +56,14 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
      * 二维码获取开始事件
      */
     open class QRCodeStartEvent(val qr: ByteArray) : Robot.Event
+
+    open class QRCodeWaitingConfirmEvent : Robot.Event
+
+    open class QRCodeCancelledEvent : Robot.Event
+
+    open class QRCodeConfirmedEvent : Robot.Event
+
+    open class QRCodeTimeoutEvent : Robot.Event
 
     /**
      * 登录成功事件
@@ -150,6 +158,14 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
                         } catch (ex: Exception) {
                             this@QQRobot.state = Robot.State.LoggingFail
                             loggingInListener(LoginFailEvent(ex))
+                        }
+                    }
+
+                    is QRCodeWaitingConfirmEvent, is QRCodeCancelledEvent, is QRCodeConfirmedEvent, is QRCodeTimeoutEvent -> {
+                        try {
+                            handle(event)
+                        } catch (ex: Exception) {
+                            Log.error(ex)
                         }
                     }
 
