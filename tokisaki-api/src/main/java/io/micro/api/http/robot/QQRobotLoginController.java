@@ -15,6 +15,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.sse.OutboundSseEvent;
 import jakarta.ws.rs.sse.Sse;
+import jakarta.ws.rs.sse.SseEventSink;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
@@ -36,8 +37,9 @@ public class QQRobotLoginController {
     @RestStreamElementType(MediaType.TEXT_HTML)
     public Multi<OutboundSseEvent> loginQQRobot(
             @Parameter(description = "机器人ID") @PathParam("id") @Valid @NotNull Long id,
-            @Context Sse sse) {
-        return robotManagerService.loginQQRobot(id, sse);
+            @Context Sse sse,
+            @Context SseEventSink sink) {
+        return robotManagerService.loginQQRobot(id, sse, sink);
     }
 
 }

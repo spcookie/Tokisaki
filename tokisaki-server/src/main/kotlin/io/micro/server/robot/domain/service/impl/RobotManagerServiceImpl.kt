@@ -41,7 +41,10 @@ import io.vertx.mutiny.core.Vertx
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.ws.rs.sse.OutboundSseEvent
 import jakarta.ws.rs.sse.Sse
+import jakarta.ws.rs.sse.SseEventSink
 import net.mamoe.mirai.contact.Contact.Companion.uploadImage
+import net.mamoe.mirai.event.events.GroupMessageEvent
+import net.mamoe.mirai.message.data.At
 import net.mamoe.mirai.message.data.MessageSource.Key.quote
 import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.buildMessageChain
@@ -69,9 +72,9 @@ class RobotManagerServiceImpl(
     /**
      * QQ号与半长连接的映射
      */
-    private val oldSse = mutableMapOf<Long, Sse>()
+    private val oldSse = mutableMapOf<Long, Pair<Sse, SseEventSink>>()
 
-    override fun loginQQRobot(id: Long, sse: Sse): Multi<OutboundSseEvent> {
+    override fun loginQQRobot(id: Long, sse: Sse, sink: SseEventSink): Multi<OutboundSseEvent> {
         return sessionFactory.withSession { robotManagerRepository.findRobotById(id) }
             .onItem().transformToMulti { robotManager ->
                 if (robotManager == null) {
@@ -80,23 +83,24 @@ class RobotManagerServiceImpl(
                     Multi.createFrom().items(sse.newEvent("fail#${CommonCode.ILLEGAL_OPERATION.code}"))
                 } else {
                     // 先移除旧的连接
-                    oldSse.remove(id)
+                    oldSse.remove(id)?.also { it.second.close() }
                     // 再关联新的连接
-                    oldSse[id] = sse
+                    sse.newBroadcaster().register(sink)
+                    oldSse[id] = sse to sink
                     val robot = manager.getRobot(id)
                     if (robot != null) {
                         if (robot.state() != Robot.State.Online) {
                             // 已存在机器人且未登录，则先注销机器人，可以使登录二维码失效
                             manager.unregisterRobot(id)
                             // 开始扫码登录
-                            qqRobotQRLoginStart(robotManager, sse)
+                            qqRobotQRLoginStart(robotManager, sse, sink)
                         } else {
                             // 若机器人已登录，则重置二维码登录
                             Multi.createFrom().items(sse.newEvent("reset#"))
                         }
                     } else {
                         // 若不存在机器人，则直接开始登录
-                        qqRobotQRLoginStart(robotManager, sse)
+                        qqRobotQRLoginStart(robotManager, sse, sink)
                     }
                 }
             }
@@ -247,14 +251,14 @@ class RobotManagerServiceImpl(
      * @param sse 半长连接
      * @return 消息事件
      */
-    private fun qqRobotQRLoginStart(robotDO: RobotDO, sse: Sse): Multi<OutboundSseEvent> {
+    private fun qqRobotQRLoginStart(robotDO: RobotDO, sse: Sse, sink: SseEventSink): Multi<OutboundSseEvent> {
         val robotId = robotDO.id
         // 创建QQ机器人
         val robot = factory.create(Credential(robotId!!, robotDO.account!!)) as QQRobot
         val vertxContext = Vertx.currentContext()
         return Multi.createFrom().emitter { em ->
             // 绑定登录回调函数
-            qqRobotEventEmitBind(robotDO, robot, em)
+            qqRobotEventEmitBind(robotDO, robot, em, sink)
             // 群消息处理
             onGroupMessage(robot, robotId, vertxContext)
             // 注册机器人并开始登录
@@ -273,8 +277,7 @@ class RobotManagerServiceImpl(
                 robotManagerRepository.findRobotCacheById(robotId)
             }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
             requireNonNull(latestRobot)
-            val text = event.message.findIsInstance<PlainText>().toString()
-            val featureFunction = latestRobot.resolveCommand(event.group.id, event.sender.id, text)
+            val featureFunction = getFeatureFunction(event, latestRobot)
             if (featureFunction != null) {
                 val authority = sessionFactory.withSession {
                     authService.getAuthorityByCode(featureFunction.code!!)
@@ -333,12 +336,31 @@ class RobotManagerServiceImpl(
         }
     }
 
+    private fun getFeatureFunction(event: GroupMessageEvent, latestRobot: RobotDO): FeatureFunctionDO? {
+        val text = event.message.findIsInstance<PlainText>().toString()
+        val at = event.message.findIsInstance<At>()
+        var featureFunction: FeatureFunctionDO? = null
+        if (at != null) {
+            if (at.target == latestRobot.id) {
+                featureFunction = FeatureFunctionDO().also { it.isMenu = true }
+            }
+        } else {
+            featureFunction = latestRobot.resolveCommand(event.group.id, event.sender.id, text)
+        }
+        return featureFunction
+    }
+
     /**
      * QQ机器人登录事件绑定
      * @param robot QQ机器人
      * @param em 事件触发器
      */
-    private fun qqRobotEventEmitBind(robotDO: RobotDO, robot: QQRobot, em: MultiEmitter<in String>) {
+    private fun qqRobotEventEmitBind(
+        robotDO: RobotDO,
+        robot: QQRobot,
+        em: MultiEmitter<in String>,
+        sink: SseEventSink
+    ) {
         val id = robot.id()
         robot.addStateChangeListener { event ->
             when (event) {
@@ -372,9 +394,13 @@ class RobotManagerServiceImpl(
                 is QQRobot.LoginSuccessEvent -> {
                     robotEvent.publishRobotLoginSuccess(robotDO).awaitSuspending()
                     em.emit("success#")
+                    sink.close()
                 }
 
-                is QQRobot.LoginFailEvent -> em.emit("fail#${event.ex.message}")
+                is QQRobot.LoginFailEvent -> {
+                    em.emit("fail#${event.ex.message}")
+                    sink.close()
+                }
             }
         }
     }

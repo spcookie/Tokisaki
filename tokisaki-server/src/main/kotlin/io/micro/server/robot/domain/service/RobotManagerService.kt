@@ -10,6 +10,7 @@ import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.Uni
 import jakarta.ws.rs.sse.OutboundSseEvent
 import jakarta.ws.rs.sse.Sse
+import jakarta.ws.rs.sse.SseEventSink
 
 /**
  *@author Augenstern
@@ -22,7 +23,7 @@ interface RobotManagerService {
      * @param sse 半长连接
      * @return 服务器推送事件
      */
-    fun loginQQRobot(id: Long, sse: Sse): Multi<OutboundSseEvent>
+    fun loginQQRobot(id: Long, sse: Sse, sink: SseEventSink): Multi<OutboundSseEvent>
 
     fun closeRobot(id: Long): Uni<Unit>
 
