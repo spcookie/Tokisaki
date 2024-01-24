@@ -38,6 +38,8 @@ interface IAuthRepository {
 
     fun findAuthorityByExample(authorityDO: AuthorityDO): Uni<List<AuthorityDO>>
 
+    fun findAuthorityCacheByExample(authorityDO: AuthorityDO): Uni<List<AuthorityDO>>
+
     fun saveAuthority(authorityDO: AuthorityDO): Uni<AuthorityDO>
 
 }

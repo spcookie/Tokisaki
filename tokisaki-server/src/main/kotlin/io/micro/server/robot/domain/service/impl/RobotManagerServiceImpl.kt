@@ -280,7 +280,7 @@ class RobotManagerServiceImpl(
             val featureFunction = getFeatureFunction(event, latestRobot)
             if (featureFunction != null) {
                 val authority = sessionFactory.withSession {
-                    authService.getAuthorityByCode(featureFunction.code!!)
+                    authService.getAuthorityCacheByCode(featureFunction.code!!)
                 }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
                 if (authority != null && authority.enabled == true) {
                     val switch = sessionFactory.withSession {

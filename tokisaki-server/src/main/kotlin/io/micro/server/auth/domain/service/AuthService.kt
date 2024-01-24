@@ -23,6 +23,8 @@ interface AuthService {
 
     fun getAuthorityByCode(code: String): Uni<AuthorityDO>
 
+    fun getAuthorityCacheByCode(code: String): Uni<AuthorityDO>
+
     fun addAuthority(authorityDO: AuthorityDO): Uni<AuthorityDO>
 
 }

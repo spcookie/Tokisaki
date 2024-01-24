@@ -9,6 +9,7 @@ import io.micro.server.auth.domain.repository.IAuthRepository
 import io.micro.server.auth.infra.converter.AuthConverter
 import io.micro.server.auth.infra.dao.impl.AuthorityDAO
 import io.micro.server.auth.infra.dao.impl.UserDAO
+import io.quarkus.cache.CacheResult
 import io.quarkus.panache.common.Page
 import io.smallrye.mutiny.Uni
 import jakarta.enterprise.context.ApplicationScoped
@@ -92,6 +93,11 @@ class AuthRepository(
     override fun findAuthorityByExample(authorityDO: AuthorityDO): Uni<List<AuthorityDO>> {
         return authorityDAO.findAuthorityByExample(authConverter.authorityDO2authorityEntity(authorityDO))
             .map { it.converter(authConverter::authorityEntity2authorityDO) }
+    }
+
+    @CacheResult(cacheName = "authority")
+    override fun findAuthorityCacheByExample(authorityDO: AuthorityDO): Uni<List<AuthorityDO>> {
+        return findAuthorityByExample(authorityDO)
     }
 
     override fun saveAuthority(authorityDO: AuthorityDO): Uni<AuthorityDO> {

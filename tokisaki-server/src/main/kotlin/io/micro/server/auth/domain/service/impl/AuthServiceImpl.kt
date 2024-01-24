@@ -70,6 +70,18 @@ class AuthServiceImpl(private val authRepository: IAuthRepository) : AuthService
             }
     }
 
+    @WithSession
+    override fun getAuthorityCacheByCode(code: String): Uni<AuthorityDO> {
+        return authRepository.findAuthorityCacheByExample(AuthorityDO().also { it.value = code })
+            .map {
+                if (it.isNotEmpty()) {
+                    it.first()
+                } else {
+                    null
+                }
+            }
+    }
+
     @WithTransaction
     override fun addAuthority(authorityDO: AuthorityDO): Uni<AuthorityDO> {
         return authRepository.findAuthorityByExample(AuthorityDO().also { it.value = authorityDO.value })

@@ -66,7 +66,7 @@ class RobotDO : BaseDomainEntity() {
                         it.args += args
                     }
             } else {
-                null
+                FeatureFunctionDO().also { it.isUndefined = true }
             }
         } else {
             null

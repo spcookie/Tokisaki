@@ -37,6 +37,10 @@ class FeatureFunctionDO {
 
     var memberId: Long? = null
 
+    var isMenu: Boolean = false
+
+    var isUndefined: Boolean = false
+
     companion object {
         const val BRACES = "{}"
     }
