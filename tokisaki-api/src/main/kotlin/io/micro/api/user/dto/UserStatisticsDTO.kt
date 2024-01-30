@@ -10,4 +10,7 @@ class UserStatisticsDTO {
     @Schema(title = "在线人数")
     var onlineUserCount: Int? = null
 
+    @Schema(title = "注册人数")
+    var enrollUserCount: Long? = null
+
 }

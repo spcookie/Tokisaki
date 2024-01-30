@@ -113,17 +113,23 @@ class AuthServiceImpl(private val authRepository: IAuthRepository) : AuthService
             .flatMap { authRepository.updateUserAuthorityRelation(id, it.toList()) }
     }
 
+    @WithTransaction
     override fun getUserStatistics(): Uni<UserStatisticsDO> {
-        return authRepository.findAllUserLastLoginTime()
-            .map { lastLoginTime ->
-                val currentTimeMillis = System.currentTimeMillis()
-                lastLoginTime.filterValues {
-                    Duration.ofMillis(currentTimeMillis - it).toMinutes() < ONLINE_SURVIVAL_MINUTES
-                }.count()
+        return Uni.createFrom().item(UserStatisticsDO())
+            .flatMap { statistics ->
+                authRepository.findAllUserLastLoginTime()
+                    .map { lastLoginTime ->
+                        val currentTimeMillis = System.currentTimeMillis()
+                        val count = lastLoginTime.filterValues {
+                            Duration.ofMillis(currentTimeMillis - it).toMinutes() < ONLINE_SURVIVAL_MINUTES
+                        }.count()
+                        statistics.apply { onlineUserCount = count }
+                    }
+
             }
-            .map {
-                UserStatisticsDO().apply {
-                    onlineUserCount = it
+            .flatMap { statistics ->
+                authRepository.countUser().map {
+                    statistics.apply { enrollUserCount = it }
                 }
             }
     }

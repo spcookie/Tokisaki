@@ -6,4 +6,6 @@ class UserStatisticsDO : BaseDomainEntity() {
 
     var onlineUserCount: Int? = null
 
+    var enrollUserCount: Long? = null
+
 }
