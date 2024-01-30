@@ -1,6 +1,7 @@
 package io.micro.starter
 
 import io.quarkus.runtime.Quarkus
+import io.quarkus.runtime.QuarkusApplication
 import io.quarkus.runtime.annotations.QuarkusMain
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition
 import org.eclipse.microprofile.openapi.annotations.info.Contact
@@ -8,12 +9,16 @@ import org.eclipse.microprofile.openapi.annotations.info.Info
 import org.eclipse.microprofile.openapi.annotations.info.License
 
 @QuarkusMain
-class Application
+class Application : QuarkusApplication {
+    override fun run(vararg args: String): Int {
+        println("Tokisaki 启动成功！")
+        Quarkus.waitForExit()
+        return 0
+    }
+}
 
 fun main(args: Array<String>) {
     Quarkus.run(*args)
-    println("Tokisaki 启动成功！")
-    Quarkus.waitForExit()
 }
 
 @OpenAPIDefinition(
