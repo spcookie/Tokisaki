@@ -26,6 +26,7 @@ quarkus:
     redis:
       robot:
         expire-after-write: 1m
+smallrye:
   jwt:
     sign:
       key:
