@@ -30,7 +30,7 @@ class GirlServiceImpl(
     override fun cmd() = Girl.identify()
 
     override fun describe(): Uni<String> {
-        return imageRepository.findCallStatistic(cmd().code)
+        return imageRepository.findCallStatistic(cmd().cmd)
             .flatMap { Girl.describe(it) }
     }
 

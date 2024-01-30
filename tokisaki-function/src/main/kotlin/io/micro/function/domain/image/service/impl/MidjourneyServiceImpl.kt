@@ -28,7 +28,7 @@ class MidjourneyServiceImpl(
     override fun cmd() = Midjourney.identify()
 
     override fun describe(): Uni<String> {
-        return imageRepository.findCallStatistic(cmd().code)
+        return imageRepository.findCallStatistic(cmd().cmd)
             .flatMap {
                 Midjourney.describe(it)
             }

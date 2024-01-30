@@ -1,6 +1,5 @@
 package io.micro.function.infra.repository
 
-import io.micro.core.aop.CommandCache
 import io.micro.function.domain.image.model.Image
 import io.micro.function.domain.image.model.entity.AnimeCartoon
 import io.micro.function.domain.image.model.entity.Girl

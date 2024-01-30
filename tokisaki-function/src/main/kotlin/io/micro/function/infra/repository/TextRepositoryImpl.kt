@@ -1,6 +1,5 @@
 package io.micro.function.infra.repository
 
-import io.micro.core.aop.CommandCache
 import io.micro.function.domain.text.model.valobj.ChatMessage
 import io.micro.function.domain.text.repository.TextRepository
 import io.micro.function.infra.cache.TextCache

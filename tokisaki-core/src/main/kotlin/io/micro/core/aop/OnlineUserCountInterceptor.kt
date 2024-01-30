@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 class OnlineUserCountInterceptor(private val ds: ReactiveRedisDataSource) {
 
     companion object {
-        const val ONLINE_USERS = "ONLINE:USERS"
+        const val ONLINE_USERS = "statistic:online:users"
         private val scope = CoroutineScope(SupervisorJob())
     }
 

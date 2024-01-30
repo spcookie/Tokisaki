@@ -39,7 +39,7 @@ class ChatServiceImpl(
     }
 
     override fun describe(): Uni<String> {
-        return textRepository.findCallStatistic(cmd().code).flatMap {
+        return textRepository.findCallStatistic(cmd().cmd).flatMap {
             Chat.describe(it)
         }
     }

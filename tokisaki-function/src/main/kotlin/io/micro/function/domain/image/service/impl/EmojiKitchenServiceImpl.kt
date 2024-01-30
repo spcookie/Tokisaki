@@ -33,7 +33,7 @@ class EmojiKitchenServiceImpl(
     override fun cmd() = EmojiKitchen.identify()
 
     override fun describe(): Uni<String> {
-        return imageRepository.findCallStatistic(cmd().code).flatMap {
+        return imageRepository.findCallStatistic(cmd().cmd).flatMap {
             EmojiKitchen.describe(it)
         }
     }

@@ -29,7 +29,7 @@ class AnimeCartoonServiceImpl(
     override fun cmd() = AnimeCartoon.identify()
 
     override fun describe(): Uni<String> {
-        return imageRepository.findCallStatistic(cmd().code).flatMap {
+        return imageRepository.findCallStatistic(cmd().cmd).flatMap {
             AnimeCartoon.describe(it)
         }
     }
