@@ -56,7 +56,7 @@ public class WxOfficialController {
     @Operation(summary = "微信公众号接收信息回调")
     @POST
     @Path("/callback")
-    @Consumes(MediaType.TEXT_XML)
+    @Consumes({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
     @Produces(MediaType.APPLICATION_XML)
     public Uni<ReplyMessageDTO> message(@Parameter(description = "普通文本信息") WxMessageDTO wxMessageDTO) {
         return wxLoginService.login(wxMessageConvert.wxMessageDTO2WxMessage(wxMessageDTO), sse)

@@ -93,4 +93,18 @@ class AuthServiceImpl(private val authRepository: IAuthRepository) : AuthService
             }
     }
 
+    @WithTransaction
+    override fun dispatchAuth(userDO: UserDO): Uni<Unit> {
+        val id = userDO.id
+        requireNonNull(id)
+        return authRepository.findUserById(id)
+            .map { user ->
+                user.addAuths = userDO.addAuths
+                user.removeAuths = userDO.removeAuths
+                user.dispatchAuth()
+                user.authorities
+            }
+            .flatMap { authRepository.updateUserAuthorityRelation(id, it.toList()) }
+    }
+
 }

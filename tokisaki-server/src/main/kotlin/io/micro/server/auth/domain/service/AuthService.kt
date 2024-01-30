@@ -27,4 +27,6 @@ interface AuthService {
 
     fun addAuthority(authorityDO: AuthorityDO): Uni<AuthorityDO>
 
+    fun dispatchAuth(userDO: UserDO): Uni<Unit>
+
 }

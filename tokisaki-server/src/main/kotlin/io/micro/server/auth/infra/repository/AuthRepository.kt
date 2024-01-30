@@ -12,6 +12,7 @@ import io.micro.server.auth.infra.dao.impl.UserDAO
 import io.quarkus.cache.CacheResult
 import io.quarkus.panache.common.Page
 import io.smallrye.mutiny.Uni
+import io.smallrye.mutiny.replaceWithUnit
 import jakarta.enterprise.context.ApplicationScoped
 
 /**
@@ -103,6 +104,11 @@ class AuthRepository(
     override fun saveAuthority(authorityDO: AuthorityDO): Uni<AuthorityDO> {
         val entity = authConverter.authorityDO2authorityEntity(authorityDO).also { it.id = null }
         return authorityDAO.persist(entity).map(authConverter::authorityEntity2authorityDO)
+    }
+
+    override fun updateUserAuthorityRelation(id: Long, authorityDOList: List<AuthorityDO>): Uni<Unit> {
+        val authorityEntityList = authorityDOList.converter(authConverter::authorityDO2authorityEntity)
+        return userDAO.findById(id).map { it.authorities = authorityEntityList.toMutableSet() }.replaceWithUnit()
     }
 
 }

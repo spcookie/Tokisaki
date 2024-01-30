@@ -24,7 +24,7 @@ class UserEntity : BaseEntity() {
         inverseJoinColumns = [JoinColumn(name = "authority_id")]
     )
     @ManyToMany(fetch = FetchType.EAGER)
-    val authorities: MutableSet<AuthorityEntity>? = null
+    var authorities: MutableSet<AuthorityEntity>? = null
 
     final override fun equals(other: Any?): Boolean {
         if (this === other) return true

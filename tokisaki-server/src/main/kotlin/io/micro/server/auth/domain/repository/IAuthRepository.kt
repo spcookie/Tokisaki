@@ -42,4 +42,6 @@ interface IAuthRepository {
 
     fun saveAuthority(authorityDO: AuthorityDO): Uni<AuthorityDO>
 
+    fun updateUserAuthorityRelation(id: Long, authorityDOList: List<AuthorityDO>): Uni<Unit>
+
 }

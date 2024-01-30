@@ -30,6 +30,7 @@ interface AuthConverter {
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     fun authorityDO2authorityEntity(authority: AuthorityDO): AuthorityEntity
 
+    @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     fun userEntity2UserDO(userEntity: UserEntity): UserDO
 
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)

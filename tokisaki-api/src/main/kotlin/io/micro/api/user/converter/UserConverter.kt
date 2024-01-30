@@ -1,5 +1,6 @@
 package io.micro.api.user.converter
 
+import io.micro.api.user.dto.DispatchAuthDTO
 import io.micro.api.user.dto.OperateUserDTO
 import io.micro.api.user.dto.QueryUserDTO
 import io.micro.server.auth.domain.model.entity.UserDO
@@ -15,5 +16,8 @@ interface UserConverter {
 
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     fun operateUserDTO2userDO(queryUserDTO: OperateUserDTO): UserDO
+
+    @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+    fun dispatchAuthDTO2UserDO(dispatchAuthDTO: DispatchAuthDTO): UserDO
 
 }

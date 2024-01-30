@@ -13,6 +13,9 @@ import jakarta.ws.rs.sse.SseEventSink
  *@since 2023/11/25
  */
 interface WxLoginService {
+
     fun loginSubscript(driveId: String, sse: Sse, sink: SseEventSink): Multi<OutboundSseEvent>
+
     fun login(wxMessage: WXMessage, sse: Sse): Uni<WXLoginUserDO>
+
 }
