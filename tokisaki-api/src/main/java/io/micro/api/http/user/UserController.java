@@ -4,6 +4,7 @@ import io.micro.api.user.converter.UserConverter;
 import io.micro.api.user.dto.DispatchAuthDTO;
 import io.micro.api.user.dto.OperateUserDTO;
 import io.micro.api.user.dto.QueryUserDTO;
+import io.micro.api.user.dto.UserStatisticsDTO;
 import io.micro.core.annotation.InitAuthContext;
 import io.micro.core.rest.PageDTO;
 import io.micro.core.rest.Pageable;
@@ -51,10 +52,20 @@ public class UserController {
 
     @Operation(summary = "分配权限")
     @RolesAllowed({"USER:ROOT"})
-    @Path("/dispatchAuth")
     @PATCH
+    @Path("/dispatchAuth")
     public Uni<R<Unit>> dispatchAuth(DispatchAuthDTO dispatchAuthDTO) {
         return authService.dispatchAuth(userConverter.dispatchAuthDTO2UserDO(dispatchAuthDTO))
+                .map(R::newInstance);
+    }
+
+    @Operation(summary = "获取用户统计数据")
+    @RolesAllowed({"USER:ROOT"})
+    @GET
+    @Path("/statistics")
+    public Uni<R<UserStatisticsDTO>> getUserStatisticsData() {
+        return authService.getUserStatistics()
+                .map(userConverter::userStatisticsDO2userStatisticsDTO)
                 .map(R::newInstance);
     }
 

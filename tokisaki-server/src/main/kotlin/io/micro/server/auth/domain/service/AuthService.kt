@@ -4,6 +4,7 @@ import io.micro.core.rest.PageDO
 import io.micro.core.rest.Pageable
 import io.micro.server.auth.domain.model.entity.AuthorityDO
 import io.micro.server.auth.domain.model.entity.UserDO
+import io.micro.server.auth.domain.model.entity.UserStatisticsDO
 import io.micro.server.auth.domain.model.entity.WXLoginUserDO
 import io.smallrye.mutiny.Uni
 
@@ -28,5 +29,7 @@ interface AuthService {
     fun addAuthority(authorityDO: AuthorityDO): Uni<AuthorityDO>
 
     fun dispatchAuth(userDO: UserDO): Uni<Unit>
+
+    fun getUserStatistics(): Uni<UserStatisticsDO>
 
 }

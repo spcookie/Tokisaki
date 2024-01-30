@@ -44,4 +44,6 @@ interface IAuthRepository {
 
     fun updateUserAuthorityRelation(id: Long, authorityDOList: List<AuthorityDO>): Uni<Unit>
 
+    fun findAllUserLastLoginTime(): Uni<Map<String, Long>>
+
 }

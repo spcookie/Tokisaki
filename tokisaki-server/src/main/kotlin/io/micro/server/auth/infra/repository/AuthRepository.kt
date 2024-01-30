@@ -6,6 +6,7 @@ import io.micro.server.auth.domain.model.entity.AuthorityDO
 import io.micro.server.auth.domain.model.entity.UserDO
 import io.micro.server.auth.domain.model.entity.WXLoginUserDO
 import io.micro.server.auth.domain.repository.IAuthRepository
+import io.micro.server.auth.infra.cache.UserStatisticsCache
 import io.micro.server.auth.infra.converter.AuthConverter
 import io.micro.server.auth.infra.dao.impl.AuthorityDAO
 import io.micro.server.auth.infra.dao.impl.UserDAO
@@ -23,7 +24,8 @@ import jakarta.enterprise.context.ApplicationScoped
 class AuthRepository(
     private val userDAO: UserDAO,
     private val authConverter: AuthConverter,
-    private val authorityDAO: AuthorityDAO
+    private val authorityDAO: AuthorityDAO,
+    private val userStatisticsCache: UserStatisticsCache
 ) : IAuthRepository {
 
     override fun registerWXLoginUser(wxLoginUserDO: WXLoginUserDO): Uni<WXLoginUserDO> {
@@ -109,6 +111,10 @@ class AuthRepository(
     override fun updateUserAuthorityRelation(id: Long, authorityDOList: List<AuthorityDO>): Uni<Unit> {
         val authorityEntityList = authorityDOList.converter(authConverter::authorityDO2authorityEntity)
         return userDAO.findById(id).map { it.authorities = authorityEntityList.toMutableSet() }.replaceWithUnit()
+    }
+
+    override fun findAllUserLastLoginTime(): Uni<Map<String, Long>> {
+        return userStatisticsCache.findAllUserLastLoginTime()
     }
 
 }

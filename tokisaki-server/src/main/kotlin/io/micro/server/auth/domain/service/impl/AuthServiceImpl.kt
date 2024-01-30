@@ -9,6 +9,7 @@ import io.micro.core.rest.PageDO
 import io.micro.core.rest.Pageable
 import io.micro.server.auth.domain.model.entity.AuthorityDO
 import io.micro.server.auth.domain.model.entity.UserDO
+import io.micro.server.auth.domain.model.entity.UserStatisticsDO
 import io.micro.server.auth.domain.model.entity.WXLoginUserDO
 import io.micro.server.auth.domain.repository.IAuthRepository
 import io.micro.server.auth.domain.service.AuthService
@@ -17,9 +18,14 @@ import io.quarkus.hibernate.reactive.panache.common.WithTransaction
 import io.smallrye.mutiny.Uni
 import io.smallrye.mutiny.replaceWithUnit
 import jakarta.enterprise.context.ApplicationScoped
+import java.time.Duration
 
 @ApplicationScoped
 class AuthServiceImpl(private val authRepository: IAuthRepository) : AuthService {
+
+    companion object {
+        private val ONLINE_SURVIVAL_MINUTES = 30
+    }
 
     @WithSession
     override fun getAuthority(): Uni<List<AuthorityDO>> {
@@ -105,6 +111,21 @@ class AuthServiceImpl(private val authRepository: IAuthRepository) : AuthService
                 user.authorities
             }
             .flatMap { authRepository.updateUserAuthorityRelation(id, it.toList()) }
+    }
+
+    override fun getUserStatistics(): Uni<UserStatisticsDO> {
+        return authRepository.findAllUserLastLoginTime()
+            .map { lastLoginTime ->
+                val currentTimeMillis = System.currentTimeMillis()
+                lastLoginTime.filterValues {
+                    Duration.ofMillis(currentTimeMillis - it).toMinutes() < ONLINE_SURVIVAL_MINUTES
+                }.count()
+            }
+            .map {
+                UserStatisticsDO().apply {
+                    onlineUserCount = it
+                }
+            }
     }
 
 }
