@@ -37,7 +37,7 @@ class FeatureFunctionDO {
 
     var memberId: Long? = null
 
-    var isMenu: Boolean = false
+    var isDescription: Boolean = false
 
     var isUndefined: Boolean = false
 

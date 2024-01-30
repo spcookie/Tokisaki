@@ -1,6 +1,5 @@
 package io.micro.function.domain.strategy
 
-import io.micro.core.context.AuthContext
 import io.micro.core.exception.CmdException
 import io.micro.core.function.ConfigHint
 import io.micro.core.function.dto.Message
@@ -47,10 +46,10 @@ class FunctionContextImpl(
         return with(allocationCommandServices[cmd.cmd.lowercase()]) { this?.configHint() }
     }
 
-    override fun menu(): Uni<MessageChain> {
+    override fun description(cmds: List<Cmd>): Uni<MessageChain> {
         val unis = buildList {
             commandServices.forEach {
-                if (AuthContext.hasRole(it.cmd().code)) {
+                if (cmds.contains(it.cmd())) {
                     add(it.describe())
                 }
             }
@@ -77,7 +76,7 @@ class FunctionContextImpl(
                                 .format(LocalDateTime.now())
                         }
                             ∷ v8.8.8
-                            ∷ Mirai&Spring&Quarkus
+                            ∷ Mirai&Quarkus
                         """.trimIndent()
                     )
                 }

@@ -8,10 +8,7 @@ import io.micro.core.exception.requireNonNull
 import io.micro.core.exception.requireTure
 import io.micro.core.function.dto.CardID
 import io.micro.core.function.dto.MediaType
-import io.micro.core.rest.CommonCode
-import io.micro.core.rest.CommonMsg
-import io.micro.core.rest.PageDO
-import io.micro.core.rest.Pageable
+import io.micro.core.rest.*
 import io.micro.core.robot.Credential
 import io.micro.core.robot.Robot
 import io.micro.core.robot.qq.QQRobot
@@ -50,6 +47,7 @@ import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.buildMessageChain
 import net.mamoe.mirai.message.data.findIsInstance
 import org.hibernate.reactive.mutiny.Mutiny
+import org.hibernate.reactive.mutiny.Mutiny.SessionFactory
 import java.util.*
 
 /**
@@ -273,29 +271,34 @@ class RobotManagerServiceImpl(
         robot.onGroupMessage = { event ->
             Log.info(event.message)
 
-            val latestRobot = sessionFactory.withSession {
-                robotManagerRepository.findRobotCacheById(robotId)
-            }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
+            val latestRobot =
+                fetchDatabase(sessionFactory, vertxContext) { robotManagerRepository.findRobotCacheById(robotId) }
             requireNonNull(latestRobot)
             val featureFunction = getFeatureFunction(event, latestRobot)
             if (featureFunction != null) {
-                val authority = sessionFactory.withSession {
-                    authService.getAuthorityCacheByCode(featureFunction.code!!)
-                }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
-                if (authority != null && authority.enabled == true) {
-                    val switch = sessionFactory.withSession {
-                        robotManagerRepository.findSwitchCacheByUseFunctionId(featureFunction.id!!)
-                    }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
-                    val switched = featureFunction.also { it.switch = switch }.switched()
-                    if (switched) {
-                        runCatching {
-                            functionContext.call(
-                                featureFunction.cmd!!,
-                                featureFunction.args,
-                                featureFunction.getConfigMap(objectMapper)
-                            ).awaitSuspending()
-                        }
-                            .onSuccess { messageChain ->
+                if (featureFunction.isDescription || featureFunction.isUndefined) {
+                    val cmds = latestRobot.functions.map { it.cmd }.filterNotNull()
+                    cacheCmdException(event, { functionContext.description(cmds) }) {
+                        val messageChain = it.awaitSuspending()
+                        group.sendMessage(messageChain.messages[0].msg)
+                    }
+                } else {
+                    val authority = fetchDatabase(sessionFactory, vertxContext) {
+                        authService.getAuthorityCacheByCode(featureFunction.code!!)
+                    }
+                    if (authority != null && authority.enabled == true) {
+                        val switch = sessionFactory.withSession {
+                            robotManagerRepository.findSwitchCacheByUseFunctionId(featureFunction.id!!)
+                        }.runSubscriptionOn { vertxContext.runOnContext(it) }.awaitSuspending()
+                        val switched = featureFunction.also { it.switch = switch }.switched()
+                        if (switched) {
+                            cacheCmdException(event, {
+                                functionContext.call(
+                                    featureFunction.cmd!!,
+                                    featureFunction.args,
+                                    featureFunction.getConfigMap(objectMapper)
+                                ).awaitSuspending()
+                            }) { messageChain ->
                                 val requireQuota = featureFunction.requireQuota
                                 val results = buildMessageChain {
                                     if (requireQuota == true) {
@@ -317,23 +320,45 @@ class RobotManagerServiceImpl(
                                     }
                                 }
 
-                                val receipt = event.group.sendMessage(results)
+                                val receipt = group.sendMessage(results)
 
                                 if (messageChain.receipt.recall > 0) {
                                     receipt.recallIn(messageChain.receipt.recall.toLong())
                                 }
                             }
-                            .onFailure {
-                                if (it is CmdException) {
-                                    event.group.sendMessage(it.message.toString())
-                                } else {
-                                    Log.error("function异常：", it)
-                                }
-                            }
+                        }
+                    } else {
+                        event.group.sendMessage("命令已被禁用")
                     }
                 }
             }
         }
+    }
+
+    private suspend fun <T> fetchDatabase(
+        sessionFactory: SessionFactory,
+        vertxContext: Context,
+        block: (Mutiny.Session) -> Uni<T>
+    ): T? {
+        return sessionFactory.withSession { block(it) }
+            .runSubscriptionOn { vertxContext.runOnContext(it) }
+            .awaitSuspending()
+    }
+
+    private suspend inline fun <T, E> cacheCmdException(
+        event: GroupMessageEvent,
+        block: () -> E,
+        success: GroupMessageEvent.(E) -> T
+    ) {
+        runCatching { block() }
+            .onSuccess { success(event, it) }
+            .onFailure {
+                if (it is CmdException) {
+                    event.group.sendMessage(it.message.toString())
+                } else {
+                    Log.error("function异常：", it)
+                }
+            }
     }
 
     private fun getFeatureFunction(event: GroupMessageEvent, latestRobot: RobotDO): FeatureFunctionDO? {
@@ -342,7 +367,7 @@ class RobotManagerServiceImpl(
         var featureFunction: FeatureFunctionDO? = null
         if (at != null) {
             if (at.target == latestRobot.id) {
-                featureFunction = FeatureFunctionDO().also { it.isMenu = true }
+                featureFunction = FeatureFunctionDO().also { it.isDescription = true }
             }
         } else {
             featureFunction = latestRobot.resolveCommand(event.group.id, event.sender.id, text)

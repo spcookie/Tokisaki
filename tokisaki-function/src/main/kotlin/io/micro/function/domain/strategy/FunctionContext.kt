@@ -15,7 +15,7 @@ interface FunctionContext {
 
     fun config(cmd: Cmd): ConfigHint?
 
-    fun menu(): Uni<MessageChain>
+    fun description(cmds: List<Cmd>): Uni<MessageChain>
 
     fun downloadImage(cmd: Cmd): Uni<Void>
 
