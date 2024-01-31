@@ -175,6 +175,7 @@ class RobotManagerServiceImpl(
             val code = functionDO.code
             requireNonNull(code)
             featureFunctionDO.ensureCmdAlias(code)
+            featureFunctionDO.ensureTitle(code)
         }.flatMap {
             robotManagerRepository.findFeatureFunctionsByRobotId(robotId).flatMap { featureFunctions ->
                 if (featureFunctions.map { it.refId }.contains(featureFunctionDO.refId)) {
@@ -199,13 +200,12 @@ class RobotManagerServiceImpl(
             )
             robot.functions.associateBy { it.id }[featureFunctionDO.id].also {
                 if (it != null) {
-                    it.config = featureFunctionDO.config
-                    it.remark = featureFunctionDO.remark
                     it.enabled = featureFunctionDO.enabled
-                    it.requireQuota = featureFunctionDO.requireQuota
-                    featureFunctionDO.cmdAlias?.also { alias ->
-                        it.cmdAlias = alias
-                    }
+                    it.config = featureFunctionDO.config ?: it.config
+                    it.remark = featureFunctionDO.remark ?: it.remark
+                    it.requireQuota = featureFunctionDO.requireQuota ?: it.requireQuota
+                    it.cmdAlias = featureFunctionDO.cmdAlias ?: it.cmdAlias
+                    it.title = featureFunctionDO.title ?: it.title
                 }
             }
             robotManagerRepository.updateRobot(robot).replaceWithUnit()

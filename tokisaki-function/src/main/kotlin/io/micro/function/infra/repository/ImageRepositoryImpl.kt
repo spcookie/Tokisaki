@@ -19,13 +19,12 @@ import jakarta.enterprise.context.ApplicationScoped
  */
 @ApplicationScoped
 class ImageRepositoryImpl(
-    private val commandCache: CommandCache,
     private val imageOss: ImageOss,
     private val imageConverter: ImageConverter
 ) : ImageRepository {
 
     override fun findCallStatistic(key: String): Uni<Long> {
-        return commandCache.fetchCallStatistic(key).onItem().ifNull().continueWith(0)
+        return Uni.createFrom().item(0)
     }
 
     @WithSession

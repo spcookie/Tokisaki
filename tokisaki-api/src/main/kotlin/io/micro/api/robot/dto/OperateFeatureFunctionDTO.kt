@@ -32,4 +32,7 @@ class OperateFeatureFunctionDTO {
     @Schema(title = "是否引用回复消息")
     var requireQuota: Boolean = false
 
+    @Schema(title = "功能标题")
+    var title: String? = null
+
 }

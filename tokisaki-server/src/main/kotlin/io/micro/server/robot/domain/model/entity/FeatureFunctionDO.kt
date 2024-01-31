@@ -27,6 +27,8 @@ class FeatureFunctionDO {
 
     var requireQuota: Boolean? = null
 
+    var title: String? = null
+
     var cmd: Cmd? = null
 
     var args: MutableList<String> = mutableListOf()
@@ -50,6 +52,14 @@ class FeatureFunctionDO {
             val cmd = Cmd.byCode(cmdCode)
             requireNonNull(cmd, code = CommonCode.NOT_FOUND)
             cmdAlias = cmd.cmd
+        }
+    }
+
+    fun ensureTitle(cmdCode: String) {
+        if (title == null) {
+            val cmd = Cmd.byCode(cmdCode)
+            requireNonNull(cmd, code = CommonCode.NOT_FOUND)
+            title = cmd.title
         }
     }
 

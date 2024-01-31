@@ -13,12 +13,11 @@ import jakarta.enterprise.context.ApplicationScoped
  */
 @ApplicationScoped
 class TextRepositoryImpl(
-    private val commandCache: CommandCache,
     private val textCache: TextCache,
     private val textConverter: TextConverter
 ) : TextRepository {
     override fun findCallStatistic(key: String): Uni<Long> {
-        return commandCache.fetchCallStatistic(key).onItem().ifNull().continueWith(0)
+        return Uni.createFrom().item(0)
     }
 
     override fun requireTenantLock(key: String): Uni<Boolean> {

@@ -29,4 +29,7 @@ class UseFunctionEntity : BaseEntity() {
     @Column(name = "use_function_require_quota", nullable = false)
     var requireQuota: Boolean = false
 
+    @Column(name = "user_function_title", nullable = false)
+    var title: String? = null
+
 }
