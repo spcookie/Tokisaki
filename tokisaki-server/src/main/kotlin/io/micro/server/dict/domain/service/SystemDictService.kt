@@ -6,7 +6,7 @@ import io.smallrye.mutiny.Uni
 
 interface SystemDictService {
 
-    fun findDictPage(pageable: Pageable): Uni<Pair<List<SystemDictDO>, Long>>
+    fun findDictPage(keyword: String?, pageable: Pageable): Uni<Pair<List<SystemDictDO>, Long>>
 
     fun saveOrUpdateDict(systemDictDO: SystemDictDO): Uni<SystemDictDO>
 

@@ -29,8 +29,11 @@ public class SystemDictController {
 
     @Operation(summary = "查询系统数据字典")
     @GET
-    public Uni<R<PageDTO<QuerySystemDictDTO>>> getSystemDictPage(@QueryParam("page") @DefaultValue("1") int page, @QueryParam("size") @DefaultValue("10") int size) {
-        return systemDictService.findDictPage(Pageable.of(page, size))
+    public Uni<R<PageDTO<QuerySystemDictDTO>>> getSystemDictPage(
+            @QueryParam("keyword") String keyword,
+            @QueryParam("page") @DefaultValue("1") int page,
+            @QueryParam("size") @DefaultValue("10") int size) {
+        return systemDictService.findDictPage(keyword, Pageable.of(page, size))
                 .map(paged -> {
                     List<QuerySystemDictDTO> list = paged.getFirst().stream()
                             .map(it -> systemDictConverter.systemDictDO2QuerySystemDictDTO(it))

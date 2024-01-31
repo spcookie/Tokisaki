@@ -1,5 +1,6 @@
 package io.micro.server.dict.infra.repository
 
+import io.micro.core.rest.Pageable
 import io.micro.core.util.converter
 import io.micro.server.dict.domain.model.entity.SystemDictDO
 import io.micro.server.dict.domain.repository.ISystemDictRepository
@@ -15,15 +16,25 @@ class SystemDictRepository(
     private val systemDictConverter: SystemDictConverter
 ) : ISystemDictRepository {
 
-    override fun findSystemDictPage(page: Page): Uni<List<SystemDictDO>> {
-        return systemDictDAO.findAll()
-            .page(page)
-            .list()
+    override fun findSystemDictByKeyLike(keyword: String, pageable: Pageable): Uni<List<SystemDictDO>> {
+        val page = Page.of(pageable.current - 1, pageable.limit)
+        return systemDictDAO.selectByKeyLike(keyword, page)
             .map { it.converter(systemDictConverter::systemDictEntity2SystemDictDO) }
     }
 
-    override fun countSystemDictPage(): Uni<Long> {
+    override fun findSystemDict(pageable: Pageable): Uni<List<SystemDictDO>> {
+        val page = Page.of(pageable.current - 1, pageable.limit)
+        return systemDictDAO.findAll()
+            .page(page).list()
+            .map { it.converter(systemDictConverter::systemDictEntity2SystemDictDO) }
+    }
+
+    override fun countSystemDict(): Uni<Long> {
         return systemDictDAO.findAll().count()
+    }
+
+    override fun countSystemDictByKeyLike(keyword: String): Uni<Long> {
+        return systemDictDAO.countByKeyLike(keyword)
     }
 
     override fun findById(id: Long): Uni<SystemDictDO> {

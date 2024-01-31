@@ -6,7 +6,6 @@ import io.micro.server.dict.domain.repository.ISystemDictRepository
 import io.micro.server.dict.domain.service.SystemDictService
 import io.quarkus.hibernate.reactive.panache.common.WithSession
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction
-import io.quarkus.panache.common.Page
 import io.smallrye.mutiny.Uni
 import jakarta.enterprise.context.ApplicationScoped
 
@@ -14,10 +13,15 @@ import jakarta.enterprise.context.ApplicationScoped
 class SystemDictServiceImpl(private val systemDictRepository: ISystemDictRepository) : SystemDictService {
 
     @WithSession
-    override fun findDictPage(pageable: Pageable): Uni<Pair<List<SystemDictDO>, Long>> {
-        val page = Page.of(pageable.current - 1, pageable.limit)
-        return systemDictRepository.findSystemDictPage(page).flatMap { list ->
-            systemDictRepository.countSystemDictPage().map { list to it }
+    override fun findDictPage(keyword: String?, pageable: Pageable): Uni<Pair<List<SystemDictDO>, Long>> {
+        return if (!keyword.isNullOrBlank()) {
+            systemDictRepository.findSystemDictByKeyLike(keyword, pageable).flatMap { list ->
+                systemDictRepository.countSystemDictByKeyLike(keyword).map { list to it }
+            }
+        } else {
+            systemDictRepository.findSystemDict(pageable).flatMap { list ->
+                systemDictRepository.countSystemDict().map { list to it }
+            }
         }
     }
 

@@ -1,14 +1,18 @@
 package io.micro.server.dict.domain.repository
 
+import io.micro.core.rest.Pageable
 import io.micro.server.dict.domain.model.entity.SystemDictDO
-import io.quarkus.panache.common.Page
 import io.smallrye.mutiny.Uni
 
 interface ISystemDictRepository {
 
-    fun findSystemDictPage(page: Page): Uni<List<SystemDictDO>>
+    fun findSystemDictByKeyLike(keyword: String, pageable: Pageable): Uni<List<SystemDictDO>>
 
-    fun countSystemDictPage(): Uni<Long>
+    fun findSystemDict(pageable: Pageable): Uni<List<SystemDictDO>>
+
+    fun countSystemDict(): Uni<Long>
+
+    fun countSystemDictByKeyLike(keyword: String): Uni<Long>
 
     fun findById(id: Long): Uni<SystemDictDO>
 
