@@ -17,13 +17,8 @@ import jakarta.ws.rs.sse.SseEventSink
  *@since 2023/11/23
  */
 interface RobotManagerService {
-    /**
-     * QQ机器人扫码登录
-     * @param id ID
-     * @param sse 半长连接
-     * @return 服务器推送事件
-     */
-    fun loginQQRobot(id: Long, sse: Sse, sink: SseEventSink): Multi<OutboundSseEvent>
+
+    fun loginQQRobot(code: String, sse: Sse, sink: SseEventSink): Multi<OutboundSseEvent>
 
     fun closeRobot(id: Long): Uni<Unit>
 
@@ -42,5 +37,7 @@ interface RobotManagerService {
     fun getFunctionSwitch(id: Long): Uni<Switch>
 
     fun loadContacts(id: Long): Uni<RobotContacts>
+
+    fun getLoginCode(id: Long): Uni<String>
 
 }

@@ -60,7 +60,6 @@ public class RobotManagerController {
     @Path("/")
     @Authenticated
     public Uni<R<QueryRobotDTO>> createRobot(@Parameter(description = "创建信息") @Valid @ConvertGroup(to = ValidGroup.Create.class) OperateRobotDTO operateRobotDTO) {
-        operateRobotDTO.setState(0);
         return robotManagerService.createRobot(robotManagerConverter.operateRobotDTO2RobotManager(operateRobotDTO))
                 .map(it -> R.newInstance(robotManagerConverter.robotManager2QueryRobotDTO(it)));
     }

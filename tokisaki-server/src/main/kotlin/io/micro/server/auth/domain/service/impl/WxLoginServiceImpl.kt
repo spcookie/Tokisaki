@@ -13,6 +13,7 @@ import io.micro.server.dict.domain.service.SystemDictService
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.Uni
+import io.smallrye.mutiny.replaceWithUnit
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.ws.rs.sse.OutboundSseEvent
 import jakarta.ws.rs.sse.Sse
@@ -49,6 +50,12 @@ class WxLoginServiceImpl(
         }
     }
 
+    override fun refreshCode(driveId: String, sse: Sse): Uni<Unit> {
+        return Uni.createFrom()
+            .item(WXLoginUserDO.refreshCode(driveId, sse))
+            .replaceWithUnit()
+    }
+
     private fun loginUser(openId: String): Uni<WXLoginUserDO> {
         return authRepository.findWXLoginUserByOpenid(openId)
             .flatMap { user ->
@@ -81,7 +88,18 @@ class WxLoginServiceImpl(
                         }
                     }.toMutableSet()
                     val defaultUser = WXLoginUserDO.defaultUser(openId, authorities)
-                    authRepository.registerWXLoginUser(defaultUser)
+                    val invokes = buildList {
+                        defaultUser.authorities.forEach { auth ->
+                            val invoke = authRepository.findAuthorityByExample(auth)
+                                .map { it.first() }
+                                .map { it.id }
+                                .invoke { id -> auth.id = id }
+                            add(invoke)
+                        }
+                    }
+                    recursChain(invokes.toMutableList()).flatMap {
+                        authRepository.registerWXLoginUser(defaultUser)
+                    }
                 } else {
                     failCastAuthoritiesDict()
                 }
@@ -91,6 +109,17 @@ class WxLoginServiceImpl(
                 failCastAuthoritiesDict()
             }
         }
+
+    private fun recursChain(invokes: MutableList<Uni<Long?>>): Uni<MutableList<Long?>> {
+        if (invokes.isEmpty()) {
+            return Uni.createFrom().item(mutableListOf())
+        }
+        return invokes.removeFirst().flatMap {
+            recursChain(invokes).invoke { ids ->
+                ids.add(it)
+            }
+        }
+    }
 
     private fun failCastAuthoritiesDict(): Nothing {
         fail("读取用户默认机器人功能权限失败")

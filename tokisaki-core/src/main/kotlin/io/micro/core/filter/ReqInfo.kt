@@ -8,5 +8,10 @@ import jakarta.enterprise.context.RequestScoped
  */
 @RequestScoped
 class ReqInfo {
+
     var driveId: String? = null
+
+    companion object {
+        const val DRIVE_ID = "driveId"
+    }
 }

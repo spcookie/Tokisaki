@@ -1,5 +1,6 @@
 package io.micro.server.robot.domain.service.impl
 
+import cn.hutool.core.util.IdUtil
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.micro.core.context.AuthContext
 import io.micro.core.exception.CmdException
@@ -72,36 +73,39 @@ class RobotManagerServiceImpl(
      */
     private val oldSse = mutableMapOf<Long, Pair<Sse, SseEventSink>>()
 
-    override fun loginQQRobot(id: Long, sse: Sse, sink: SseEventSink): Multi<OutboundSseEvent> {
-        return sessionFactory.withSession { robotManagerRepository.findRobotById(id) }
-            .onItem().transformToMulti { robotManager ->
-                if (robotManager == null) {
-                    Multi.createFrom().items(sse.newEvent("fail#${CommonCode.NOT_FOUND.code}"))
-                } else if (!AuthContext.equalId(robotManager.userId)) {
-                    Multi.createFrom().items(sse.newEvent("fail#${CommonCode.ILLEGAL_OPERATION.code}"))
-                } else {
-                    // 先移除旧的连接
-                    oldSse.remove(id)?.also { it.second.close() }
-                    // 再关联新的连接
-                    sse.newBroadcaster().register(sink)
-                    oldSse[id] = sse to sink
-                    val robot = manager.getRobot(id)
-                    if (robot != null) {
-                        if (robot.state() != Robot.State.Online) {
-                            // 已存在机器人且未登录，则先注销机器人，可以使登录二维码失效
-                            manager.unregisterRobot(id)
-                            // 开始扫码登录
-                            qqRobotQRLoginStart(robotManager, sse, sink)
+    override fun loginQQRobot(code: String, sse: Sse, sink: SseEventSink): Multi<OutboundSseEvent> {
+        return sessionFactory.withSession { robotManagerRepository.getLoginRobotId(code) }
+            .onItem().transformToMulti { id ->
+                requireNonNull(id, "登录码已过期请刷新")
+                sessionFactory.withSession { robotManagerRepository.findRobotById(id) }
+                    .onItem().transformToMulti { robotManager ->
+                        if (robotManager == null) {
+                            Multi.createFrom().items(sse.newEvent("fail#${CommonCode.NOT_FOUND.code}"))
                         } else {
-                            // 若机器人已登录，则重置二维码登录
-                            Multi.createFrom().items(sse.newEvent("reset#"))
+                            // 先移除旧的连接
+                            oldSse.remove(id)?.also { it.second.close() }
+                            // 再关联新的连接
+                            sse.newBroadcaster().register(sink)
+                            oldSse[id] = sse to sink
+                            val robot = manager.getRobot(id)
+                            if (robot != null) {
+                                if (robot.state() != Robot.State.Online) {
+                                    // 已存在机器人且未登录，则先注销机器人，可以使登录二维码失效
+                                    manager.unregisterRobot(id)
+                                    // 开始扫码登录
+                                    qqRobotQRLoginStart(robotManager, sse, sink)
+                                } else {
+                                    // 若机器人已登录，则重置二维码登录
+                                    Multi.createFrom().items(sse.newEvent("reset#"))
+                                }
+                            } else {
+                                // 若不存在机器人，则直接开始登录
+                                qqRobotQRLoginStart(robotManager, sse, sink)
+                            }
                         }
-                    } else {
-                        // 若不存在机器人，则直接开始登录
-                        qqRobotQRLoginStart(robotManager, sse, sink)
                     }
-                }
             }
+
     }
 
     @WithTransaction
@@ -117,6 +121,9 @@ class RobotManagerServiceImpl(
 
     @WithSession
     override fun createRobot(robotDO: RobotDO): Uni<RobotDO> {
+        if (robotDO.state == null) {
+            robotDO.state = RobotDO.State.Create
+        }
         val userId = AuthContext.id.toLongOrNull()
         requireNonNull(userId, CommonMsg.NULL_USER_ID)
         robotDO.userId = userId
@@ -240,6 +247,16 @@ class RobotManagerServiceImpl(
         }
         return Uni.createFrom().item {
             robot.loadContacts().run { RobotContacts(groupName, groups, friends) }
+        }
+    }
+
+    @WithSession
+    override fun getLoginCode(id: Long): Uni<String> {
+        return robotManagerRepository.findRobotById(id).flatMap { robot ->
+            requireNonNull(robot)
+            requireTure(AuthContext.equalId(robot.userId), code = CommonCode.ILLEGAL_OPERATION)
+            val code = IdUtil.fastSimpleUUID()
+            robotManagerRepository.addLoginCode(code, id).replaceWith(code)
         }
     }
 

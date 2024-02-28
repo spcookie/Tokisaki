@@ -1,6 +1,6 @@
 package io.micro.function.domain.text.model
 
-import io.micro.core.entity.BaseDomainEntity
+import io.micro.core.base.BaseDomainEntity
 
 /**
  *@author Augenstern

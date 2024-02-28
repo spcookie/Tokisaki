@@ -47,6 +47,8 @@ interface RobotConverter {
         @MappingTarget useFunctionEntity: UseFunctionEntity
     )
 
+    @Mapping(target = "type", source = "type.code")
+    @Mapping(target = "state", source = "state.code")
     fun robotDO2RobotDTO(robotDO: RobotDO): RobotDTO
 
 }

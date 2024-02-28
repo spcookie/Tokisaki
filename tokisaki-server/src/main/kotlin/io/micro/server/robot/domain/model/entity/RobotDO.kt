@@ -1,6 +1,7 @@
 package io.micro.server.robot.domain.model.entity
 
-import io.micro.core.entity.BaseDomainEntity
+import io.micro.core.base.BaseDomainEntity
+import io.micro.core.base.BaseEnum
 import io.micro.core.exception.requireNonNull
 import io.micro.core.exception.requireTure
 import io.micro.core.function.sdk.Cmd
@@ -16,9 +17,9 @@ class RobotDO : BaseDomainEntity() {
 
     var password: String? = null
 
-    var type: Int? = null
+    var type: Type? = null
 
-    var state: Int? = null
+    var state: State? = null
 
     var remark: String? = null
 
@@ -26,13 +27,37 @@ class RobotDO : BaseDomainEntity() {
 
     var cmdPrefix: String? = null
 
-    private fun isValidType() = validTypeIds.contains(type)
+    private fun isValidType() = type?.let { Type.query(it.code) != null } ?: false
 
-    private fun isValidState() = validStateIds.contains(state)
+    private fun isValidState() = state?.let { State.query(it.code) != null } ?: false
+
+    enum class Type(override var title: String, override var code: String) : BaseEnum<String> {
+        QQ("逆向QQ机器人", "113.01");
+
+        companion object {
+            fun query(code: String): Type? {
+                return entries.associateBy { it.code }.get(code)
+            }
+        }
+    }
+
+    enum class State(override var title: String, override var code: String) : BaseEnum<String> {
+        Create("已创建", "114.01"),
+        LoggingIn("登录中", "114.02"),
+        LoggingFail("登录失败", "114.03"),
+        Online("在线", "114.04"),
+        Offline("离线", "114.05"),
+        Closed("已关闭", "114.06"),
+        ALL("ALL", "114.07");
+
+        companion object {
+            fun query(code: String): State? {
+                return entries.associateBy { it.code }.get(code)
+            }
+        }
+    }
 
     companion object {
-        val validTypeIds = listOf(0)
-        val validStateIds = listOf(0, 1, 2, 3, 4, 5, 6, 7)
         const val SPACE = " "
     }
 

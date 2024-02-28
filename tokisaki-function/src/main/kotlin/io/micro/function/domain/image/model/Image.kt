@@ -1,6 +1,6 @@
 package io.micro.function.domain.image.model
 
-import io.micro.core.entity.BaseDomainEntity
+import io.micro.core.base.BaseDomainEntity
 import java.util.*
 
 /**

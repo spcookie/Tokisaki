@@ -17,8 +17,7 @@ class DriveInfoReqFilter : ContainerRequestFilter {
     lateinit var reqInfo: ReqInfo
 
     override fun filter(requestContext: ContainerRequestContext) {
-        val driveId = "driveId"
-        val cookie = requestContext.cookies[driveId]
+        val cookie = requestContext.cookies[ReqInfo.DRIVE_ID]
         reqInfo.driveId = if (cookie == null || cookie.value == null) {
             IdUtil.fastSimpleUUID()
         } else {

@@ -18,4 +18,6 @@ interface WxLoginService {
 
     fun login(wxMessage: WXMessage, sse: Sse): Uni<WXLoginUserDO>
 
+    fun refreshCode(driveId: String, sse: Sse): Uni<Unit>
+
 }

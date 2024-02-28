@@ -1,6 +1,5 @@
 package io.micro.core.filter
 
-import io.vertx.core.http.Cookie.cookie
 import io.vertx.core.http.HttpServerResponse
 import jakarta.inject.Inject
 import jakarta.ws.rs.container.ContainerRequestContext
@@ -23,10 +22,10 @@ class DriveInfoRespFilter : ContainerResponseFilter {
     lateinit var response: HttpServerResponse
 
     override fun filter(requestContext: ContainerRequestContext, responseContext: ContainerResponseContext) {
-        val driveId = "driveId"
-        val cookie = requestContext.cookies[driveId]
-        if (cookie == null && reqInfo.driveId != null) {
-            response.addCookie(cookie(driveId, reqInfo.driveId))
-        }
+//        val driveId = "driveId"
+//        val cookie = requestContext.cookies[driveId]
+//        if (cookie == null && reqInfo.driveId != null) {
+//            response.addCookie(cookie(driveId, reqInfo.driveId))
+//        }
     }
 }

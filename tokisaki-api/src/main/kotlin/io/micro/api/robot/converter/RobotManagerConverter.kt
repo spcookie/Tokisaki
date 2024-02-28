@@ -4,6 +4,7 @@ import io.micro.api.robot.dto.OperateFeatureFunctionDTO
 import io.micro.api.robot.dto.OperateRobotDTO
 import io.micro.api.robot.dto.QueryRobotContactsDTO
 import io.micro.api.robot.dto.QueryRobotDTO
+import io.micro.core.base.BaseEnumConvertor
 import io.micro.server.robot.domain.model.entity.FeatureFunctionDO
 import io.micro.server.robot.domain.model.entity.RobotDO
 import io.micro.server.robot.domain.model.valobj.RobotContacts
@@ -13,11 +14,8 @@ import org.mapstruct.Mapper
 import org.mapstruct.MappingConstants.ComponentModel
 import org.mapstruct.ReportingPolicy
 
-@Mapper(componentModel = ComponentModel.CDI)
+@Mapper(componentModel = ComponentModel.CDI, uses = [BaseEnumConvertor::class])
 interface RobotManagerConverter {
-
-    @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
-    fun queryRobotDTO2RobotManager(dto: QueryRobotDTO): RobotDO
 
     @InheritInverseConfiguration
     fun robotManager2QueryRobotDTO(robotDO: RobotDO): QueryRobotDTO

@@ -1,5 +1,6 @@
 package io.micro.api.robot.dto
 
+import io.micro.core.rest.KV
 import jakarta.validation.Valid
 import kotlinx.serialization.Serializable
 import org.eclipse.microprofile.openapi.annotations.media.Schema
@@ -23,14 +24,17 @@ class QueryRobotDTO {
     @Schema(title = "密码")
     var password: String? = null
 
-    @Schema(title = "类型", anyOf = [])
-    var type: Int? = null
+    @Schema(title = "类型")
+    var type: KV<String>? = null
 
     @Schema(title = "状态")
-    var state: Int? = null
+    var state: KV<String>? = null
 
     @Schema(title = "备注")
     var remark: String? = null
+
+    @Schema(title = "触发前缀")
+    var cmdPrefix: String? = null
 
     @Schema(title = "功能列表")
     val functions: MutableList<@Valid QueryFeatureFunctionDTO> = mutableListOf()

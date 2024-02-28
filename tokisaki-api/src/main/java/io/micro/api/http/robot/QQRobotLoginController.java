@@ -1,9 +1,11 @@
 package io.micro.api.http.robot;
 
 import io.micro.core.annotation.InitAuthContext;
+import io.micro.core.rest.R;
 import io.micro.server.robot.domain.service.RobotManagerService;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -31,15 +33,22 @@ public class QQRobotLoginController {
 
     @Operation(summary = "QQ机器人扫码登录")
     @GET
-    @Path("/login/{id}")
-    @Authenticated
+    @Path("/login/{code}")
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @RestStreamElementType(MediaType.TEXT_HTML)
     public Multi<OutboundSseEvent> loginQQRobot(
-            @Parameter(description = "机器人ID") @PathParam("id") @Valid @NotNull Long id,
+            @Parameter(description = "登录码") @PathParam("code") @Valid @NotNull String code,
             @Context Sse sse,
             @Context SseEventSink sink) {
-        return robotManagerService.loginQQRobot(id, sse, sink);
+        return robotManagerService.loginQQRobot(code, sse, sink);
+    }
+
+    @Operation(summary = "获取QQ机器人登录码")
+    @GET
+    @Path("/login/code/{id}")
+    @Authenticated
+    public Uni<R<String>> loginCode(@Parameter(description = "机器人ID") @PathParam("id") @Valid @NotNull Long id) {
+        return robotManagerService.getLoginCode(id).map(R::newInstance);
     }
 
 }

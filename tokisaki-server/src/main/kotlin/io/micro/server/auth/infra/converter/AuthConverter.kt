@@ -17,13 +17,8 @@ interface AuthConverter {
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     fun wxUserToUser(wxLoginUserDO: WXLoginUserDO): UserEntity
 
-    fun stringToAuthority(string: MutableSet<String>): MutableSet<AuthorityEntity>
-
     @InheritInverseConfiguration
     fun userToWXUser(userEntity: UserEntity): WXLoginUserDO
-
-    @InheritInverseConfiguration
-    fun authorityToString(string: MutableSet<AuthorityEntity>): MutableSet<String>
 
     fun authorityEntity2authorityDO(authority: AuthorityEntity): AuthorityDO
 

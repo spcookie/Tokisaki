@@ -1,5 +1,6 @@
 package io.micro.server.robot.infra.po
 
+import io.micro.core.base.BaseEnum
 import io.micro.core.persistence.BaseEntity
 import io.micro.server.auth.infra.po.UserEntity
 import jakarta.persistence.*
@@ -43,16 +44,18 @@ class RobotEntity : BaseEntity() {
     @Column(name = "robot_cmd_prefix", nullable = false)
     var cmdPrefix: String? = null
 
-    enum class Type { QQ }
+    enum class Type(override var title: String, override var code: String) : BaseEnum<String> {
+        QQ("逆向QQ机器人", "113.01");
+    }
 
-    enum class State {
-        Create,
-        LoggingIn,
-        LoggingFail,
-        Online,
-        Offline,
-        Closed,
-        ALL
+    enum class State(override var title: String, override var code: String) : BaseEnum<String> {
+        Create("已创建", "114.01"),
+        LoggingIn("登录中", "114.02"),
+        LoggingFail("登录失败", "114.03"),
+        Online("在线", "114.04"),
+        Offline("离线", "114.05"),
+        Closed("已关闭", "114.06"),
+        ALL("所有", "114.07");
     }
 
     final override fun equals(other: Any?): Boolean {

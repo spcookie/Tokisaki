@@ -12,9 +12,9 @@ class RobotDTO {
 
     var password: String? = null
 
-    var type: Int? = null
+    var type: String? = null
 
-    var state: Int? = null
+    var state: String? = null
 
     var remark: String? = null
 

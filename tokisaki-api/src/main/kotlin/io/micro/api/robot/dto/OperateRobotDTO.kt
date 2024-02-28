@@ -25,10 +25,10 @@ class OperateRobotDTO {
     var password: String? = null
 
     @Schema(title = "类型")
-    var type: Int? = null
+    var type: String? = null
 
     @Schema(title = "状态")
-    var state: Int? = null
+    var state: String? = null
 
     @Schema(title = "备注")
     var remark: String? = null

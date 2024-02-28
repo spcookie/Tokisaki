@@ -6,6 +6,7 @@ import io.micro.server.robot.domain.model.entity.FeatureFunctionDO
 import io.micro.server.robot.domain.model.entity.RobotDO
 import io.micro.server.robot.domain.model.valobj.Switch
 import io.micro.server.robot.domain.repository.IRobotManagerRepository
+import io.micro.server.robot.infra.cache.RobotManagerCache
 import io.micro.server.robot.infra.cache.SwitchCache
 import io.micro.server.robot.infra.converter.RobotConverter
 import io.micro.server.robot.infra.converter.RobotMapper
@@ -28,7 +29,8 @@ class RobotManagerRepository(
     private val useFunctionDAO: IUseFunctionDAO,
     private val functionDAO: IFunctionDAO,
     private val switchCache: SwitchCache,
-    private val switchConverter: SwitchConverter
+    private val switchConverter: SwitchConverter,
+    private val robotManagerCache: RobotManagerCache
 ) : IRobotManagerRepository {
 
     override fun saveRobotWithUser(robotDO: RobotDO): Uni<RobotDO> {
@@ -130,6 +132,14 @@ class RobotManagerRepository(
         return useFunctionDAO.findById(id)
             .onItem().ifNotNull()
             .transform { robotConverter.robotEntity2RobotDO(it.robot!!) }
+    }
+
+    override fun addLoginCode(code: String, id: Long): Uni<Unit> {
+        return robotManagerCache.addLoginCode(code, id)
+    }
+
+    override fun getLoginRobotId(code: String): Uni<Long> {
+        return robotManagerCache.getLoginRobotId(code)
     }
 
 }

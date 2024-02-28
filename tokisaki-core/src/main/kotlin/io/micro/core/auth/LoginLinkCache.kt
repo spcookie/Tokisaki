@@ -14,13 +14,13 @@ class LoginLinkCache private constructor() {
 
     val linkPool: Cache<String, SseEventSink> = Caffeine.newBuilder()
         .expireAfterAccess(Duration.ofMinutes(3))
-        .removalListener<String, SseEventSink> { _, value, _ ->
-            value?.close()
-        }
+//        .removalListener<String, SseEventSink> { _, value, _ ->
+//            value?.close()
+//        }
         .build()
 
     val idPool: LoadingCache<String, RandomLoginCode.Code> = Caffeine.newBuilder()
-        .expireAfterAccess(Duration.ofMillis(3))
+        .expireAfterAccess(Duration.ofMinutes(3))
         .build { RandomLoginCode.hire() }
 
     companion object {

@@ -36,4 +36,8 @@ interface IRobotManagerRepository {
 
     fun findRobotByUseFunctionId(id: Long): Uni<RobotDO>
 
+    fun addLoginCode(code: String, id: Long): Uni<Unit>
+
+    fun getLoginRobotId(code: String): Uni<Long>
+
 }

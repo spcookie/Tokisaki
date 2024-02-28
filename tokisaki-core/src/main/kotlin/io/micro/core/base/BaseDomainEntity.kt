@@ -1,4 +1,4 @@
-package io.micro.core.entity
+package io.micro.core.base
 
 /**
  *@author Augenstern

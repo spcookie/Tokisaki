@@ -1,6 +1,6 @@
 package io.micro.server.auth.domain.model.entity
 
-import io.micro.core.entity.BaseDomainEntity
+import io.micro.core.base.BaseDomainEntity
 
 class UserStatisticsDO : BaseDomainEntity() {
 
