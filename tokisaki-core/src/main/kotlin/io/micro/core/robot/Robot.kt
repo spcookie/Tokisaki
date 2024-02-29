@@ -28,7 +28,9 @@ interface Robot {
      */
     fun close()
 
-    fun addStateChangeListener(block: suspend (event: Event) -> Unit)
+    fun addLoginInStateChangeListener(block: suspend (event: Event) -> Unit)
+
+    fun addRobotStateChangeListener(block: suspend (state: State) -> Unit)
 
     fun loadContacts(): Contacts
 
@@ -43,6 +45,8 @@ interface Robot {
          * 在线时监听器
          */
         fun onlineListener(event: Event) {}
+
+        fun robotStateListener(state: State) {}
 
     }
 

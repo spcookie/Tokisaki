@@ -7,4 +7,6 @@ interface IRobotEvent {
 
     fun publishRobotLoginSuccess(robotDO: RobotDO): Uni<Unit>
 
+    fun publishRobotStateChange(id: Long, state: RobotDO.State): Uni<Unit>
+
 }

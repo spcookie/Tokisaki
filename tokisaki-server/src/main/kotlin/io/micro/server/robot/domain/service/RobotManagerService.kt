@@ -40,4 +40,6 @@ interface RobotManagerService {
 
     fun getLoginCode(id: Long): Uni<String>
 
+    fun modifyRobotState(id: Long, state: RobotDO.State): Uni<Unit>
+
 }

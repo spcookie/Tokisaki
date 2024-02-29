@@ -111,11 +111,10 @@ class RobotManagerServiceImpl(
     @WithTransaction
     @WithSession
     override fun closeRobot(id: Long): Uni<Unit> {
-        return robotManagerRepository.findRobotById(id).flatMap { robotManager ->
+        return robotManagerRepository.findRobotById(id).map { robotManager ->
             requireNonNull(robotManager, CommonMsg.NOT_FOUND_ROBOT)
             requireTure(value = AuthContext.equalId(robotManager.userId), code = CommonCode.ILLEGAL_OPERATION)
             manager.unregisterRobot(id)
-            robotManagerRepository.updateRobotStateById(5, id)
         }.replaceWithUnit()
     }
 
@@ -260,6 +259,11 @@ class RobotManagerServiceImpl(
         }
     }
 
+    @WithTransaction
+    override fun modifyRobotState(id: Long, state: RobotDO.State): Uni<Unit> {
+        return robotManagerRepository.updateRobotStateById(state, id).replaceWithUnit()
+    }
+
     /**
      * 通过半长连接开始QQ扫码登录
      * @param robotDO 机器人
@@ -271,6 +275,7 @@ class RobotManagerServiceImpl(
         // 创建QQ机器人
         val robot = factory.create(Credential(robotId!!, robotDO.account!!)) as QQRobot
         val vertxContext = Vertx.currentContext()
+        bindRobotStateChangeEvent(robot, vertxContext)
         return Multi.createFrom().emitter { em ->
             // 绑定登录回调函数
             qqRobotEventEmitBind(robotDO, robot, em, sink)
@@ -284,8 +289,25 @@ class RobotManagerServiceImpl(
         }
     }
 
+    private fun bindRobotStateChangeEvent(robot: QQRobot, context: Context) {
+        robot.addRobotStateChangeListener { state ->
+            val state = when (state) {
+                Robot.State.Create -> RobotDO.State.Create
+                Robot.State.LoggingIn -> RobotDO.State.LoggingIn
+                Robot.State.LoggingFail -> RobotDO.State.LoggingFail
+                Robot.State.Online -> RobotDO.State.Online
+                Robot.State.Closed -> RobotDO.State.Closed
+            }
+            sessionFactory.withSession { modifyRobotState(robot.id(), state) }
+                .runSubscriptionOn { context.runOnContext(it) }
+                .awaitSuspending()
+            modifyRobotState(robot.id(), state).awaitSuspending()
+            robotEvent.publishRobotStateChange(robot.id(), state).awaitSuspending()
+        }
+    }
+
     private fun onGroupMessage(robot: QQRobot, robotId: Long, vertxContext: Context) {
-        robot.onGroupMessage = { event ->
+        robot.addGroupMessageListener { event ->
             Log.info(event.message)
 
             val latestRobot =
@@ -404,7 +426,7 @@ class RobotManagerServiceImpl(
         sink: SseEventSink
     ) {
         val id = robot.id()
-        robot.addStateChangeListener { event ->
+        robot.addLoginInStateChangeListener { event ->
             when (event) {
                 is QQRobot.QRCodeStartEvent -> {
                     val qrCode = Base64.getEncoder().encodeToString(event.qr)

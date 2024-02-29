@@ -44,9 +44,20 @@ mp:
         queue:
           name: queue.robot.login.success
         exchange:
-          name: exchange.robot.login
+          name: exchange.qq.robot
+      robot-state-change:
+        connector: smallrye-rabbitmq
+        routing-keys: robot.state.change
+        queue:
+          name: queue.robot.state.change
+        exchange:
+          name: exchange.robot
     outgoing:
-      robot-login:
+      robot:
         connector: smallrye-rabbitmq
         exchange:
-          name: exchange.robot.login
+          name: exchange.robot
+      qq-robot:
+        connector: smallrye-rabbitmq
+        exchange:
+          name: exchange.qq.robot

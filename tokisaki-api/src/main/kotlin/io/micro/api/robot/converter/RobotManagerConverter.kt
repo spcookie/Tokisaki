@@ -8,6 +8,7 @@ import io.micro.core.base.BaseEnumConvertor
 import io.micro.server.robot.domain.model.entity.FeatureFunctionDO
 import io.micro.server.robot.domain.model.entity.RobotDO
 import io.micro.server.robot.domain.model.valobj.RobotContacts
+import io.micro.server.robot.infra.event.dto.RobotDTO
 import org.mapstruct.BeanMapping
 import org.mapstruct.InheritInverseConfiguration
 import org.mapstruct.Mapper
@@ -27,5 +28,8 @@ interface RobotManagerConverter {
     fun operateRobotDTO2RobotManager(dto: OperateRobotDTO): RobotDO
 
     fun robotContact2QueryRobotContactDTO(robotContacts: RobotContacts): QueryRobotContactsDTO
+
+    fun stateDTO2stateDO(state: RobotDTO.State): RobotDO.State
+
 
 }

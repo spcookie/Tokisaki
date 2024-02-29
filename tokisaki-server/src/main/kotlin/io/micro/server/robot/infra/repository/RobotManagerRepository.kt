@@ -9,7 +9,6 @@ import io.micro.server.robot.domain.repository.IRobotManagerRepository
 import io.micro.server.robot.infra.cache.RobotManagerCache
 import io.micro.server.robot.infra.cache.SwitchCache
 import io.micro.server.robot.infra.converter.RobotConverter
-import io.micro.server.robot.infra.converter.RobotMapper
 import io.micro.server.robot.infra.converter.SwitchConverter
 import io.micro.server.robot.infra.dao.IFunctionDAO
 import io.micro.server.robot.infra.dao.IRobotDAO
@@ -24,7 +23,6 @@ import java.util.function.Supplier
 @ApplicationScoped
 class RobotManagerRepository(
     private val robotConverter: RobotConverter,
-    private val robotMapper: RobotMapper,
     private val robotDAO: IRobotDAO,
     private val useFunctionDAO: IUseFunctionDAO,
     private val functionDAO: IFunctionDAO,
@@ -58,9 +56,9 @@ class RobotManagerRepository(
         return robotDAO.existByAccount(account, id)
     }
 
-    override fun updateRobotStateById(state: Int, id: Long): Uni<Unit> {
+    override fun updateRobotStateById(state: RobotDO.State, id: Long): Uni<Unit> {
         return Uni.createFrom()
-            .item(robotMapper.number2State(state))
+            .item(robotConverter.stateDO2state(state))
             .flatMap { s ->
                 robotDAO.findById(id)
                     .map { it.state = s }

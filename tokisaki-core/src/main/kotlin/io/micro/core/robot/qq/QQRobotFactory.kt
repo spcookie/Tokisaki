@@ -29,7 +29,7 @@ class QQRobotFactory : RobotFactory {
         val bot = BotFactory.newBot(account.toLong(), BotAuthorization.byQRCode(), configuration)
         bot.setBizId(id)
         robot.bot = bot
-        robot.state = Robot.State.Create
+        robot.robotStateListener(Robot.State.Create)
         return robot
     }
 }

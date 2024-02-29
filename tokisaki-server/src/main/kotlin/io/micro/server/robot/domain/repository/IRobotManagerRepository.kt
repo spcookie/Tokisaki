@@ -16,7 +16,7 @@ interface IRobotManagerRepository {
 
     fun existRobotByAccountAndUserId(account: String, id: Long): Uni<Boolean>
 
-    fun updateRobotStateById(state: Int, id: Long): Uni<Unit>
+    fun updateRobotStateById(state: RobotDO.State, id: Long): Uni<Unit>
 
     fun findRobotByExample(robot: RobotDO, pageable: Page): Uni<List<RobotDO>>
 

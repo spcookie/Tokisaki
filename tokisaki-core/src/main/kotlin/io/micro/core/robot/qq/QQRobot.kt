@@ -43,14 +43,13 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
      * 机器人状态
      */
     @Volatile
-    lateinit var state: Robot.State
+    private lateinit var state: Robot.State
 
-    /**
-     * 收到群消息回调
-     */
-    var onGroupMessage: (suspend (GroupMessageEvent) -> Unit)? = null
+    private var onGroupMessageList: MutableList<suspend (GroupMessageEvent) -> Unit> = mutableListOf()
 
-    private var onStateChangeList: MutableList<suspend (Robot.Event) -> Unit> = mutableListOf()
+    private var onLoginInStateChangeList: MutableList<suspend (Robot.Event) -> Unit> = mutableListOf()
+
+    private var onRobotStateChangeList: MutableList<suspend (Robot.State) -> Unit> = mutableListOf()
 
     /**
      * 二维码获取开始事件
@@ -104,7 +103,7 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
                 // 同一时间只允许一个协程开启登录
                 mutex.withLock {
                     if (canLogin()) {
-                        robot.state = Robot.State.LoggingIn
+                        robotStateListener(Robot.State.LoggingIn)
                         try {
                             // 登录
                             withTimeOutCloseLogin()
@@ -126,8 +125,16 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
         bot.close()
     }
 
-    override fun addStateChangeListener(block: suspend (event: Robot.Event) -> Unit) {
-        onStateChangeList += block
+    override fun addLoginInStateChangeListener(block: suspend (event: Robot.Event) -> Unit) {
+        onLoginInStateChangeList += block
+    }
+
+    override fun addRobotStateChangeListener(block: suspend (state: Robot.State) -> Unit) {
+        onRobotStateChangeList += block
+    }
+
+    fun addGroupMessageListener(block: suspend (GroupMessageEvent) -> Unit) {
+        onGroupMessageList += block
     }
 
     override fun loadContacts(): Contacts {
@@ -150,13 +157,13 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
 
     override fun loggingInListener(event: Robot.Event) {
         scope.launch {
-            onStateChangeList.forEach { handle ->
+            onLoginInStateChangeList.forEach { handle ->
                 when (event) {
                     is QRCodeStartEvent -> {
                         try {
                             handle(event)
                         } catch (ex: Exception) {
-                            this@QQRobot.state = Robot.State.LoggingFail
+                            robotStateListener(Robot.State.LoggingFail)
                             loggingInListener(LoginFailEvent(ex))
                         }
                     }
@@ -175,7 +182,7 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
                         } catch (ex: Exception) {
                             Log.error(ex)
                         }
-                        state = Robot.State.Online
+                        robotStateListener(Robot.State.Online)
                     }
 
                     is LoginFailEvent -> {
@@ -184,11 +191,11 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
                         } catch (ex: Exception) {
                             Log.error(ex)
                         }
-                        state = Robot.State.LoggingFail
+                        robotStateListener(Robot.State.LoggingFail)
                     }
 
                     is LoginTimeoutEvent -> {
-                        state = Robot.State.Closed
+                        robotStateListener(Robot.State.Closed)
                         bot.close()
                         try {
                             handle(event)
@@ -205,12 +212,20 @@ class QQRobot(private val id: Long, private val account: String) : Robot, Robot.
         when (event) {
             is OnlineGroupMessageEvent -> {
                 val e = event.event
-                val handle = onGroupMessage
-                if (handle != null) {
+                onGroupMessageList.forEach { handle ->
                     scope.launch {
                         handle(e)
                     }
                 }
+            }
+        }
+    }
+
+    override fun robotStateListener(state: Robot.State) {
+        this.state = state
+        onRobotStateChangeList.forEach { block ->
+            scope.launch {
+                block(state)
             }
         }
     }
