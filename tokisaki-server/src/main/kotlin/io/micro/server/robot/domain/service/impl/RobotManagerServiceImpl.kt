@@ -291,18 +291,17 @@ class RobotManagerServiceImpl(
 
     private fun bindRobotStateChangeEvent(robot: QQRobot, context: Context) {
         robot.addRobotStateChangeListener { state ->
-            val state = when (state) {
+            val s = when (state) {
                 Robot.State.Create -> RobotDO.State.Create
                 Robot.State.LoggingIn -> RobotDO.State.LoggingIn
                 Robot.State.LoggingFail -> RobotDO.State.LoggingFail
                 Robot.State.Online -> RobotDO.State.Online
                 Robot.State.Closed -> RobotDO.State.Closed
             }
-            sessionFactory.withSession { modifyRobotState(robot.id(), state) }
+            sessionFactory.withSession { modifyRobotState(robot.id(), s) }
                 .runSubscriptionOn { context.runOnContext(it) }
                 .awaitSuspending()
-            modifyRobotState(robot.id(), state).awaitSuspending()
-            robotEvent.publishRobotStateChange(robot.id(), state).awaitSuspending()
+            robotEvent.publishRobotStateChange(robot.id(), s).awaitSuspending()
         }
     }
 
